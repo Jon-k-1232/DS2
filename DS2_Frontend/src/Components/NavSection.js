@@ -8,7 +8,7 @@ import { alpha, useTheme, styled } from '@mui/material/styles';
 import { Box, List, Collapse, ListItemText, ListItemIcon, ListItemButton } from '@mui/material';
 
 const ListItemStyle = styled(props => <ListItemButton disableGutters {...props} />)(({ theme }) => ({
-  ...theme.typography.body2,
+  ...theme.typography.drawerText,
   height: 48,
   position: 'relative',
   textTransform: 'capitalize',

@@ -1,15 +1,14 @@
+import React, { useState } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import DashboardLayout from '../Layouts/Drawer';
 import LogoOnlyLayout from '../Layouts/LogoOnlyLayout';
 import NotFound from '../Pages/Page404/Page404';
 import Dashboard from '../Pages/Dashboard/Dashboard';
 import CustomerPage from '../Pages/Customer/CustomerPage';
-// import { useContext } from 'react';
-// import { context } from '../App';
-// import AccessControl from 'src/Pages/Access/Access';
+import TransactionsPage from '../Pages/Transactions/TransactionsPage';
 
 export default function Router() {
-  // const { loginUser } = useContext(context);
+  const [pageTitle, setPageTitle] = useState('');
 
   return (
     <Routes>
@@ -20,9 +19,10 @@ export default function Router() {
       </Route>
 
       {/* Any route that goes through DashboardLayout will be checked by Private Route component */}
-      <Route element={<DashboardLayout />}>
-        <Route path='dashboard' element={<Dashboard />} />
-        <Route path='customers' element={<CustomerPage />} />
+      <Route element={<DashboardLayout pageTitle={pageTitle} />}>
+        <Route path='dashboard' element={<Dashboard setPageTitle={pageTitle => setPageTitle(pageTitle)} />} />
+        <Route path='customers' element={<CustomerPage setPageTitle={pageTitle => setPageTitle(pageTitle)} />} />
+        <Route path='transactions' element={<TransactionsPage setPageTitle={pageTitle => setPageTitle(pageTitle)} />} />
       </Route>
     </Routes>
   );

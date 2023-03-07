@@ -77,7 +77,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
           PaperProps={{
             sx: {
               width: DRAWER_WIDTH,
-              bgcolor: 'background.default'
+              bgcolor: 'background.drawerDefault'
             }
           }}
         >
