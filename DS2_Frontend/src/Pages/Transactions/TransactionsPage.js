@@ -1,22 +1,16 @@
 import { useEffect } from 'react';
 import { Container } from '@mui/material';
-import MenuHeader from '../../Components/MenuHeader/MenuHeader';
 import Page from '../../Components/Page';
-import { useNavigate } from 'react-router-dom';
 
-export default function TransactionsPage({ setPageTitle }) {
-  const navigate = useNavigate();
-
-  // eslint-disable-next-line
-  useEffect(() => setPageTitle('Transactions'), []);
+export default function TransactionsPage({ setPageTitle, setMenuOptions, menuNavigation }) {
+  useEffect(() => {
+    setPageTitle('Transactions');
+    setMenuOptions(menuOptions);
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <Page style={{ paddingTop: 0 }}>
-      <MenuHeader
-        menuOptions={menuOptions}
-        // handle click returns object {route, value}
-        handleOnClick={target => navigate(`/${target.route}`)}
-      />
       <Container style={{ display: 'contents' }}></Container>
     </Page>
   );

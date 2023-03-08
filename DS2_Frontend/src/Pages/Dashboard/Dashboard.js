@@ -2,9 +2,12 @@ import { useEffect } from 'react';
 import { Container } from '@mui/material';
 import Page from '../../Components/Page';
 
-export default function Dashboard({ setPageTitle }) {
-  // eslint-disable-next-line
-  useEffect(() => setPageTitle('Dashboard'), []);
+export default function Dashboard({ setPageTitle, setMenuOptions, menuNavigation }) {
+  useEffect(() => {
+    setPageTitle('Dashboard');
+    setMenuOptions(menuOptions);
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <Page>
@@ -12,3 +15,5 @@ export default function Dashboard({ setPageTitle }) {
     </Page>
   );
 }
+
+const menuOptions = [];

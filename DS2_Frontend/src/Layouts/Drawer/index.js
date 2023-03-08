@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import DashboardNavbar from './DashboardNavbar';
 import DashboardSidebar from './DashboardSidebar';
 import PrivateRoute from '../../Routes/PrivateRoute';
+import MenuHeader from '../../Components/MenuHeader/MenuHeader';
 
 const APP_BAR_MOBILE = 64;
 const APP_BAR_DESKTOP = 92;
@@ -26,7 +27,7 @@ const MainStyle = styled('div')(({ theme }) => ({
   }
 }));
 
-export default function DashboardLayout({ pageTitle }) {
+export default function DashboardLayout({ pageTitle, menuOptions, onClickNavigation }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,6 +35,11 @@ export default function DashboardLayout({ pageTitle }) {
       <DashboardNavbar onOpenSidebar={() => setOpen(true)} pageTitle={pageTitle} />
       <DashboardSidebar isOpenSidebar={open} onCloseSidebar={() => setOpen(false)} />
       <MainStyle>
+        <MenuHeader
+          menuOptions={menuOptions}
+          // handle click returns object {route, value}
+          onClickNavigation={target => onClickNavigation(target)}
+        />
         <PrivateRoute />
       </MainStyle>
     </RootStyle>
