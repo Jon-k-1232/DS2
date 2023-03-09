@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Container } from '@mui/material';
+import { Stack } from '@mui/material';
 import Page from '../../Components/Page';
 
 export default function InvoicesPage({ setPageTitle, setMenuOptions, menuNavigation }) {
@@ -11,7 +11,7 @@ export default function InvoicesPage({ setPageTitle, setMenuOptions, menuNavigat
 
   return (
     <Page>
-      <Container style={{ display: 'contents' }}></Container>
+      <Stack style={{ display: 'contents' }}></Stack>
     </Page>
   );
 }
@@ -24,9 +24,9 @@ const menuOptions = [
     icon: ''
   },
   {
-    display: 'Create Qoute',
-    value: 'createQoute',
-    route: '/invoices/createQoute',
+    display: 'Create Quote',
+    value: 'createQuote',
+    route: '/invoices/createQuote',
     icon: ''
   },
   {
@@ -36,8 +36,8 @@ const menuOptions = [
     icon: ''
   },
   {
-    display: 'Qoutes',
-    value: 'qoutes',
-    route: '/invoices/qoutes'
+    display: 'Quotes',
+    value: 'quotes',
+    route: '/invoices/quotes'
   }
 ];

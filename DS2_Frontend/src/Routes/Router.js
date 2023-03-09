@@ -24,7 +24,9 @@ export default function Router() {
         <Route path='*' element={<Navigate to='/404' />} />
       </Route>
 
-      {/* Any route that goes through DashboardLayout will be checked by Private Route component */}
+      {/* Any route that goes through DashboardLayout will be checked by Private Route component,
+      Navigation for header: { route: e.target.attributes.route.value, value: e.target.name }
+      */}
       <Route
         element={<DashboardLayout pageTitle={pageTitle} menuOptions={menuOptions} onClickNavigation={nav => setMenuNavigation(nav)} />}
       >

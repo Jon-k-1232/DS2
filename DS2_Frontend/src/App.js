@@ -8,17 +8,19 @@ let context = createContext();
 
 export default function App() {
   // Hook for Context, holds user info once logged in.
-  let [loginUser, setLoginUser] = useState(
+  let [loggedInUser, setLoggedInUser] = useState(
     {
-      oid: UserService.getUserId(),
-      displayname: UserService.getUserDisplayName(),
-      role: UserService.getUserRole()
+      accountID: UserService.getUserAccountID(),
+      userID: UserService.getUserId(),
+      displayName: UserService.getUserDisplayName(),
+      role: UserService.getUserRole(),
+      accessLevel: UserService.getUserAccessLevel()
     } || {}
   );
 
   return (
     <ThemeConfig>
-      <context.Provider value={{ loginUser, setLoginUser }}>
+      <context.Provider value={{ loggedInUser, setLoggedInUser }}>
         <GlobalStyles />
         <Router />
       </context.Provider>

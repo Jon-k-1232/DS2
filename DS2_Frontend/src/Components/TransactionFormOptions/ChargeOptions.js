@@ -1,50 +1,38 @@
-import { Container, Stack, TextField, Typography, Checkbox, FormControlLabel } from '@mui/material';
+import { Stack, TextField, Checkbox, FormControlLabel } from '@mui/material';
 
-export default function ChargeOptions({
-  selectedQuantity,
-  setSelectedQuantity,
-  setTotalTransaction,
-  selectedAmount,
-  setSelectedAmount,
-  selectedType,
-  setDisableSubmit,
-  billable,
-  setBillable
-}) {
+export default function ChargeOptions({ selectedItems, setSelectedItems }) {
   return (
-    <Container>
+    <>
       <Stack spacing={3}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
           <TextField
-            required
+            variant='standard'
             type='number'
-            value={selectedQuantity}
-            onChange={e => {
-              setSelectedQuantity(e.target.value);
-              setTotalTransaction(Math.abs(e.target.value * selectedAmount).toFixed(2));
-            }}
             label='Quantity'
+            value={selectedItems.quantity}
+            onChange={e => setSelectedItems(otherItems => ({ ...otherItems, quantity: e.target.value }))}
           />
-          <Typography style={{ color: '#92999f', alignSelf: 'center' }} variant='subtitle1'>
-            {selectedType}
-          </Typography>
           <TextField
-            required
+            variant='standard'
             type='number'
-            max='10'
-            label='Charge Amount'
-            value={selectedAmount}
-            onChange={e => {
-              e.target.value >= 0 && setSelectedAmount(e.target.value);
-              setTotalTransaction(Math.abs(e.target.value * selectedQuantity).toFixed(2));
-              setDisableSubmit(false);
-            }}
+            label='Unit Cost'
+            value={selectedItems.unitCost}
+            onChange={e => setSelectedItems(otherItems => ({ ...otherItems, unitCost: e.target.value }))}
           />
         </Stack>
+
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
-          <FormControlLabel control={<Checkbox checked={billable} onChange={e => setBillable(e.target.checked)} />} label='Billable' />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedItems.isTransactionBillable}
+                onChange={e => setSelectedItems(otherItems => ({ ...otherItems, isTransactionBillable: e.target.checked }))}
+              />
+            }
+            label='Billable'
+          />
         </Stack>
       </Stack>
-    </Container>
+    </>
   );
 }
