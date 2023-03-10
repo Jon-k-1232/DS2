@@ -1,0 +1,15 @@
+.myDatePicker fieldset.MuiOutlinedInput-notchedOutline {
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid #c2c8d0;
+}
+
+.myDatePicker .Mui-focused fieldset.MuiOutlinedInput-notchedOutline {
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid #c2c8d0;
+}
+
+.myDatePicker {
+  margin-top: 40px !important;
+}

@@ -10,6 +10,7 @@
     "@iconify/icons-eva": "^1.2.6",
     "@iconify/icons-ic": "^1.1.17",
     "@iconify/react": "^4.1.0",
+    "@mui/icons-material": "^5.11.11",
     "@mui/lab": "^5.0.0-alpha.122",
     "@mui/material": "^5.11.11",
     "@mui/styled-engine-sc": "^5.11.11",

@@ -3,6 +3,7 @@ import { getCustomersList, getCustomerJobsList, getTeamMembersList } from '../..
 import { Stack } from '@mui/material';
 import Page from '../../Components/Page';
 import Charge from './Charge';
+import Time from './Time';
 
 export default function TransactionsPage({ setPageTitle, setMenuOptions, menuNavigation }) {
   const [optionLists, setOptionLists] = useState({});
@@ -26,6 +27,7 @@ export default function TransactionsPage({ setPageTitle, setMenuOptions, menuNav
     <Page style={{ paddingTop: 0 }}>
       <Stack style={{ padding: '20px' }}>
         {menuNavigation.value === 'newCharge' && <Charge optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />}
+        {menuNavigation.value === 'newTime' && <Time optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />}
       </Stack>
     </Page>
   );
@@ -33,15 +35,15 @@ export default function TransactionsPage({ setPageTitle, setMenuOptions, menuNav
 
 const menuOptions = [
   {
-    display: 'New Charge',
-    value: 'newCharge',
-    route: 'transactions/newCharge',
-    icon: ''
-  },
-  {
     display: 'New Time',
     value: 'newTime',
     route: 'transactions/newTime',
+    icon: ''
+  },
+  {
+    display: 'New Charge',
+    value: 'newCharge',
+    route: 'transactions/newCharge',
     icon: ''
   },
   {

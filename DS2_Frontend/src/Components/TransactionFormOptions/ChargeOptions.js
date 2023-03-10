@@ -7,6 +7,7 @@ export default function ChargeOptions({ selectedItems, setSelectedItems }) {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
           <TextField
             variant='standard'
+            sx={{ width: 100 }}
             type='number'
             label='Quantity'
             value={selectedItems.quantity}
@@ -14,6 +15,7 @@ export default function ChargeOptions({ selectedItems, setSelectedItems }) {
           />
           <TextField
             variant='standard'
+            sx={{ width: 100 }}
             type='number'
             label='Unit Cost'
             value={selectedItems.unitCost}

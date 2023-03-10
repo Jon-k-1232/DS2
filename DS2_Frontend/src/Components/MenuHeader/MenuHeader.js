@@ -15,6 +15,8 @@ export default function MenuHeader({ menuOptions, onClickNavigation }) {
   useEffect(() => {
     setValue('0');
     setPriorMenuOptions(menuOptions);
+    // Sets the initial route to the first menu option.
+    menuOptions.length && onClickNavigation({ route: menuOptions[0].route, value: menuOptions[0].value });
     // eslint-disable-next-line
   }, [menuOptions.length]);
 

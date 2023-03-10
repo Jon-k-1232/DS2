@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Stack, Button, Typography, Alert } from '@mui/material';
 import InitialSelectionOptions from '../../Components/TransactionFormOptions/InitialSelectionOptions';
+import TimeOptions from '../../Components/TransactionFormOptions/TimeOptions';
 import { postTransaction } from '../../Services/ApiCalls/PostCalls';
-import ChargeOptions from '../../Components/TransactionFormOptions/ChargeOptions';
 import dayjs from 'dayjs';
 import { useContext } from 'react';
 import { context } from '../../App';
 
-export default function Charge({ optionLists, setOptionLists }) {
+export default function Time({ optionLists, setOptionLists }) {
   const { loggedInUser } = useContext(context);
 
   const [postStatus, setPostStatus] = useState(null);
@@ -31,7 +31,7 @@ export default function Charge({ optionLists, setOptionLists }) {
 
   const resetState = () => {
     setPostStatus(null);
-    setOptionLists({ ...optionLists, customerJobsList: [] });
+    setOptionLists(otherItems => ({ ...otherItems, customerJobsList: [] }));
     setSelectedItems({
       selectedCustomer: {},
       selectedJob: {},
@@ -52,7 +52,7 @@ export default function Charge({ optionLists, setOptionLists }) {
     customerInvoicesID: null,
     dateCreated: dayjs().format(),
     transactionDate: dayjs(selectedDate).format(),
-    transactionType: 'Charge',
+    transactionType: 'Time',
     quantity: quantity,
     unitCost: unitCost,
     totalTransaction: (quantity * unitCost).toFixed(2),
@@ -71,7 +71,7 @@ export default function Charge({ optionLists, setOptionLists }) {
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
-          <ChargeOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
+          <TimeOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
         </Stack>
 
         <Typography>
