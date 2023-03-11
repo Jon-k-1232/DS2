@@ -20,3 +20,10 @@ export const getTeamMembersList = async () => {
   const teamMembersList = [];
   return teamMembersList;
 };
+
+export const getTransactionsList = async () => {
+  // const response = await axios.get('/transactions');
+  //const transactionsList = response.data;
+  const transactionsList = [];
+  return transactionsList;
+};

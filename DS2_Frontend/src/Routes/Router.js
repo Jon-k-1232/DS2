@@ -10,6 +10,7 @@ import InvoicesPage from '../Pages/Invoices/InvoicesPage';
 import AccountPage from '../Pages/Account/AccountPage';
 import JobsPage from '../Pages/Jobs/JobsPage';
 import TeamMembersPage from '../Pages/TeamMembers/TeamMembersPage';
+import Charge from '../Pages/Transactions/Charge';
 
 export default function Router() {
   const [pageTitle, setPageTitle] = useState('');
@@ -100,6 +101,7 @@ export default function Router() {
             />
           }
         />
+        <Route path='transactions/newCharge' element={<Charge />} />
       </Route>
     </Routes>
   );

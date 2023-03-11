@@ -4,7 +4,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import './Transactions.css';
 
-export default function InitialSelectionOptions({ optionLists, selectedItems, setSelectedItems }) {
+export default function InitialSelectionOptions({ optionLists, selectedItems, setSelectedItems, page }) {
   const { teamMembersList, customerJobsList, customersList } = optionLists;
   const { selectedDate, selectedCustomer, selectedJob, selectedTeamMember } = selectedItems;
 
@@ -31,16 +31,18 @@ export default function InitialSelectionOptions({ optionLists, selectedItems, se
             renderInput={params => <TextField {...params} label='Select Customer' variant='standard' />}
           />
 
-          <Autocomplete
-            required
-            size='small'
-            value={selectedJob}
-            onChange={(event, newValue) => setSelectedItems(otherItems => ({ ...otherItems, selectedJob: newValue }))}
-            getOptionLabel={option => option.jobDescription || ''}
-            options={customerJobsList}
-            sx={{ width: 350 }}
-            renderInput={params => <TextField {...params} label='Select Job' variant='standard' />}
-          />
+          {page !== 'Payment' && (
+            <Autocomplete
+              required
+              size='small'
+              value={selectedJob}
+              onChange={(event, newValue) => setSelectedItems(otherItems => ({ ...otherItems, selectedJob: newValue }))}
+              getOptionLabel={option => option.jobDescription || ''}
+              options={customerJobsList}
+              sx={{ width: 350 }}
+              renderInput={params => <TextField {...params} label='Select Job' variant='standard' />}
+            />
+          )}
 
           <Autocomplete
             required
