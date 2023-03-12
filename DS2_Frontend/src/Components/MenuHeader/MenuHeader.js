@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Box, Tab } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
+import { useEffect, useState } from 'react';
 
 /**
  * Using prior menu items to compare against incoming menu Item to check for change.
@@ -10,8 +9,6 @@ import TabList from '@mui/lab/TabList';
  * By checking to see if the arrays change, the value can be reset to 0, therefore avoiding the error.
  */
 export default function MenuHeader({ menuOptions, onClickNavigation }) {
-  const navigate = useNavigate();
-
   const [value, setValue] = useState('0');
   const [priorMenuOptions, setPriorMenuOptions] = useState([]);
 
@@ -32,7 +29,6 @@ export default function MenuHeader({ menuOptions, onClickNavigation }) {
             onChange={(e, val) => {
               onClickNavigation({ route: e.target.attributes.route.value, value: e.target.name });
               setValue(val);
-              navigate(`/${e.target.attributes.route.value}/`);
             }}
           >
             {menuOptions.map((option, i) => (

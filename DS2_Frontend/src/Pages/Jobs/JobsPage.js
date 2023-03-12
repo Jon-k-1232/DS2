@@ -1,18 +1,39 @@
-import { useEffect } from 'react';
-import { Container } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Stack } from '@mui/material';
+import { getJobsList, getJobsCatagoriesList, getJobOptionsList } from '../../Services/ApiCalls/GetCalls';
 import Page from '../../Components/Page';
+import Jobs from './Jobs';
+import JobCatagories from './JobCatagories';
+import JobOptions from './JobOptions';
 
 export default function JobsPage({ setPageTitle, setMenuOptions, menuNavigation }) {
-  // eslint-disable-next-line
+  const [optionLists, setOptionLists] = useState({
+    jobsList: [],
+    jobsCatagoriesList: [],
+    jobOptionsList: []
+  });
+
   useEffect(() => {
     setPageTitle('Jobs');
     setMenuOptions(menuOptions);
+
+    const apiCall = async () => {
+      const jobsList = await getJobsList();
+      const jobsCatagoriesList = await getJobsCatagoriesList();
+      const jobOptionsList = await getJobOptionsList();
+      setOptionLists({ jobsList, jobsCatagoriesList, jobOptionsList });
+    };
+    apiCall();
     // eslint-disable-next-line
   }, []);
 
   return (
     <Page>
-      <Container style={{ display: 'contents' }}></Container>
+      <Stack style={{ padding: '20px' }}>
+        {menuNavigation.value === 'jobs' && <Jobs optionLists={optionLists} />}
+        {menuNavigation.value === 'jobCatagories' && <JobCatagories optionLists={optionLists} />}
+        {menuNavigation.value === 'jobOptions' && <JobOptions optionLists={optionLists} />}
+      </Stack>
     </Page>
   );
 }

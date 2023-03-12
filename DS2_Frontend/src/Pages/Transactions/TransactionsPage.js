@@ -7,7 +7,6 @@ import Time from './Time';
 import Payment from './Payment';
 import WriteOff from './WriteOff';
 import TransactionTable from './Transactions';
-import ComingSoon from '../../Components/ComingSoon';
 
 export default function TransactionsPage({ setPageTitle, setMenuOptions, menuNavigation }) {
   const [optionLists, setOptionLists] = useState({
@@ -37,11 +36,10 @@ export default function TransactionsPage({ setPageTitle, setMenuOptions, menuNav
     <Page style={{ paddingTop: 0 }}>
       <Stack style={{ padding: '20px' }}>
         {menuNavigation.value === 'newTime' && <Time optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />}
-        {/* {menuNavigation.value === 'newCharge' && <Charge optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />}
+        {menuNavigation.value === 'newCharge' && <Charge optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />}
         {menuNavigation.value === 'newPayment' && <Payment optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />}
         {menuNavigation.value === 'writeOff' && <WriteOff optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />}
-        {menuNavigation.value === 'customerTransactions' && <TransactionTable transactionsList={optionLists.transactionsList} />} */}
-        <Charge optionLists={optionLists} setOptionLists={data => setOptionLists(data)} />
+        {menuNavigation.value === 'customerTransactions' && <TransactionTable transactionsList={optionLists.transactionsList} />}
       </Stack>
     </Page>
   );

@@ -27,3 +27,24 @@ export const getTransactionsList = async () => {
   const transactionsList = [];
   return transactionsList;
 };
+
+export const getJobsList = async () => {
+  // const response = await axios.get('/jobs');
+  //const jobsList = response.data;
+  const jobsList = [];
+  return jobsList;
+};
+
+export const getJobsCatagoriesList = async () => {
+  // const response = await axios.get('/jobsCatagories');
+  //const jobsCatagoriesList = response.data;
+  const jobsCatagoriesList = [];
+  return jobsCatagoriesList;
+};
+
+export const getJobOptionsList = async () => {
+  // const response = await axios.get('/jobOptions');
+  //const jobOptionsList = response.data;
+  const jobOptionsList = [];
+  return jobOptionsList;
+};

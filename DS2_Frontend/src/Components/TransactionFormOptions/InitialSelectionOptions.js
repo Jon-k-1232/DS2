@@ -16,7 +16,7 @@ export default function InitialSelectionOptions({ optionLists, selectedItems, se
             className='myDatePicker'
             required
             label='Select Transaction Date'
-            value={selectedDate}
+            value={selectedDate || dayjs()}
             onChange={newValue => setSelectedItems(otherItems => ({ ...otherItems, selectedDate: dayjs(newValue) }))}
             renderInput={params => <TextField {...params} />}
           />
@@ -26,7 +26,7 @@ export default function InitialSelectionOptions({ optionLists, selectedItems, se
             value={selectedCustomer}
             onChange={(event, newValue) => setSelectedItems(otherItems => ({ ...otherItems, selectedCustomer: newValue }))}
             getOptionLabel={option => option.customerName || ''}
-            options={customersList}
+            options={customersList || []}
             sx={{ width: 350 }}
             renderInput={params => <TextField {...params} label='Select Customer' variant='standard' />}
           />
@@ -38,7 +38,7 @@ export default function InitialSelectionOptions({ optionLists, selectedItems, se
               value={selectedJob}
               onChange={(event, newValue) => setSelectedItems(otherItems => ({ ...otherItems, selectedJob: newValue }))}
               getOptionLabel={option => option.jobDescription || ''}
-              options={customerJobsList}
+              options={customerJobsList || []}
               sx={{ width: 350 }}
               renderInput={params => <TextField {...params} label='Select Job' variant='standard' />}
             />
@@ -50,7 +50,7 @@ export default function InitialSelectionOptions({ optionLists, selectedItems, se
             value={selectedTeamMember}
             onChange={(event, newValue) => setSelectedItems(otherItems => ({ ...otherItems, selectedTeamMember: newValue }))}
             getOptionLabel={option => option.displayName || ''}
-            options={teamMembersList}
+            options={teamMembersList || []}
             sx={{ width: 350 }}
             renderInput={params => <TextField {...params} label='Select Team Member' variant='standard' />}
           />
