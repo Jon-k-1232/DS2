@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Stack, Button, Typography, Alert } from '@mui/material';
-// import { postTransaction } from '../../Services/ApiCalls/PostCalls';
-import { formObjectForPost } from './SharedTransactionFunctions';
+import { postTransaction } from '../../Services/ApiCalls/PostCalls';
+import { formObjectForTransactionPost } from '../../Services/SharedPostObjects/SharedPostObjects';
 import InitialSelectionOptions from './TransactionFormOptions/InitialSelectionOptions';
 import WriteOffOptions from './TransactionFormOptions/WriteOffOptions';
 import dayjs from 'dayjs';
@@ -26,30 +26,30 @@ export default function WriteOff({ optionLists, setOptionLists }) {
   const { unitCost, quantity } = selectedItems;
 
   const handleSubmit = async () => {
-    const dataToPost = formObjectForPost(selectedItems, loggedInUser, 'Payment');
+    const dataToPost = formObjectForTransactionPost(selectedItems, loggedInUser, 'Payment');
     console.log(dataToPost);
-    // const postedItem = await postTransaction(dataToPost);
-    // setPostStatus(postedItem.status);
-    // if (postStatus === 200) {
-    //   resetState();
-    //   setOptionLists({ ...optionLists, transactionsList: postedItem.updatedTransactionsList });
-    // }
+    const postedItem = await postTransaction(dataToPost);
+    setPostStatus(postedItem.status);
+    if (postStatus === 200) {
+      resetState();
+      setOptionLists({ ...optionLists, transactionsList: postedItem.updatedTransactionsList });
+    }
   };
 
-  //   const resetState = () => {
-  //     setPostStatus(null);
-  //     setOptionLists({ ...optionLists, customerJobsList: [] });
-  //     setSelectedItems({
-  //       selectedCustomer: {},
-  //       selectedJob: {},
-  //       selectedTeamMember: {},
-  //       selectedDate: '',
-  //       detailedJobDescription: '',
-  //       isTransactionBillable: true,
-  //       unitCost: 0,
-  //       quantity: 1
-  //     });
-  //   };
+  const resetState = () => {
+    setPostStatus(null);
+    setOptionLists({ ...optionLists, customerJobsList: [] });
+    setSelectedItems({
+      selectedCustomer: {},
+      selectedJob: {},
+      selectedTeamMember: {},
+      selectedDate: '',
+      detailedJobDescription: '',
+      isTransactionBillable: true,
+      unitCost: 0,
+      quantity: 1
+    });
+  };
 
   return (
     <>

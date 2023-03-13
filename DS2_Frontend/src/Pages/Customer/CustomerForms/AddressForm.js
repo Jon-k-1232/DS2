@@ -1,18 +1,7 @@
-import { Stack, TextField, Checkbox, FormControlLabel } from '@mui/material';
-import Typography from '../../../Theme/overrides/Typography';
+import { Stack, TextField } from '@mui/material';
 
 export default function AddressForm({ selectedItems, setSelectedItems }) {
-  const {
-    isCustomerPhysicalAddress,
-    isCustomerBillingAddress,
-    isCustomerMailingAddress,
-    customerStreet,
-    customerCity,
-    customerState,
-    customerZip,
-    customerPhone,
-    customerEmail
-  } = selectedItems;
+  const { customerStreet, customerCity, customerState, customerZip, customerPhone, customerEmail } = selectedItems;
 
   return (
     <>

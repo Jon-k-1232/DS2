@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
-import { Stack } from '@mui/material';
+import { Stack, Button, Alert } from '@mui/material';
 import NameForm from './CustomerForms/NameForm';
 import AddressForm from './CustomerForms/AddressForm';
 import CustomerSettings from './CustomerForms/CustomerSettings';
 import CustomerEntityType from './CustomerForms/CustomerEntityType';
+import { formObjectForCustomerPost } from '../../Services/SharedPostObjects/SharedPostObjects';
+import { postNewCustomer } from '../../Services/ApiCalls/PostCalls';
 import AddressTypeSelections from './CustomerForms/AddressTypeSelections';
 import { useContext } from 'react';
 import { context } from '../../App';
+import RecurringCustomerForm from './CustomerForms/RecurringCustomerForm';
 
 export default function NewCustomer() {
   const { loggedInUser } = useContext(context);
 
-  //   const [postStatus, setPostStatus] = useState(null);
+  const [postStatus, setPostStatus] = useState(null);
   const [selectedItems, setSelectedItems] = useState({
     customerEntityType: 'individual',
+    recurringAmount: '',
+    billingCycle: '',
     customerBusinessName: '',
     customerName: '',
     customerFirstName: '',
@@ -33,31 +38,44 @@ export default function NewCustomer() {
     isCustomerRecurring: false
   });
 
-  //   const handleSubmit = async () => {
-  //     const dataToPost = formObjectForPost(selectedItems, loggedInUser, 'Charge');
-  //     console.log(dataToPost);
-  //     const postedItem = await postTransaction(dataToPost);
-  //     setPostStatus(postedItem.status);
-  //     if (postStatus === 200) {
-  //       resetState();
-  //       setOptionLists({ ...optionLists, transactionsList: postedItem.updatedTransactionsList });
-  //     }
-  //   };
+  const { isCustomerRecurring } = selectedItems;
 
-  // const resetState = () => {
-  //   setPostStatus(null);
-  //   setOptionLists({ ...optionLists, customerJobsList: [] });
-  //   setSelectedItems({
-  //     selectedCustomer: {},
-  //     selectedJob: {},
-  //     selectedTeamMember: {},
-  //     selectedDate: '',
-  //     detailedJobDescription: '',
-  //     isTransactionBillable: true,
-  //     unitCost: 0,
-  //     quantity: 1
-  //   });
-  // };
+  const handleSubmit = async () => {
+    const dataToPost = formObjectForCustomerPost(selectedItems, loggedInUser);
+    console.log(dataToPost);
+
+    const postedItem = await postNewCustomer(dataToPost);
+    setPostStatus(postedItem.status);
+    if (postStatus === 200) {
+      resetState();
+    }
+  };
+
+  const resetState = () => {
+    setPostStatus(null);
+    setSelectedItems({
+      customerEntityType: 'individual',
+      recurringAmount: '',
+      billingCycle: '',
+      customerBusinessName: '',
+      customerName: '',
+      customerFirstName: '',
+      customerLastName: '',
+      customerStreet: '',
+      customerCity: '',
+      customerState: '',
+      customerZip: '',
+      customerPhone: '',
+      customerEmail: '',
+      isCustomerAddressActive: true,
+      isCustomerPhysicalAddress: true,
+      isCustomerBillingAddress: true,
+      isCustomerMailingAddress: true,
+      isCustomerActive: true,
+      isCustomerBillable: true,
+      isCustomerRecurring: false
+    });
+  };
 
   return (
     <>
@@ -82,10 +100,16 @@ export default function NewCustomer() {
           <CustomerSettings selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
         </Stack>
 
-        {/* <Stack>
+        {isCustomerRecurring && (
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2 }}>
+            <RecurringCustomerForm selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
+          </Stack>
+        )}
+
+        <Stack>
           <Button onClick={handleSubmit}>Primary</Button>
           {postStatus && <Alert severity={postStatus === 200 ? 'success' : 'error'}>{postStatus}</Alert>}
-        </Stack> */}
+        </Stack>
       </Stack>
     </>
   );

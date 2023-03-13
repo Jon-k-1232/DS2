@@ -1,4 +1,4 @@
-import { Stack, TextField, Checkbox, FormControlLabel } from '@mui/material';
+import { Stack, Checkbox, FormControlLabel } from '@mui/material';
 
 export default function AddressForm({ selectedItems, setSelectedItems }) {
   const { isCustomerPhysicalAddress, isCustomerBillingAddress, isCustomerMailingAddress } = selectedItems;
