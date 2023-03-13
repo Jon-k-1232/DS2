@@ -1,17 +1,29 @@
-import { useEffect } from 'react';
-import { Container } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Stack } from '@mui/material';
+import { getAccountUsersList } from '../../Services/ApiCalls/GetCalls';
 import Page from '../../Components/Page';
+import AccountUsers from './AccountUsers';
 
 export default function AccountPage({ setPageTitle, setMenuOptions, menuNavigation }) {
+  const [optionLists, setOptionLists] = useState({
+    accountUsersList: []
+  });
+
   useEffect(() => {
     setPageTitle('Account');
     setMenuOptions(menuOptions);
+
+    const apiCall = async () => {
+      const accountUsersList = await getAccountUsersList();
+      setOptionLists({ accountUsersList });
+    };
+    apiCall();
     // eslint-disable-next-line
   }, []);
 
   return (
     <Page>
-      <Container style={{ display: 'contents' }}></Container>
+      <Stack style={{ padding: '20px' }}>{menuNavigation.value === 'accountUsers' && <AccountUsers optionLists={optionLists} />}</Stack>
     </Page>
   );
 }

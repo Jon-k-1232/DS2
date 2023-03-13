@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Stack } from '@mui/material';
-import { getCustomersList } from '../../Services/ApiCalls/GetCalls';
+import { getCustomersList, getRecurringCustomersList } from '../../Services/ApiCalls/GetCalls';
 import Page from '../../Components/Page';
 import Customers from './Customers';
+import RecurringCustomers from './RecurringCustomers';
+import NewCustomer from './NewCustomer';
 
 export default function CustomerPage({ setPageTitle, setMenuOptions, menuNavigation }) {
   const [optionLists, setOptionLists] = useState({
-    customersList: []
+    customersList: [],
+    recurringCustomersList: []
   });
 
   useEffect(() => {
@@ -15,7 +18,8 @@ export default function CustomerPage({ setPageTitle, setMenuOptions, menuNavigat
 
     const apiCall = async () => {
       const customersList = await getCustomersList();
-      setOptionLists({ customersList });
+      const recurringCustomersList = await getRecurringCustomersList();
+      setOptionLists({ customersList, recurringCustomersList });
     };
     apiCall();
     // eslint-disable-next-line
@@ -23,7 +27,11 @@ export default function CustomerPage({ setPageTitle, setMenuOptions, menuNavigat
 
   return (
     <Page>
-      <Stack style={{ padding: '20px' }}>{menuNavigation.value === 'customers' && <Customers optionLists={optionLists} />}</Stack>
+      <Stack style={{ padding: '20px' }}>
+        {menuNavigation.value === 'addCustomer' && <NewCustomer />}
+        {menuNavigation.value === 'customers' && <Customers optionLists={optionLists} />}
+        {menuNavigation.value === 'recurringCustomers' && <RecurringCustomers optionLists={optionLists} />}
+      </Stack>
     </Page>
   );
 }

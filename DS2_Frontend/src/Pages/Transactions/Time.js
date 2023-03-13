@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Stack, Button, Typography, Alert } from '@mui/material';
-import InitialSelectionOptions from '../../Components/TransactionFormOptions/InitialSelectionOptions';
-import TimeOptions from '../../Components/TransactionFormOptions/TimeOptions';
+import InitialSelectionOptions from './TransactionFormOptions/InitialSelectionOptions';
+import TimeOptions from './TransactionFormOptions/TimeOptions';
 // import { postTransaction } from '../../Services/ApiCalls/PostCalls';
 import { formObjectForPost } from './SharedTransactionFunctions';
 import dayjs from 'dayjs';

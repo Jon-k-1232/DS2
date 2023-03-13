@@ -1,17 +1,35 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Stack } from '@mui/material';
 import Page from '../../Components/Page';
+import { getInvoicesList, getQuotesList } from '../../Services/ApiCalls/GetCalls';
+import Invoices from './Invoices';
+import Quotes from './Quotes';
 
 export default function InvoicesPage({ setPageTitle, setMenuOptions, menuNavigation }) {
+  const [optionLists, setOptionLists] = useState({
+    invoicesList: [],
+    quotesList: []
+  });
+
   useEffect(() => {
     setPageTitle('Invoices');
     setMenuOptions(menuOptions);
+
+    const apiCall = async () => {
+      const invoicesList = await getInvoicesList();
+      const quotesList = await getQuotesList();
+      setOptionLists({ invoicesList, quotesList });
+    };
+    apiCall();
     // eslint-disable-next-line
   }, []);
 
   return (
     <Page>
-      <Stack style={{ display: 'contents' }}></Stack>
+      <Stack style={{ padding: '20px' }}>
+        {menuNavigation.value === 'invoices' && <Invoices optionLists={optionLists} />}
+        {menuNavigation.value === 'quotes' && <Quotes optionLists={optionLists} />}
+      </Stack>
     </Page>
   );
 }
