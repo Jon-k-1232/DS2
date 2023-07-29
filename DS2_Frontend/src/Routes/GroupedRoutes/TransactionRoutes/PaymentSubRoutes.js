@@ -1,0 +1,78 @@
+import React, { useEffect, useState, useContext } from 'react';
+import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
+import PageNavigationHeader from '../../../Components/PageNavigationHeader/PageNavigationHeader';
+import { fetchSinglePayment, fetchCustomerProfileInformation } from '../../../Services/ApiCalls/GetCalls';
+import { context } from '../../../App';
+import DeletePayment from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeletePayment';
+import EditPayment from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditPayment';
+
+export default function PaymentSubRoutes({ customerData, setCustomerData }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { accountID, userID } = useContext(context).loggedInUser;
+  const { rowData } = location?.state ?? {};
+  const { customer_id, payment_id } = rowData ?? {};
+  const menuOptions = fetchMenuOptions(navigate);
+
+  const [paymentData, setPaymentData] = useState({});
+  const [customerProfileData, setCustomerProfileData] = useState([]);
+
+  useEffect(() => {
+    const fetchPaymentData = async () => {
+      if (rowData) {
+        const fetchPayment = await fetchSinglePayment(payment_id, accountID, userID);
+        const customerInfo = await fetchCustomerProfileInformation(accountID, userID, customer_id);
+        setPaymentData(...fetchPayment.activePaymentData.activePayments);
+        setCustomerProfileData({ ...customerInfo });
+      }
+    };
+    fetchPaymentData();
+    // eslint-disable-next-line
+  }, [rowData]);
+
+  return (
+    <>
+      <PageNavigationHeader menuOptions={menuOptions} onClickNavigation={() => {}} currentLocation={location} />
+
+      <Routes>
+        <Route
+          path='deletePayment'
+          element={
+            <DeletePayment
+              customerData={customerData}
+              setCustomerData={data => setCustomerData(data)}
+              paymentData={paymentData}
+              customerProfileData={customerProfileData}
+            />
+          }
+        />
+        <Route
+          path='editPayment'
+          element={
+            <EditPayment
+              customerData={customerData}
+              setCustomerData={data => setCustomerData(data)}
+              paymentData={paymentData}
+              customerProfileData={customerProfileData}
+            />
+          }
+        />
+      </Routes>
+    </>
+  );
+}
+
+const fetchMenuOptions = navigate => [
+  {
+    display: 'Delete Payment',
+    value: 'deletePayment',
+    route: '/transactions/customerPayments/deletePayment',
+    onClick: () => navigate('/transactions/customerPayments/deletePayment')
+  },
+  {
+    display: 'Edit Payment',
+    value: 'editPayment',
+    route: '/transactions/customerPayments/editPayment',
+    onClick: () => navigate('/transactions/customerPayments/editPayment')
+  }
+];

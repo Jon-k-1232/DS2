@@ -1,0 +1,33 @@
+const jobCategoriesService = {
+  getActiveJobCategories(db, accountID) {
+    return db.select().from('customer_job_categories').where('account_id', accountID).where('is_job_category_active', true);
+  },
+
+  createJobCategory(db, newJobCategory) {
+    return db
+      .insert(newJobCategory)
+      .into('customer_job_categories')
+      .returning('*')
+      .then(rows => rows[0]);
+  },
+
+  updateJobCategory(db, updatedJobCategory) {
+    return db
+      .update(updatedJobCategory)
+      .into('customer_job_categories')
+      .where('customer_job_category_id', '=', updatedJobCategory.customer_job_category_id)
+      .returning('*')
+      .then(rows => rows[0]);
+  },
+
+  deleteJobCategory(db, jobCategoryID) {
+    return db
+      .delete()
+      .from('customer_job_categories')
+      .where('customer_job_category_id', '=', jobCategoryID)
+      .returning('*')
+      .then(rows => rows[0]);
+  }
+};
+
+module.exports = jobCategoriesService;
