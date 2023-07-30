@@ -1,5 +1,5 @@
 const app = require('./app');
-const { PORT, DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, NODE_ENV } = require('../config');
+const { NODE_PORT, DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, NODE_ENV } = require('../config');
 const knex = require('knex');
 
 const db = knex({
@@ -14,8 +14,8 @@ const db = knex({
 
 app.set('db', db);
 
-app.listen(PORT, () => {
+app.listen(NODE_PORT, () => {
   if (NODE_ENV !== 'development') {
-    console.log(`Server listening at http://localhost:${PORT}`);
+    console.log(`Server listening at http://localhost:${NODE_PORT}`);
   }
 });

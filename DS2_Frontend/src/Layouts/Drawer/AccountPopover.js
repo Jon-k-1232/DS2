@@ -6,7 +6,6 @@ import { alpha } from '@mui/material/styles';
 import { Button, Box, Divider, MenuItem, Typography, Avatar, IconButton } from '@mui/material';
 import MenuPopover from '../../Components/MenuPopover';
 import TokenService from '../../Services/TokenService';
-import UserService from '../../Services/UserService';
 import { useContext } from 'react';
 import { context } from '../../App';
 
@@ -22,7 +21,7 @@ export default function AccountPopover() {
   const navigate = useNavigate();
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
-  const { loggedInUser } = useContext(context);
+  const { loggedInUser, setLoggedInUser } = useContext(context);
 
   const handleOpen = () => {
     setOpen(true);
@@ -33,7 +32,16 @@ export default function AccountPopover() {
 
   const handleLogout = () => {
     TokenService.clearAuthToken();
-    UserService.clearUserId();
+    window.sessionStorage.removeItem('userID');
+    window.sessionStorage.removeItem('accountID');
+    setLoggedInUser({
+      accountID: null,
+      userID: null,
+      displayName: null,
+      role: null,
+      accessLevel: null,
+      token: null
+    });
     navigate('/login');
   };
 

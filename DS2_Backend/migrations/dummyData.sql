@@ -13,11 +13,11 @@ INSERT INTO account_information(account_info_id, account_id, account_street, acc
 (5, 4, '222 Pine St', 'Seattle', 'WA', '98101', 'aspire@jimkimmel.com', '602-555-1234', TRUE, TRUE, TRUE, TRUE, '2022-01-04 13:00:00'),
 (6, 5, '333 Maple St', 'Chicago', 'IL', '60601', 'aspire@jimkimmel.com', '602-555-1234', TRUE, TRUE, TRUE, TRUE, '2022-01-05 14:00:00');
 
-INSERT INTO users(account_id, email, display_name, cost_rate, billing_rate, job_title, access_level, last_login_date, login_ip, is_user_active, created_at)
-     VALUES (2, 'johndoe@example.com', 'John Doe', 40.00, 75.00, 'Lawn Care Specialist', 'manager', '2022-03-01 09:00:00', '192.168.0.1', TRUE, '2022-03-01 08:00:00'),
-(2, 'janedoe@example.com', 'Jane Doe', 50.00, 90.00, 'Gutter Cleaning Specialist', 'manager', '2022-03-02 10:00:00', '192.168.0.2', TRUE, '2022-03-01 08:00:00'),
-(2, 'bobsmith@example.com', 'Bob Smith', 45.00, 85.00, 'Window Specialist', 'manager', '2022-03-03 11:00:00', '192.168.0.3', TRUE, '2022-03-01 08:00:00'),
-(2, 'janesmith@example.com', 'Jane Smith', 55.00, 100.00, 'Pest Control Specialist', 'manager', '2022-03-04 12:00:00', '192.168.0.4', TRUE, '2022-03-01 08:00:00');
+INSERT INTO users(account_id, email, display_name, cost_rate, billing_rate, job_title, access_level, is_user_active, created_at)
+     VALUES (2, 'johndoe@example.com', 'John Doe', 40.00, 75.00, 'Lawn Care Specialist', 'manager', TRUE, '2022-03-01 08:00:00'),
+(2, 'janedoe@example.com', 'Jane Doe', 50.00, 90.00, 'Gutter Cleaning Specialist', 'manager', TRUE, '2022-03-01 08:00:00'),
+(2, 'bobsmith@example.com', 'Bob Smith', 45.00, 85.00, 'Window Specialist', 'manager', TRUE, '2022-03-01 08:00:00'),
+(2, 'janesmith@example.com', 'Jane Smith', 55.00, 100.00, 'Pest Control Specialist', 'manager', TRUE, '2022-03-01 08:00:00');
 
 INSERT INTO user_login(account_id, user_id, user_name, password_hash, is_login_active, created_at, updated_at)
      VALUES (1, 1, 'johndoe', '3b3d7cb8c71e1bba19c7109f9e2c60a7', TRUE, '2022-03-01 08:00:00', '2022-03-01 08:00:00'),

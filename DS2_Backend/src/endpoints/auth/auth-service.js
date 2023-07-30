@@ -3,20 +3,20 @@ const jwt = require('jsonwebtoken');
 const config = require('../../../config');
 
 const authService = {
-  async getUserByUserName(db, username) {
-    return db('userLogin').where('userLogin', username).where('isLoginActive', true);
+  getUserByUserName(db, username) {
+    return db('user_login').where('user_name', username).where('is_login_active', true);
   },
 
-  async getUserInformation(db, userTableID) {
-    return db('users').where('userLoginID', userTableID).where('isUserActive', true);
+  getUserInformation(db, accountID, userID) {
+    return db('users').where('account_id', accountID).where('user_id', userID).where('is_user_active', true);
   },
 
-  async comparePasswords(password, hash) {
+  comparePasswords(password, hash) {
     return bcrypt.compare(password, hash);
   },
 
   createJwt(subject, payload) {
-    return jwt.sign(payload, config.ACCESS_TOKEN, {
+    return jwt.sign(payload, config.API_TOKEN, {
       subject,
       expiresIn: config.JWT_EXPIRATION,
       algorithm: 'HS256'
@@ -24,13 +24,17 @@ const authService = {
   },
 
   verifyJwt(token) {
-    return jwt.verify(token, config.ACCESS_TOKEN, {
+    return jwt.verify(token, config.API_TOKEN, {
       algorithms: ['HS256']
     });
   },
 
   hashPassword(password) {
     return bcrypt.hash(password, 12);
+  },
+
+  insertLoginLog(db, userLog) {
+    return db('user_login_log').insert(userLog).returning('*');
   }
 };
 

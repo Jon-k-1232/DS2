@@ -56,13 +56,6 @@ export const getTransactionsList = async (accountID, userID) => {
   }
 };
 
-export const getTeamList = async () => {
-  // const response = await axios.get('/team');
-  //const teamList = response.data;
-  const teamList = [];
-  return teamList;
-};
-
 export const getTeamMembersList = async (accountID, userID) => {
   try {
     const response = await axios.get(`${config.API_ENDPOINT}/user/accountUsers/${accountID}/${userID}`);
@@ -96,13 +89,6 @@ export const getQuotesList = async (accountID, quoteID) => {
   }
 };
 
-export const getAccountUsersList = async () => {
-  // const response = await axios.get('/accountUsers');
-  //const accountUsersList = response.data;
-  const accountUsersList = [];
-  return accountUsersList;
-};
-
 export const getRecurringCustomersList = async (accountID, userID) => {
   try {
     const response = await axios.get(`${config.API_ENDPOINT}/recurringCustomer/getActiveRecurringCustomers/${accountID}/${userID}`);
@@ -112,20 +98,6 @@ export const getRecurringCustomersList = async (accountID, userID) => {
     console.error('Error fetching customer data:', error);
     return [];
   }
-};
-
-export const getRoleList = async () => {
-  // const response = await axios.get('/roles');
-  //const roleList = response.data;
-  const roleList = [];
-  return roleList;
-};
-
-export const getAccessLevelList = async () => {
-  // const response = await axios.get('/accessLevels');
-  //const accessLevelList = response.data;
-  const accessLevelList = [];
-  return accessLevelList;
 };
 
 export const getCustomerJobsList = async (accountID, userID, customerID) => {
@@ -139,9 +111,13 @@ export const getCustomerJobsList = async (accountID, userID, customerID) => {
   }
 };
 
-export const getInitialAppData = async (accountID, userID) => {
+export const getInitialAppData = async (accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/customer/activeCustomers/initial/${accountID}/${userID}`);
+    const response = await axios.get(`${config.API_ENDPOINT}/initialData/initialBlob/${accountID}/${userID}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     const initialAppData = response.data;
     return initialAppData;
   } catch (error) {
@@ -150,13 +126,32 @@ export const getInitialAppData = async (accountID, userID) => {
   }
 };
 
-export const fetchCustomerProfileInformation = async (accountID, userID, customerID) => {
+export const fetchCustomerProfileInformation = async (accountID, userID, customerID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/customer/activeCustomers/customerByID/${accountID}/${userID}/${customerID}`);
+    const response = await axios.get(`${config.API_ENDPOINT}/customer/activeCustomers/customerByID/${accountID}/${userID}/${customerID}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     const customerContactInformation = response.data;
     return customerContactInformation;
   } catch (error) {
     console.error('Error fetching customer contact information:', error);
+    return [];
+  }
+};
+
+export const fetchSingleUser = async (accountID, userID, token) => {
+  try {
+    const response = await axios.get(`${config.API_ENDPOINT}/user/fetchSingleUser/${accountID}/${userID}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const singleUser = response.data;
+    return singleUser;
+  } catch (error) {
+    console.error('Error fetching single user:', error);
     return [];
   }
 };

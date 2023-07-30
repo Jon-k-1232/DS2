@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import DashboardLayout from '../Layouts/Drawer';
 import LogoOnlyLayout from '../Layouts/LogoOnlyLayout';
+import Login from '../Pages/Login/Login';
 import NotFound from '../Pages/Page404/Page404';
 import DashboardRoutes from './GroupedRoutes/DashboardRoutes';
 import CustomerRoutes from './GroupedRoutes/CustomerRoutes/CustomerRoutes';
@@ -10,10 +11,11 @@ import InvoiceRoutes from './GroupedRoutes/InvoiceRoutes';
 import AccountRoutes from './GroupedRoutes/AccountRoutes';
 import JobRoutes from './GroupedRoutes/JobRoutes/JobRoutes';
 import { context } from '../App';
-import { getInitialAppData } from '../Services/ApiCalls/GetCalls';
+import { getInitialAppData, fetchSingleUser } from '../Services/ApiCalls/GetCalls';
 
 export default function Router() {
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { loggedInUser, setLoggedInUser } = useContext(context);
+  const { accountID, userID, displayName, token } = loggedInUser;
 
   const [pageTitle, setPageTitle] = useState('');
   const [customerData, setCustomerData] = useState({});
@@ -22,20 +24,37 @@ export default function Router() {
 
   // Gets all customer data on page load
   useEffect(() => {
-    const apiCall = async () => {
-      const initialData = await getInitialAppData(accountID, userID);
-      setCustomerData({ ...customerData, ...initialData });
-    };
-    apiCall();
+    if (accountID && userID && token) apiCall();
     // eslint-disable-next-line
-  }, []);
+  }, [loggedInUser]);
+
+  const apiCall = async () => {
+    const initialData = await getInitialAppData(accountID, userID, token);
+    setCustomerData({ ...customerData, ...initialData });
+
+    // Need this condition for reloads. DisplayName on reload is null, so we need to catch it along with others.
+    // Additionally when this re runs since token will be pulled again, server will re authenticate jwt.
+    if (!displayName) {
+      const userData = await fetchSingleUser(accountID, userID, token);
+      const { account_id, user_id, display_name, job_title, access_level } = userData.activeUserData.activeUser;
+      setLoggedInUser({
+        accountID: account_id,
+        userID: user_id,
+        displayName: display_name,
+        role: job_title,
+        accessLevel: access_level,
+        token: token
+      });
+    }
+  };
 
   const handleSetCustomerData = updatedData => setCustomerData(updatedData);
 
   return (
     <Routes>
       <Route element={<LogoOnlyLayout />}>
-        <Route path='/' element={<Navigate to='/dashboard' />} />
+        <Route exact path='/login' element={<Login />} />
+        <Route path='/' element={<Navigate to='/login' />} />
         <Route path='404' element={<NotFound />} />
         <Route path='*' element={<Navigate to='/404' />} />
       </Route>

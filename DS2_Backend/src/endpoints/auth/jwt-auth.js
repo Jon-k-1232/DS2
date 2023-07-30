@@ -1,7 +1,9 @@
 const authService = require('./auth-service');
 
-// JWT auth process
-async function requireAuth(req, res, next) {
+// JWT Authentication Middleware
+const requireAuth = async (req, res, next) => {
+  // const tokens = req.cookies.session;
+
   const authToken = req.get('Authorization') || '';
   let bearerToken;
 
@@ -13,16 +15,20 @@ async function requireAuth(req, res, next) {
 
   try {
     const payload = authService.verifyJwt(bearerToken);
-    const user = await authService.getUserByUserName(req.app.get('db'), payload.sub);
-    if (!user) {
+    const [user] = await authService.getUserByUserName(req.app.get('db'), payload.sub);
+
+    // Check if user exists and is active
+    if (!user || !user.is_login_active) {
       return res.status(401).json({ error: 'Unauthorized request' });
     }
+
     req.user = user;
     next();
   } catch (error) {
+    console.error(`Authentication error: ${error}`);
     res.status(401).json({ error: 'Unauthorized request' });
   }
-}
+};
 
 module.exports = {
   requireAuth

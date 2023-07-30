@@ -21,6 +21,8 @@ const config = require('../config');
 const accountRouter = require('./endpoints/account/account-router');
 const retainerRouter = require('./endpoints/retainer/retainer-router');
 const writeOffsRouter = require('./endpoints/writeOffs/writeOffs-router');
+const initialDataRouter = require('./endpoints/initialData/initialData-router');
+const cookieParser = require('cookie-parser');
 
 // Middleware
 app.use(
@@ -38,30 +40,23 @@ app.use(
 
 app.use(helmet());
 app.use(express.json());
-app.use(cors({ origin: '*' }));
+app.use(
+  cors({
+    origin: 'http://localhost:3001',
+    // origin: config.FRONT_END_URL,
+    credentials: true
+  })
+);
+app.use(cookieParser());
 
 /* ///////////////////////////\\\\  KEY VALIDATION  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
-// app.use(
-//   (validateBearerToken = (req, res, next) => {
-//     const apiToken = config.API_TOKEN;
-//     const authToken = req.get('BearerAuthorization');
-
-//     if (!authToken || authToken !== apiToken) {
-//       return res.send({
-//         error: 'Unauthorized request',
-//         status: 401
-//       });
-//     }
-//     next();
-//   })
-// );
+// app.use((req, res, next) => {
+//   req.jwtAuth = req.cookies.session;
+//   next();
+// });
 
 /* ///////////////////////////\\\\  USER ENDPOINTS  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-app.get('/', (req, res) => {
-  res.send('Hello, world!');
-});
 
 app.use('/auth', authentication);
 app.use('/customer', customerRouter);
@@ -77,9 +72,7 @@ app.use('/payments', paymentsRouter);
 app.use('/recurringCustomer', recurringCustomerRouter);
 app.use('/retainers', retainerRouter);
 app.use('/writeOffs', writeOffsRouter);
-
-// ToDo - temp use for dev
-app.use('/invoices', express.static('invoices'));
+app.use('/initialData', initialDataRouter);
 
 /* ///////////////////////////\\\\  ERROR HANDLER  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 

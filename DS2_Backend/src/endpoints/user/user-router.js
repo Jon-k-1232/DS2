@@ -109,7 +109,7 @@ userRouter
     });
   });
 
-// Update users table
+// Update user
 userRouter
   .route('/updateUser')
   // .all(requireAuth)
@@ -166,6 +166,30 @@ userRouter
     res.send({
       user,
       message: 'Successfully deleted',
+      status: 200
+    });
+  });
+
+// fetch single user
+userRouter
+  .route('/fetchSingleUser/:accountID/:userID')
+  // .all( requireAuth )
+  .get(async (req, res) => {
+    const db = req.app.get('db');
+    const { accountID, userID } = req.params;
+
+    // Get user
+    const [activeUser] = await accountUserService.fetchUser(db, accountID, userID);
+
+    // Return Object
+    const activeUserData = {
+      activeUser,
+      grid: createGrid(activeUser)
+    };
+
+    res.send({
+      activeUserData,
+      message: 'Successfully fetched',
       status: 200
     });
   });

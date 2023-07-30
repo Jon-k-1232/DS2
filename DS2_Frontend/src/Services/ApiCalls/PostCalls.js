@@ -121,3 +121,14 @@ export const postNewRetainer = async (data, accountID, userID) => {
     throw error;
   }
 };
+
+export const postLoginAuth = async (suppliedUsername, suppliedPassword) => {
+  const url = `${config.API_ENDPOINT}/auth/login`;
+  try {
+    const response = await axios.post(url, { suppliedUsername, suppliedPassword }, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting login auth:', error);
+    return error;
+  }
+};

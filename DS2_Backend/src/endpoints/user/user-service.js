@@ -52,6 +52,10 @@ const accountUserService = {
       .where('user_id', '=', userID)
       .returning('*')
       .then(rows => rows[0]);
+  },
+
+  fetchUser(db, accountID, userID) {
+    return db.select().from('users').where('account_id', '=', accountID).andWhere('user_id', '=', userID).returning('*');
   }
 };
 
