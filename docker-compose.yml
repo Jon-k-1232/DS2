@@ -17,28 +17,8 @@ services:
     ports:
       - '3001:3001'
     networks:
-      customnetwork2:
-        ipv4_address: 172.18.0.2
-    restart: always
-
-  # Database
-  db:
-    container_name: DS2_Database
-    image: 'postgres'
-    env_file:
-      - ./DS2_Frontend/.env
-      - ./DS2_Backend/.env
-    environment:
-      # POSTGRES_DB: ds2
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    volumes:
-      - data:/var/lib/postgresql
-    ports:
-      - '5432:5432'
-    networks:
-      customnetwork2:
-        ipv4_address: 172.18.0.3
+      - server_customnetwork
+      - customnetwork2
     restart: always
 
   # Backend
@@ -49,16 +29,14 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./DS2_Backend/.env
-    depends_on:
-      - db
     ports:
       - '8001:8001'
     volumes:
       - /app/node_modules
       - ./DS2_Backend:/app
     networks:
-      customnetwork2:
-        ipv4_address: 172.18.0.4
+      - server_customnetwork
+      - customnetwork2
     restart: always
 
   # Server
@@ -68,7 +46,6 @@ services:
     depends_on:
       - api
       - app
-      - db
     build:
       context: ./Nginx
       dockerfile: Dockerfile
@@ -76,18 +53,15 @@ services:
       - '81:81'
       - '444:444'
     networks:
-      customnetwork2:
-        ipv4_address: 172.18.0.5
+      - server_customnetwork
+      - customnetwork2
     volumes:
       - ./Nginx/Server_ssl/192.168.12.209.crt:/etc/nginx/192.168.12.209.crt
       - ./Nginx/Server_ssl/192.168.12.209.key:/etc/nginx/192.168.12.209.key
     restart: always
 
 networks:
+  server_customnetwork:
+    external: true
   customnetwork2:
-    ipam:
-      config:
-        - subnet: 172.18.0.0/16
-
-volumes:
-  data:
+    driver: bridge
