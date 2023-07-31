@@ -104,6 +104,7 @@ const palette = {
   chart: CHART_COLORS,
   divider: GREY[500_24],
   text: { primary: GREY[800], secondary: GREY[600], disabled: GREY[500] },
+  // paper: '#fff', default: '#fff' controls the apps background color
   background: { paper: '#fff', default: '#fff', neutral: GREY[200], drawerDefault: '#1c2536' },
   action: {
     active: GREY[600],

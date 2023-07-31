@@ -1,7 +1,6 @@
 const express = require('express');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
-const { requireAuth } = require('../auth/jwt-auth');
 const paymentsRouter = express.Router();
 const paymentsService = require('./payments-service');
 const invoiceService = require('../invoice/invoice-service');
@@ -42,27 +41,24 @@ paymentsRouter.route('/createPayment/:accountID/:userID').post(jsonParser, async
 });
 
 // Get all active payments
-paymentsRouter
-  .route('/getActivePayments/:accountID')
-  // .all(requireAuth)
-  .get(async (req, res) => {
-    const db = req.app.get('db');
-    const { accountID } = req.params;
+paymentsRouter.route('/getActivePayments/:accountID').get(async (req, res) => {
+  const db = req.app.get('db');
+  const { accountID } = req.params;
 
-    const activePayments = await paymentsService.getActivePayments(db, accountID);
+  const activePayments = await paymentsService.getActivePayments(db, accountID);
 
-    // Return Object
-    const activePaymentsData = {
-      activePayments,
-      grid: createGrid(activePayments)
-    };
+  // Return Object
+  const activePaymentsData = {
+    activePayments,
+    grid: createGrid(activePayments)
+  };
 
-    res.send({
-      activePaymentsData,
-      message: 'Successfully retrieved all active payments.',
-      status: 200
-    });
+  res.send({
+    activePaymentsData,
+    message: 'Successfully retrieved all active payments.',
+    status: 200
   });
+});
 
 // Get single payment
 paymentsRouter
@@ -88,78 +84,72 @@ paymentsRouter
   });
 
 // Update a payment
-paymentsRouter
-  .route('/updatePayment/:accountID/:userID')
-  // .all(requireAuth)
-  .put(jsonParser, async (req, res) => {
-    const db = req.app.get('db');
-    const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
+paymentsRouter.route('/updatePayment/:accountID/:userID').put(jsonParser, async (req, res) => {
+  const db = req.app.get('db');
+  const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
 
-    // Create new object with sanitized fields
-    const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
-    const { customer_invoice_id } = paymentTableFields;
+  // Create new object with sanitized fields
+  const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
+  const { customer_invoice_id } = paymentTableFields;
 
-    // If payment is attached to an invoice, do not allow update
-    if (customer_invoice_id) {
-      const reason = 'Payment is attached to an invoice and cannot be updated.';
-      unableToCompleteRequest(res, reason, 423);
-      return;
-    }
+  // If payment is attached to an invoice, do not allow update
+  if (customer_invoice_id) {
+    const reason = 'Payment is attached to an invoice and cannot be updated.';
+    unableToCompleteRequest(res, reason, 423);
+    return;
+  }
 
-    // Update payment
-    await paymentsService.updatePayment(db, paymentTableFields);
+  // Update payment
+  await paymentsService.updatePayment(db, paymentTableFields);
 
-    // Get all payments
-    const activePayments = await paymentsService.getActivePayments(db, paymentTableFields.account_id);
+  // Get all payments
+  const activePayments = await paymentsService.getActivePayments(db, paymentTableFields.account_id);
 
-    const activePaymentsData = {
-      activePayments,
-      grid: createGrid(activePayments)
-    };
+  const activePaymentsData = {
+    activePayments,
+    grid: createGrid(activePayments)
+  };
 
-    res.send({
-      paymentsList: { activePaymentsData },
-      message: 'Successfully updated payment.',
-      status: 200
-    });
+  res.send({
+    paymentsList: { activePaymentsData },
+    message: 'Successfully updated payment.',
+    status: 200
   });
+});
 
 // Delete a payment
-paymentsRouter
-  .route('/deletePayment/:accountID/:userID')
-  // .all(requireAuth)
-  .delete(jsonParser, async (req, res) => {
-    const db = req.app.get('db');
-    const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
+paymentsRouter.route('/deletePayment/:accountID/:userID').delete(jsonParser, async (req, res) => {
+  const db = req.app.get('db');
+  const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
 
-    // Create new object with sanitized fields
-    const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
-    const { customer_invoice_id, payment_id, account_id } = paymentTableFields;
+  // Create new object with sanitized fields
+  const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
+  const { customer_invoice_id, payment_id, account_id } = paymentTableFields;
 
-    // If payment is attached to an invoice, do not allow delete
-    if (customer_invoice_id) {
-      const reason = 'Payment is attached to an invoice and cannot be deleted.';
-      unableToCompleteRequest(res, reason, 423);
-      return;
-    }
+  // If payment is attached to an invoice, do not allow delete
+  if (customer_invoice_id) {
+    const reason = 'Payment is attached to an invoice and cannot be deleted.';
+    unableToCompleteRequest(res, reason, 423);
+    return;
+  }
 
-    // Delete payment
-    await paymentsService.deletePayment(db, payment_id);
+  // Delete payment
+  await paymentsService.deletePayment(db, payment_id);
 
-    // Get all payments
-    const paymentsData = await paymentsService.getActivePayments(db, account_id);
+  // Get all payments
+  const paymentsData = await paymentsService.getActivePayments(db, account_id);
 
-    const activePaymentsData = {
-      paymentsData,
-      grid: createGrid(paymentsData)
-    };
+  const activePaymentsData = {
+    paymentsData,
+    grid: createGrid(paymentsData)
+  };
 
-    res.send({
-      paymentsList: { activePaymentsData },
-      message: 'Successfully deleted payment.',
-      status: 200
-    });
+  res.send({
+    paymentsList: { activePaymentsData },
+    message: 'Successfully deleted payment.',
+    status: 200
   });
+});
 
 module.exports = paymentsRouter;
 

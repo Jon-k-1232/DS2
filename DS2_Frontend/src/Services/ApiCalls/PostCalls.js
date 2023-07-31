@@ -1,10 +1,20 @@
 import axios from 'axios';
 import config from '../../config';
+import TokenService from '../TokenService';
 
-export const postTransaction = async (data, accountID, userID) => {
+const headers = memoryToken => {
+  const token = memoryToken || TokenService.getAuthToken();
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+};
+
+export const postTransaction = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/transactions/createTransaction/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { transaction: data });
+    const response = await axios.post(url, { transaction: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new transaction:', error);
@@ -12,10 +22,10 @@ export const postTransaction = async (data, accountID, userID) => {
   }
 };
 
-export const postNewPayment = async (data, accountID, userID) => {
+export const postNewPayment = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/payments/createPayment/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { payment: data });
+    const response = await axios.post(url, { payment: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new payment:', error);
@@ -23,10 +33,10 @@ export const postNewPayment = async (data, accountID, userID) => {
   }
 };
 
-export const postNewWriteOff = async (data, accountID, userID) => {
+export const postNewWriteOff = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/writeOffs/createWriteOffs/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { writeOff: data });
+    const response = await axios.post(url, { writeOff: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new write off:', error);
@@ -34,10 +44,10 @@ export const postNewWriteOff = async (data, accountID, userID) => {
   }
 };
 
-export const postNewJobCategory = async (data, accountID, userID) => {
+export const postNewJobCategory = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/jobCategories/createJobCategory/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { jobCategory: data });
+    const response = await axios.post(url, { jobCategory: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new job category:', error);
@@ -45,10 +55,10 @@ export const postNewJobCategory = async (data, accountID, userID) => {
   }
 };
 
-export const postNewCustomer = async (data, accountID, userID) => {
+export const postNewCustomer = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/customer/createCustomer/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { customer: data });
+    const response = await axios.post(url, { customer: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new customer:', error);
@@ -56,10 +66,10 @@ export const postNewCustomer = async (data, accountID, userID) => {
   }
 };
 
-export const postNewJobType = async (data, accountID, userID) => {
+export const postNewJobType = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/jobTypes/createJobType/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { jobType: data });
+    const response = await axios.post(url, { jobType: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new job type:', error);
@@ -67,10 +77,10 @@ export const postNewJobType = async (data, accountID, userID) => {
   }
 };
 
-export const postNewCustomerJob = async (data, accountID, userID) => {
+export const postNewCustomerJob = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/jobs/createJob/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { job: data });
+    const response = await axios.post(url, { job: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new customer job:', error);
@@ -78,10 +88,10 @@ export const postNewCustomerJob = async (data, accountID, userID) => {
   }
 };
 
-export const postNewTeamMember = async (data, accountID, userID) => {
+export const postNewTeamMember = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/user/createUser/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { user: data });
+    const response = await axios.post(url, { user: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new team member:', error);
@@ -89,10 +99,10 @@ export const postNewTeamMember = async (data, accountID, userID) => {
   }
 };
 
-export const postInvoiceCreation = async (data, accountID, userID) => {
+export const postInvoiceCreation = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/invoices/createInvoice/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { invoice: data });
+    const response = await axios.post(url, { invoice: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new invoice:', error);
@@ -100,10 +110,10 @@ export const postInvoiceCreation = async (data, accountID, userID) => {
   }
 };
 
-export const postNewRecurringCustomer = async (data, accountID, userID) => {
+export const postNewRecurringCustomer = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/recurringCustomer/createRecurringCustomer/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { recurringCustomer: data });
+    const response = await axios.post(url, { recurringCustomer: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new recurring customer:', error);
@@ -111,10 +121,10 @@ export const postNewRecurringCustomer = async (data, accountID, userID) => {
   }
 };
 
-export const postNewRetainer = async (data, accountID, userID) => {
+export const postNewRetainer = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/retainers/createRetainer/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { retainer: data });
+    const response = await axios.post(url, { retainer: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new retainer:', error);
@@ -122,10 +132,10 @@ export const postNewRetainer = async (data, accountID, userID) => {
   }
 };
 
-export const postLoginAuth = async (suppliedUsername, suppliedPassword) => {
+export const postLoginAuth = async (suppliedUsername, suppliedPassword, token) => {
   const url = `${config.API_ENDPOINT}/auth/login`;
   try {
-    const response = await axios.post(url, { suppliedUsername, suppliedPassword }, { withCredentials: true });
+    const response = await axios.post(url, { suppliedUsername, suppliedPassword }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting login auth:', error);

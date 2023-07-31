@@ -9,7 +9,7 @@ import { context } from '../../../App';
 export default function TransactionSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { accountID, userID, token } = useContext(context).loggedInUser;
   const { rowData } = location?.state ?? {};
   const { customer_id, transaction_id } = rowData ?? {};
   const menuOptions = fetchMenuOptions(navigate);
@@ -19,7 +19,7 @@ export default function TransactionSubRoutes({ customerData, setCustomerData }) 
   useEffect(() => {
     const fetchTransactionData = async () => {
       if (rowData) {
-        const fetchTransaction = await fetchSingleTransaction(customer_id, transaction_id, accountID, userID);
+        const fetchTransaction = await fetchSingleTransaction(customer_id, transaction_id, accountID, userID, token);
         setTransactionData(...fetchTransaction.activeTransactionsData.transactionData);
       }
     };

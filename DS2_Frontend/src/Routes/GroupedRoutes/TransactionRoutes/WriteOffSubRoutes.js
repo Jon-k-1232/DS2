@@ -9,7 +9,7 @@ import EditWriteOff from '../../../Pages/Transactions/TransactionForms/EditTrans
 export default function WriteOffSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { accountID, userID, token } = useContext(context).loggedInUser;
   const { rowData } = location?.state ?? {};
   const { writeoff_id } = rowData ?? {};
   const menuOptions = fetchMenuOptions(navigate);
@@ -19,7 +19,7 @@ export default function WriteOffSubRoutes({ customerData, setCustomerData }) {
   useEffect(() => {
     const fetchWriteOffData = async () => {
       if (rowData) {
-        const fetchPayment = await fetchSingleWriteOff(writeoff_id, accountID, userID);
+        const fetchPayment = await fetchSingleWriteOff(writeoff_id, accountID, userID, token);
         setWriteOffData(...fetchPayment.activeWriteOffsData.activeWriteOffs);
       }
     };

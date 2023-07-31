@@ -31,9 +31,7 @@ export default function AccountPopover() {
   };
 
   const handleLogout = () => {
-    TokenService.clearAuthToken();
-    window.sessionStorage.removeItem('userID');
-    window.sessionStorage.removeItem('accountID');
+    TokenService.handleLogout();
     setLoggedInUser({
       accountID: null,
       userID: null,

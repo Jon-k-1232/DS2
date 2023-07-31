@@ -37,6 +37,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
     <Scrollbar
       sx={{
         height: '100%',
+        backgroundColor: '#1c2536',
         '& .simplebar-content': {
           height: '100%',
           display: 'flex',
@@ -45,7 +46,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
       }}
     >
       <Box sx={{ px: 2.5, py: 3 }}>
-        <Box component={RouterLink} to='/clients' sx={{ display: 'inline-flex' }}>
+        <Box component={RouterLink} to='/customers/customersList' sx={{ display: 'inline-flex' }}>
           <Logo />
         </Box>
       </Box>

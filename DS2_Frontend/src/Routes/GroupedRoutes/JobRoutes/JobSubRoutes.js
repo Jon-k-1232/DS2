@@ -9,7 +9,7 @@ import EditJob from '../../../Pages/Jobs/JobForms/EditJob/EditJob';
 export default function JobSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { accountID, userID, token } = useContext(context).loggedInUser;
   const { rowData } = location?.state ?? {};
   const { customer_job_id } = rowData ?? {};
   const menuOptions = fetchMenuOptions(navigate);
@@ -19,7 +19,7 @@ export default function JobSubRoutes({ customerData, setCustomerData }) {
   useEffect(() => {
     const fetchJobData = async () => {
       if (rowData) {
-        const jobData = await fetchSingleJob(customer_job_id, accountID, userID);
+        const jobData = await fetchSingleJob(customer_job_id, accountID, userID, token);
         setJobData(...jobData.activeJobData.activeJobs);
       }
     };

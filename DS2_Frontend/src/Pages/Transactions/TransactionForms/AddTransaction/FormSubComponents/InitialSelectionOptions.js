@@ -29,7 +29,7 @@ export default function InitialSelectionOptions({
   const customerTransactionData = combinedData?.customerTransactionData?.customerTransactionData || [];
   const customerJobData = combinedData?.customerJobData?.customerJobData || [];
 
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { accountID, userID, token } = useContext(context).loggedInUser;
 
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const [jobDialogOpen, setJobDialogOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function InitialSelectionOptions({
   useEffect(() => {
     if (selectedCustomer) {
       const fetchJobs = async () => {
-        const customerJobsList = await getCustomerJobsList(accountID, userID, selectedCustomer.customer_id);
+        const customerJobsList = await getCustomerJobsList(accountID, userID, selectedCustomer.customer_id, token);
         const activeCustomerJobs = customerJobsList?.activeCustomerJobData?.activeCustomerJobs || [];
         setCustomerJobs(activeCustomerJobs);
       };

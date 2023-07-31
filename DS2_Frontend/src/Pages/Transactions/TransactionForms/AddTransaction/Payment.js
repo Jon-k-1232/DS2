@@ -30,7 +30,7 @@ const initialState = {
 
 export default function Payment({ customerData, setCustomerData }) {
   const { loggedInUser } = useContext(context);
-  const { accountID, userID } = loggedInUser;
+  const { accountID, userID, token } = loggedInUser;
 
   const [postStatus, setPostStatus] = useState(null);
   const [selectedItems, setSelectedItems] = useState(initialState);
@@ -41,7 +41,7 @@ export default function Payment({ customerData, setCustomerData }) {
   useEffect(() => {
     if (selectedCustomer) {
       const fetchCustomerData = async () => {
-        const customerInfo = await fetchCustomerProfileInformation(accountID, userID, selectedCustomer.customer_id);
+        const customerInfo = await fetchCustomerProfileInformation(accountID, userID, selectedCustomer.customer_id, token);
         setCustomerProfileData({ ...customerInfo });
 
         // Auto select the user

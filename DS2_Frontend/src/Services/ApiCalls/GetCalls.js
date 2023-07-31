@@ -1,108 +1,22 @@
 import axios from 'axios';
 import config from '../../config';
+import TokenService from '../TokenService';
 
-export const getCustomersList = async (accountID, userID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/customer/activeCustomers/${accountID}/${userID}`);
-    const customersList = response.data;
-    return customersList;
-  } catch (error) {
-    console.error('Error fetching customer data:', error);
-    return [];
-  }
+const headers = memoryToken => {
+  const token = memoryToken || TokenService.getAuthToken();
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
 };
 
-export const getJobsCategoriesList = async (accountID, userID) => {
+export const getCustomerJobsList = async (accountID, userID, customerID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/jobCategories/getActiveJobCategories/${accountID}/${userID}`);
-    const jobsCategoriesList = response.data;
-    return jobsCategoriesList;
-  } catch (error) {
-    console.error('Error fetching job categories data:', error);
-    return [];
-  }
-};
-
-export const getJobTypesList = async (accountID, userID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/jobTypes/getActiveJobTypes/${accountID}/${userID}`);
-    const jobTypesList = response.data;
-    return jobTypesList;
-  } catch (error) {
-    console.error('Error fetching job types data:', error);
-    return [];
-  }
-};
-
-export const getAccountJobsList = async (accountID, userID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/jobs/getActiveJobs/${accountID}/${userID}`);
-    const jobsList = response.data;
-    return jobsList;
-  } catch (error) {
-    console.error('Error fetching account jobs data:', error);
-    return [];
-  }
-};
-
-export const getTransactionsList = async (accountID, userID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/transactions/getActiveTransactions/${accountID}/${userID}`);
-    const transactionsList = response.data;
-    return transactionsList;
-  } catch (error) {
-    console.error('Error fetching transactions data:', error);
-    return [];
-  }
-};
-
-export const getTeamMembersList = async (accountID, userID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/user/accountUsers/${accountID}/${userID}`);
-    const teamMembersList = response.data;
-    return teamMembersList;
-  } catch (error) {
-    console.error('Error fetching team members data:', error);
-    return [];
-  }
-};
-
-export const getInvoicesList = async (accountID, invoiceID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/invoices/getInvoices/${accountID}/${invoiceID}`);
-    const invoicesList = response.data;
-    return invoicesList;
-  } catch (error) {
-    console.error('Error fetching invoices data:', error);
-    return [];
-  }
-};
-
-export const getQuotesList = async (accountID, quoteID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/quotes/getActiveQuotes/${accountID}/${quoteID}`);
-    const quotesList = response.data;
-    return quotesList;
-  } catch (error) {
-    console.error('Error fetching quotes data:', error);
-    return [];
-  }
-};
-
-export const getRecurringCustomersList = async (accountID, userID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/recurringCustomer/getActiveRecurringCustomers/${accountID}/${userID}`);
-    const customersList = response.data;
-    return customersList;
-  } catch (error) {
-    console.error('Error fetching customer data:', error);
-    return [];
-  }
-};
-
-export const getCustomerJobsList = async (accountID, userID, customerID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/jobs/getActiveCustomerJobs/${accountID}/${userID}/${customerID}`);
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/jobs/getActiveCustomerJobs/${accountID}/${userID}/${customerID}`,
+      headers(token)
+    );
     const customerJobsList = response.data;
     return customerJobsList;
   } catch (error) {
@@ -113,11 +27,7 @@ export const getCustomerJobsList = async (accountID, userID, customerID) => {
 
 export const getInitialAppData = async (accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/initialData/initialBlob/${accountID}/${userID}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await axios.get(`${config.API_ENDPOINT}/initialData/initialBlob/${accountID}/${userID}`, headers(token));
     const initialAppData = response.data;
     return initialAppData;
   } catch (error) {
@@ -128,11 +38,10 @@ export const getInitialAppData = async (accountID, userID, token) => {
 
 export const fetchCustomerProfileInformation = async (accountID, userID, customerID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/customer/activeCustomers/customerByID/${accountID}/${userID}/${customerID}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/customer/activeCustomers/customerByID/${accountID}/${userID}/${customerID}`,
+      headers(token)
+    );
     const customerContactInformation = response.data;
     return customerContactInformation;
   } catch (error) {
@@ -143,11 +52,7 @@ export const fetchCustomerProfileInformation = async (accountID, userID, custome
 
 export const fetchSingleUser = async (accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/user/fetchSingleUser/${accountID}/${userID}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    const response = await axios.get(`${config.API_ENDPOINT}/user/fetchSingleUser/${accountID}/${userID}`, headers(token));
     const singleUser = response.data;
     return singleUser;
   } catch (error) {
@@ -156,9 +61,12 @@ export const fetchSingleUser = async (accountID, userID, token) => {
   }
 };
 
-export const getOutstandingBalanceList = async (accountID, userID) => {
+export const getOutstandingBalanceList = async (accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/invoices/createInvoice/AccountsWithBalance/${accountID}/${userID}`);
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/invoices/createInvoice/AccountsWithBalance/${accountID}/${userID}`,
+      headers(token)
+    );
     const outstandingInvoicesList = response.data;
     return outstandingInvoicesList;
   } catch (error) {
@@ -168,7 +76,7 @@ export const getOutstandingBalanceList = async (accountID, userID) => {
 };
 
 // ToDO will need to update to S3 bucket once dev is complete.
-export const getZippedInvoices = async (zipFileName, accountID, userID) => {
+export const getZippedInvoices = async (zipFileName, accountID, userID, token) => {
   try {
     const queryParams = new URLSearchParams({
       filename: zipFileName
@@ -183,10 +91,11 @@ export const getZippedInvoices = async (zipFileName, accountID, userID) => {
   }
 };
 
-export const fetchSingleTransaction = async (customer_id, transaction_id, accountID, userID) => {
+export const fetchSingleTransaction = async (customer_id, transaction_id, accountID, userID, token) => {
   try {
     const response = await axios.get(
-      `${config.API_ENDPOINT}/transactions/getSingleTransaction/${customer_id}/${transaction_id}/${accountID}/${userID}`
+      `${config.API_ENDPOINT}/transactions/getSingleTransaction/${customer_id}/${transaction_id}/${accountID}/${userID}`,
+      headers(token)
     );
     const transaction = response.data;
     return transaction;
@@ -196,9 +105,12 @@ export const fetchSingleTransaction = async (customer_id, transaction_id, accoun
   }
 };
 
-export const fetchSinglePayment = async (paymentID, accountID, userID) => {
+export const fetchSinglePayment = async (paymentID, accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/payments/getSinglePayment/${paymentID}/${accountID}/${userID}`);
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/payments/getSinglePayment/${paymentID}/${accountID}/${userID}`,
+      headers(token)
+    );
     const payment = response.data;
     return payment;
   } catch (error) {
@@ -207,9 +119,12 @@ export const fetchSinglePayment = async (paymentID, accountID, userID) => {
   }
 };
 
-export const fetchSingleWriteOff = async (writeOffID, accountID, userID) => {
+export const fetchSingleWriteOff = async (writeOffID, accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/writeOffs/getSingleWriteOff/${writeOffID}/${accountID}/${userID}`);
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/writeOffs/getSingleWriteOff/${writeOffID}/${accountID}/${userID}`,
+      headers(token)
+    );
     const writeOff = response.data;
     return writeOff;
   } catch (error) {
@@ -218,9 +133,9 @@ export const fetchSingleWriteOff = async (writeOffID, accountID, userID) => {
   }
 };
 
-export const fetchSingleJob = async (customer_job_id, accountID, userID) => {
+export const fetchSingleJob = async (customer_job_id, accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/jobs/getSingleJob/${customer_job_id}/${accountID}/${userID}`);
+    const response = await axios.get(`${config.API_ENDPOINT}/jobs/getSingleJob/${customer_job_id}/${accountID}/${userID}`, headers(token));
     const job = response.data;
     return job;
   } catch (error) {
@@ -229,9 +144,12 @@ export const fetchSingleJob = async (customer_job_id, accountID, userID) => {
   }
 };
 
-export const fetchSingleJobType = async (jobTypeID, accountID, userID) => {
+export const fetchSingleJobType = async (jobTypeID, accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/jobTypes/getSingleJobType/${jobTypeID}/${accountID}/${userID}`);
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/jobTypes/getSingleJobType/${jobTypeID}/${accountID}/${userID}`,
+      headers(token)
+    );
     const job = response.data;
     return job;
   } catch (error) {
@@ -240,20 +158,12 @@ export const fetchSingleJobType = async (jobTypeID, accountID, userID) => {
   }
 };
 
-export const fetchAccountRetainers = async (accountID, userID) => {
+export const fetchSingleRetainer = async (retainerID, accountID, userID, token) => {
   try {
-    const response = await axios.get(`${config.API_ENDPOINT}/retainers/getActiveRetainers/${accountID}/${userID}`);
-    const retainers = response.data;
-    return retainers;
-  } catch (error) {
-    console.error('Error fetching retainers:', error);
-    return [];
-  }
-};
-
-export const fetchSingleRetainer = async (retainerID, accountID, userID) => {
-  try {
-    const response = await axios.get(`${config.API_ENDPOINT}/retainers/getSingleRetainer/${retainerID}/${accountID}/${userID}`);
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/retainers/getSingleRetainer/${retainerID}/${accountID}/${userID}`,
+      headers(token)
+    );
     const retainer = response.data;
     return retainer;
   } catch (error) {

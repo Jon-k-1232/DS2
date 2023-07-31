@@ -9,7 +9,7 @@ import EditRetainer from '../../../Pages/Transactions/TransactionForms/EditTrans
 export default function RetainerSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { accountID, userID, token } = useContext(context).loggedInUser;
   const { rowData } = location?.state ?? {};
   const { retainer_id } = rowData ?? {};
   const menuOptions = fetchMenuOptions(navigate);
@@ -19,7 +19,7 @@ export default function RetainerSubRoutes({ customerData, setCustomerData }) {
   useEffect(() => {
     const fetchRetainerData = async () => {
       if (rowData) {
-        const fetchPayment = await fetchSingleRetainer(retainer_id, accountID, userID);
+        const fetchPayment = await fetchSingleRetainer(retainer_id, accountID, userID, token);
         setRetainerData(...fetchPayment.activeRetainerData.activeRetainer);
       }
     };

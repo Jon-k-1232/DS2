@@ -1,10 +1,20 @@
 import axios from 'axios';
 import config from '../../config';
+import TokenService from '../TokenService';
 
-export const putUpdateAccount = async data => {
+const headers = memoryToken => {
+  const token = memoryToken || TokenService.getAuthToken();
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  };
+};
+
+export const putUpdateAccount = async (data, token) => {
   const url = `${config.API_ENDPOINT}/account/updateAccount/:accountID`;
   try {
-    const response = await axios.post(url, { account: data });
+    const response = await axios.post(url, { account: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting update account:', error);
@@ -12,10 +22,10 @@ export const putUpdateAccount = async data => {
   }
 };
 
-export const putUpdateAccountAddress = async data => {
+export const putUpdateAccountAddress = async (data, token) => {
   const url = `${config.API_ENDPOINT}/account/updateAccountAddress/:accountID`;
   try {
-    const response = await axios.post(url, { accountAddress: data });
+    const response = await axios.post(url, { accountAddress: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting update account address:', error);
@@ -23,10 +33,10 @@ export const putUpdateAccountAddress = async data => {
   }
 };
 
-export const putEditTransaction = async (data, accountID, userID) => {
+export const putEditTransaction = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/transactions/updateTransaction/${accountID}/${userID}`;
   try {
-    const response = await axios.put(url, { transaction: data });
+    const response = await axios.put(url, { transaction: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting transaction edit:', error);
@@ -34,10 +44,10 @@ export const putEditTransaction = async (data, accountID, userID) => {
   }
 };
 
-export const putEditPayment = async (data, accountID, userID) => {
+export const putEditPayment = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/payments/updatePayment/${accountID}/${userID}`;
   try {
-    const response = await axios.put(url, { payment: data });
+    const response = await axios.put(url, { payment: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting payment edit:', error);
@@ -45,12 +55,10 @@ export const putEditPayment = async (data, accountID, userID) => {
   }
 };
 
-// /updateCustomer/:customerID/:accountID/:userID
-
-export const putEditCustomer = async (data, accountID, userID) => {
+export const putEditCustomer = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/customer/updateCustomer/${accountID}/${userID}`;
   try {
-    const response = await axios.put(url, { customer: data });
+    const response = await axios.put(url, { customer: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting customer edit:', error);

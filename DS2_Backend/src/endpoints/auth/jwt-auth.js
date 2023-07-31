@@ -1,9 +1,8 @@
+const jwt = require('jsonwebtoken');
 const authService = require('./auth-service');
 
 // JWT Authentication Middleware
 const requireAuth = async (req, res, next) => {
-  // const tokens = req.cookies.session;
-
   const authToken = req.get('Authorization') || '';
   let bearerToken;
 
@@ -14,7 +13,9 @@ const requireAuth = async (req, res, next) => {
   }
 
   try {
+    // Check JWT token, and check if modified or expired
     const payload = authService.verifyJwt(bearerToken);
+
     const [user] = await authService.getUserByUserName(req.app.get('db'), payload.sub);
 
     // Check if user exists and is active
@@ -22,11 +23,14 @@ const requireAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'Unauthorized request' });
     }
 
-    req.user = user;
     next();
   } catch (error) {
     console.error(`Authentication error: ${error}`);
-    res.status(401).json({ error: 'Unauthorized request' });
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(401).json({ error: 'Expired token' });
+    } else {
+      res.status(401).json({ error: 'Unauthorized request' });
+    }
   }
 };
 

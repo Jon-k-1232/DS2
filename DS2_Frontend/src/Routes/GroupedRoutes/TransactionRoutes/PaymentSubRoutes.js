@@ -9,7 +9,7 @@ import EditPayment from '../../../Pages/Transactions/TransactionForms/EditTransa
 export default function PaymentSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { accountID, userID, token } = useContext(context).loggedInUser;
   const { rowData } = location?.state ?? {};
   const { customer_id, payment_id } = rowData ?? {};
   const menuOptions = fetchMenuOptions(navigate);
@@ -20,8 +20,8 @@ export default function PaymentSubRoutes({ customerData, setCustomerData }) {
   useEffect(() => {
     const fetchPaymentData = async () => {
       if (rowData) {
-        const fetchPayment = await fetchSinglePayment(payment_id, accountID, userID);
-        const customerInfo = await fetchCustomerProfileInformation(accountID, userID, customer_id);
+        const fetchPayment = await fetchSinglePayment(payment_id, accountID, userID, token);
+        const customerInfo = await fetchCustomerProfileInformation(accountID, userID, customer_id, token);
         setPaymentData(...fetchPayment.activePaymentData.activePayments);
         setCustomerProfileData({ ...customerInfo });
       }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import TokenService from '../Services/TokenService';
 import DashboardLayout from '../Layouts/Drawer';
 import LogoOnlyLayout from '../Layouts/LogoOnlyLayout';
 import Login from '../Pages/Login/Login';
@@ -13,7 +14,13 @@ import JobRoutes from './GroupedRoutes/JobRoutes/JobRoutes';
 import { context } from '../App';
 import { getInitialAppData, fetchSingleUser } from '../Services/ApiCalls/GetCalls';
 
+// loaders
+// https://awesome-loaders.netlify.app/docs/loaders/wifiloader/
+
 export default function Router() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const { loggedInUser, setLoggedInUser } = useContext(context);
   const { accountID, userID, displayName, token } = loggedInUser;
 
@@ -21,6 +28,17 @@ export default function Router() {
   const [customerData, setCustomerData] = useState({});
 
   console.log(customerData);
+
+  useEffect(() => {
+    // With every route check if token is still good or not.
+    const checkedToken = token && TokenService.isTokenExpired(token);
+    if (token && checkedToken.isExpired) {
+      setLoggedInUser(checkedToken.resetContext);
+      setCustomerData({});
+      navigate('/login');
+    }
+    // eslint-disable-next-line
+  }, [location]);
 
   // Gets all customer data on page load
   useEffect(() => {

@@ -1,11 +1,8 @@
 const express = require('express');
 const authService = require('./auth-service');
-const userService = require('../user/user-service');
 const authentication = express.Router();
-const config = require('../../../config');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
-const ip = require('ip');
 
 // JWT Creation Endpoint
 authentication.post('/login', jsonParser, async (req, res, next) => {
@@ -56,19 +53,36 @@ authentication.post('/login', jsonParser, async (req, res, next) => {
     const payload = { user_id };
 
     // Create JWT token
-
     const authToken = authService.createJwt(sub, payload);
-
-    // Set JWT in a cookie
-    res.cookie('session', authToken, {
-      httpOnly: true,
-      secure: config.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 1000 // 1 hour in milliseconds
-    });
 
     res.send({
       user: getUserInformation,
-      authToken: authToken,
+      authToken,
+      status: 200
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+authentication.post('/renew', async (req, res, next) => {
+  const db = req.app.get('db');
+  const { user_id, user_name } = req.body;
+
+  try {
+    // Check if the user is still active
+    const [user] = await authService.getUserByUserName(db, user_name);
+    if (!user || !user.is_login_active) {
+      return res.status(401).json({ error: 'Unauthorized request' });
+    }
+
+    // Create a new JWT token
+    const sub = user_name;
+    const payload = { user_id };
+    const authToken = authService.createJwt(sub, payload);
+
+    res.send({
+      authToken,
       status: 200
     });
   } catch (err) {

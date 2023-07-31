@@ -20,7 +20,6 @@ export default function LoginForm() {
 
   const handleSubmit = async () => {
     const fetchedToken = await postLoginAuth(username, password);
-    console.log(fetchedToken);
     if (fetchedToken.status !== 200) setIncorrectCredential(fetchedToken.response.data);
 
     const { account_id, user_id, display_name, job_title, access_level } = fetchedToken.user;

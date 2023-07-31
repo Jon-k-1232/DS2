@@ -35,7 +35,7 @@ const initialState = {
 export default function CreateNewInvoices({ customerData, setCustomerData }) {
   const {
     loggedInUser,
-    loggedInUser: { accountID, userID }
+    loggedInUser: { accountID, userID, token }
   } = useContext(context);
 
   const [postStatus, setPostStatus] = useState(null);
@@ -49,7 +49,7 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
 
   useEffect(() => {
     const getOutstandingInvoices = async () => {
-      const outstandingBalanceList = await getOutstandingBalanceList(accountID, userID);
+      const outstandingBalanceList = await getOutstandingBalanceList(accountID, userID, token);
       setOutstandingBalanceData(outstandingBalanceList);
     };
     getOutstandingInvoices();

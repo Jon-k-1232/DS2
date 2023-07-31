@@ -23,8 +23,10 @@ const retainerRouter = require('./endpoints/retainer/retainer-router');
 const writeOffsRouter = require('./endpoints/writeOffs/writeOffs-router');
 const initialDataRouter = require('./endpoints/initialData/initialData-router');
 const cookieParser = require('cookie-parser');
+const { requireAuth } = require('./endpoints/auth/jwt-auth');
 
 // Middleware
+app.use(cookieParser());
 app.use(
   morgan((tokens, req, res) => {
     const ipAddress = req.ip;
@@ -37,7 +39,6 @@ app.use(
     return `[${currentTime}] - ${ipAddress} - ${method} - Status: ${status} - Response Time: ${formattedResponseTime}ms - ${endpoint}`;
   })
 );
-
 app.use(helmet());
 app.use(express.json());
 app.use(
@@ -47,32 +48,24 @@ app.use(
     credentials: true
   })
 );
-app.use(cookieParser());
-
-/* ///////////////////////////\\\\  KEY VALIDATION  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
-
-// app.use((req, res, next) => {
-//   req.jwtAuth = req.cookies.session;
-//   next();
-// });
 
 /* ///////////////////////////\\\\  USER ENDPOINTS  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 app.use('/auth', authentication);
-app.use('/customer', customerRouter);
-app.use('/jobs', company);
-app.use('/transactions', transactions);
-app.use('/user', user);
-app.use('/invoices', invoices);
-app.use('/jobCategories', jobCategoriesRouter);
-app.use('/account', accountRouter);
-app.use('/jobTypes', jobTypeRouter);
-app.use('/quotes', quotesRouter);
-app.use('/payments', paymentsRouter);
-app.use('/recurringCustomer', recurringCustomerRouter);
-app.use('/retainers', retainerRouter);
-app.use('/writeOffs', writeOffsRouter);
-app.use('/initialData', initialDataRouter);
+app.use('/customer', requireAuth, customerRouter);
+app.use('/jobs', requireAuth, company);
+app.use('/transactions', requireAuth, transactions);
+app.use('/user', requireAuth, user);
+app.use('/invoices', requireAuth, invoices);
+app.use('/jobCategories', requireAuth, jobCategoriesRouter);
+app.use('/account', requireAuth, accountRouter);
+app.use('/jobTypes', requireAuth, jobTypeRouter);
+app.use('/quotes', requireAuth, quotesRouter);
+app.use('/payments', requireAuth, paymentsRouter);
+app.use('/recurringCustomer', requireAuth, recurringCustomerRouter);
+app.use('/retainers', requireAuth, retainerRouter);
+app.use('/writeOffs', requireAuth, writeOffsRouter);
+app.use('/initialData', requireAuth, initialDataRouter);
 
 /* ///////////////////////////\\\\  ERROR HANDLER  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 

@@ -14,7 +14,7 @@ import { context } from '../../../App';
 export default function CustomerProfileSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accountID, userID } = useContext(context).loggedInUser;
+  const { accountID, userID, token } = useContext(context).loggedInUser;
   const menuOptions = fetchMenuOptions(navigate);
   const { rowData } = location?.state ?? {};
 
@@ -27,7 +27,7 @@ export default function CustomerProfileSubRoutes({ customerData, setCustomerData
       const apiCall = async () => {
         const customerID = rowData?.customer_id || customerInfoID;
 
-        const fetchCustomerInformation = await fetchCustomerProfileInformation(accountID, userID, customerID);
+        const fetchCustomerInformation = await fetchCustomerProfileInformation(accountID, userID, customerID, token);
         setProfileData({ ...fetchCustomerInformation });
         setCustomerInfoID(customerID);
       };
