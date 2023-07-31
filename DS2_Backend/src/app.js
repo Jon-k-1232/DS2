@@ -43,8 +43,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(
   cors({
-    origin: 'http://localhost:3001',
-    // origin: config.FRONT_END_URL,
+    origin: config.FRONT_END_URL,
     credentials: true
   })
 );
