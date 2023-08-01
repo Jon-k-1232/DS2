@@ -16,12 +16,7 @@ const jobTypeService = {
   },
 
   updateJobType(db, updatedJobType) {
-    return db
-      .update(updatedJobType)
-      .into('customer_job_types')
-      .where('job_type_id', '=', updatedJobType.job_type_id)
-      .returning('*')
-      .then(rows => rows[0]);
+    return db.update(updatedJobType).into('customer_job_types').where('job_type_id', '=', updatedJobType.job_type_id);
   },
 
   deleteJobType(db, jobTypeID) {

@@ -75,8 +75,9 @@ jobTypeRouter.route('/getActiveJobTypes/:accountID/:userID').get(async (req, res
 });
 
 // Update a jobType
-jobTypeRouter.route('/updateJobType').put(jsonParser, async (req, res) => {
+jobTypeRouter.route('/updateJobType/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
+  const { accountID } = req.params;
   const sanitizedUpdatedJobType = sanitizeFields(req.body.jobType);
 
   // Create new object with sanitized fields
@@ -86,18 +87,15 @@ jobTypeRouter.route('/updateJobType').put(jsonParser, async (req, res) => {
   await jobTypeService.updateJobType(db, jobTypeTableFields);
 
   // Get all jobTypes
-  const jobTypesData = await jobTypeService.getActiveJobTypes(db, jobTypeTableFields.account_id);
+  const jobTypesData = await jobTypeService.getActiveJobTypes(db, accountID);
 
-  // Create grid for Mui Grid
-  const grid = createGrid(jobTypesData);
-
-  const jobType = {
+  const activeJobTypesData = {
     jobTypesData,
-    grid
+    grid: createGrid(jobTypesData)
   };
 
   res.send({
-    jobType,
+    jobTypesList: { activeJobTypesData },
     message: 'Successfully updated jobType.',
     status: 200
   });

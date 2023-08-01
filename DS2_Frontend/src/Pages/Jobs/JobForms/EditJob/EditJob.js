@@ -1,4 +1,4 @@
-import React, {useEffect, useState,useContext} from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stack, Button, Alert, Box } from '@mui/material';
 import { formObjectForJobPost } from '../../../../Services/SharedPostObjects/SharedPostObjects';
@@ -15,34 +15,34 @@ const initialState = {
   notes: ''
 };
 
-export default function EditJob ( {customerData, setCustomerData, jobData} ) {
+export default function EditJob({ customerData, setCustomerData, jobData }) {
   const navigate = useNavigate();
   const { loggedInUser } = useContext(context);
   const { accountID, userID } = useContext(context).loggedInUser;
 
   const [postStatus, setPostStatus] = useState(null);
-  const [ selectedItems, setSelectedItems ] = useState( initialState );
-  
-    const {
+  const [selectedItems, setSelectedItems] = useState(initialState);
+
+  const {
     customersList: { activeCustomerData: { activeCustomers } = [] } = [],
     accountJobsList: { activeJobData: { activeJobs } = [] } = []
   } = { ...customerData };
 
   const {
-account_id,
-agreed_job_amount,
-created_at,
-created_by_user_id,
-current_job_total,
-customer_id,
-customer_job_id,
-is_job_complete,
-is_quote,
-job_quote_amount,
-job_status,
-job_type_id,
-notes,
-parent_job_id
+    account_id,
+    agreed_job_amount,
+    created_at,
+    created_by_user_id,
+    current_job_total,
+    customer_id,
+    customer_job_id,
+    is_job_complete,
+    is_quote,
+    job_quote_amount,
+    job_status,
+    job_type_id,
+    notes,
+    parent_job_id
   } = jobData || {};
 
   useEffect(() => {
@@ -72,10 +72,10 @@ parent_job_id
     const dataToPost = formObjectForJobPost(selectedItems, loggedInUser);
     const postedItem = await postEditCustomerJob(dataToPost, accountID, userID);
 
-    setPostStatus( postedItem );
-    
-    if( postedItem.status === 200 ) {
-    setCustomerData({ ...customerData, accountJobsList: postedItem.accountJobsList });
+    setPostStatus(postedItem);
+
+    if (postedItem.status === 200) {
+      setCustomerData({ ...customerData, accountJobsList: postedItem.accountJobsList });
       setTimeout(() => setPostStatus(null), 2000);
       navigate('/jobs/jobsList');
       setSelectedItems(initialState);
@@ -84,9 +84,14 @@ parent_job_id
 
   return (
     <>
-      <Stack sx={{marginTop: '25px'}} spacing={3}>
+      <Stack sx={{ marginTop: '25px' }} spacing={3}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
-          <NewJobSelections customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} pageName='editJob'/>
+          <NewJobSelections
+            customerData={customerData}
+            selectedItems={selectedItems}
+            setSelectedItems={data => setSelectedItems(data)}
+            pageName='editJob'
+          />
         </Stack>
 
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
