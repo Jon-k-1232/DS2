@@ -37,10 +37,22 @@ export default function NewJobSelections({ customerData, selectedItems, setSelec
             value={selectedJobDescription}
             onChange={(event, newValue) => setSelectedItems(otherItems => ({ ...otherItems, selectedJobDescription: newValue }))}
             getOptionLabel={option => option.job_description || ''}
+            isOptionEqualToValue={(option, value) => option.job_type_id === value.job_type_id}
             options={jobTypesData || []}
             renderInput={params => <TextField {...params} label='Type Of Job' variant='standard' />}
           />
 
+          <TextField
+            sx={{width: 350}}
+            variant='standard'
+            type='number'
+            label='Agreed Job Amount'
+            value={agreedJobAmount}
+            onChange={e => setSelectedItems( otherItems => ( {...otherItems, agreedJobAmount: e.target.value} ) )}
+          />
+        </Stack>
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
           <TextField
             sx={{ width: '350px' }}
             variant='standard'
@@ -48,17 +60,7 @@ export default function NewJobSelections({ customerData, selectedItems, setSelec
             value={notes}
             onChange={e => setSelectedItems(otherItems => ({ ...otherItems, notes: e.target.value }))}
           />
-        </Stack>
-
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
-          <TextField
-            sx={{ width: 350 }}
-            variant='standard'
-            type='number'
-            label='Write Off Amount'
-            value={agreedJobAmount}
-            onChange={e => setSelectedItems(otherItems => ({ ...otherItems, agreedJobAmount: e.target.value }))}
-          />
+          
 
           <FormControlLabel
             control={

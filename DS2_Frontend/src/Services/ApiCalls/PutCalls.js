@@ -65,3 +65,14 @@ export const putEditCustomer = async (data, accountID, userID, token) => {
     throw error;
   }
 };
+
+export const postEditCustomerJob = async ( data, accountID, userID, token ) => {
+    const url = `${config.API_ENDPOINT}/jobs/updateJob/${accountID}/${userID}`;
+  try {
+    const response = await axios.put(url, { job: data }, headers(token));
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting new customer job:', error);
+    throw error;
+  }
+};

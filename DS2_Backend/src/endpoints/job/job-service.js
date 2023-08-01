@@ -36,9 +36,7 @@ const jobService = {
     return db
       .update(updatedJob)
       .into('customer_jobs')
-      .where('customer_job_id', '=', updatedJob.customer_job_id)
-      .returning('*')
-      .then(rows => rows[0]);
+      .where('customer_job_id', '=', updatedJob.customer_job_id);
   },
 
   deleteJob(db, jobID) {

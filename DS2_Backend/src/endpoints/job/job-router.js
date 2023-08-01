@@ -101,29 +101,29 @@ jobRouter.route('/getActiveJobs/:accountID/:userID').get(async (req, res) => {
 });
 
 // Update a job
-jobRouter.route('/updateJob').put(jsonParser, async (req, res) => {
-  const db = req.app.get('db');
-  const sanitizedUpdatedJob = sanitizeFields(req.body.job);
-
+jobRouter.route('/updateJob/:accountID/:userID').put(jsonParser, async (req, res) => {
+  const db = req.app.get( 'db' );
+  const {accountID} = req.params;
+  
+  const sanitizedUpdatedJob = sanitizeFields( req.body.job );
+  
   // Create new object with sanitized fields
-  const jobTableFields = restoreDataTypesJobTableOnUpdate(sanitizedUpdatedJob);
-
+  const jobTableFields = restoreDataTypesJobTableOnUpdate( sanitizedUpdatedJob );
+  
   // Update job
   await jobService.updateJob(db, jobTableFields);
 
   // Get all jobs
-  const jobsData = await jobService.getActiveJobs(db, jobTableFields.account_id);
+  const activeJobs = await jobService.getActiveJobs(db, accountID);
 
-  // Create grid for Mui Grid
-  const grid = createGrid(jobsData);
-
-  const job = {
-    jobsData,
-    grid
+  // Return Object
+  const activeJobData = {
+    activeJobs,
+    grid: createGrid(activeJobs)
   };
 
   res.send({
-    job,
+    accountJobsList: {activeJobData},
     message: 'Successfully updated job.',
     status: 200
   });
