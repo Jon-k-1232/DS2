@@ -28,7 +28,9 @@ export default function JobCatagoriesGrid({ customerData, setCustomerData }) {
           title='Job Categories'
           tableData={activeJobCategoriesData.grid}
           checkboxSelection={false}
+          enableSingleRowClick
           arrayOfButtons={gridButtons}
+          routeToPass={'/jobs/jobCategoriesList/deleteJobCategory'}
         />
       </Stack>
     </>

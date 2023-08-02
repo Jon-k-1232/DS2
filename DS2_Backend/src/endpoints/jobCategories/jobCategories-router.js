@@ -56,7 +56,7 @@ jobCategoriesRouter.route('/createJobCategory/:accountID/:userID').post(jsonPars
 });
 
 // Update a job category
-jobCategoriesRouter.route('/updateJobCategory').put(jsonParser, async (req, res) => {
+jobCategoriesRouter.route('/updateJobCategory/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
   const sanitizedUpdatedJobCategory = sanitizeFields(req.body.jobCategory);
 
@@ -67,25 +67,22 @@ jobCategoriesRouter.route('/updateJobCategory').put(jsonParser, async (req, res)
   await jobCategoriesService.updateJobCategory(db, jobCategoriesTableFields);
 
   // Get all Job Categories
-  const jobCategoriesData = await jobCategoriesService.getActiveJobCategories(db, jobCategoriesTableFields.account_id);
+  const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, jobCategoriesTableFields.account_id);
 
-  // Create grid for Mui Grid
-  const grid = createGrid(jobCategoriesData);
-
-  const jobCategory = {
-    jobCategoriesData,
-    grid
+  const activeJobCategoriesData = {
+    activeJobCategories,
+    grid: createGrid(activeJobCategories)
   };
 
   res.send({
-    jobCategory,
+    jobCategoriesList: { activeJobCategoriesData },
     message: 'Successfully updated job category.',
     status: 200
   });
 });
 
 // Delete a job category
-jobCategoriesRouter.route('/deleteJobCategory/:jobCategoryID/:accountID').delete(async (req, res) => {
+jobCategoriesRouter.route('/deleteJobCategory/:jobCategoryID/:accountID/:userID').delete(async (req, res) => {
   const db = req.app.get('db');
   const { jobCategoryID, accountID } = req.params;
 
@@ -106,6 +103,25 @@ jobCategoriesRouter.route('/deleteJobCategory/:jobCategoryID/:accountID').delete
   res.send({
     jobCategory,
     message: 'Successfully deleted job category.',
+    status: 200
+  });
+});
+
+// get single job category
+jobCategoriesRouter.route('/getSingleJobCategory/:jobCategoryID/:accountID/:userID').get(async (req, res) => {
+  const db = req.app.get('db');
+  const { jobCategoryID } = req.params;
+
+  const activeJobCategory = await jobCategoriesService.getSingleJobCategory(db, jobCategoryID);
+
+  const activeJobCategoriesData = {
+    activeJobCategory,
+    grid: createGrid(activeJobCategory)
+  };
+
+  res.send({
+    activeJobCategoriesData,
+    message: 'Successfully retrieved job category.',
     status: 200
   });
 });

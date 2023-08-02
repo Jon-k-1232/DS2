@@ -6,11 +6,11 @@ const restoreDataTypesJobCategoriesOnCreate = data => ({
 });
 
 const restoreDataTypesJobCategoriesOnUpdate = data => ({
-  customer_job_category_id: Number(data.customer_job_category_id),
-  account_id: Number(data.account_id),
-  customer_job_category: data.customer_job_category,
-  is_job_category_active: Boolean(data.is_job_category_active),
-  created_by_user_id: Number(data.created_by_user_id)
+  customer_job_category_id: Number(data.customerJobCategoryID),
+  account_id: Number(data.accountID),
+  customer_job_category: data.selectedNewJobCategory,
+  is_job_category_active: Boolean(data.isJobCategoryActive),
+  created_by_user_id: Number(data.createdByUserID)
 });
 
 module.exports = {

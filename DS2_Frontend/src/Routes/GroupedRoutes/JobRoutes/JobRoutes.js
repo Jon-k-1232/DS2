@@ -7,6 +7,7 @@ import { Stack } from '@mui/material';
 import JobTypesGrid from '../../../Pages/Jobs/JobGrids/JobTypesGrid';
 import JobSubRoutes from './JobSubRoutes';
 import JobTypeSubRoutes from './JobTypeSubRoutes';
+import JobCategorySubRoutes from './JobCategorySubRoutes';
 
 export default function JobRoutes({ setPageTitle, customerData, setCustomerData }) {
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function JobRoutes({ setPageTitle, customerData, setCustomerData 
             element={<JobCatagoriesGrid customerData={customerData} setCustomerData={e => setCustomerData(e)} />}
           />
           <Route path='jobTypesList' element={<JobTypesGrid customerData={customerData} setCustomerData={e => setCustomerData(e)} />} />
+
           <Route
             path='/jobsList/*'
             element={<JobSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
@@ -31,6 +33,10 @@ export default function JobRoutes({ setPageTitle, customerData, setCustomerData 
           <Route
             path='/jobTypesList/*'
             element={<JobTypeSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
+          />
+          <Route
+            path='/jobCategoriesList/*'
+            element={<JobCategorySubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
           />
         </Routes>
       </Stack>

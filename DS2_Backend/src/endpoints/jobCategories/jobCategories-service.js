@@ -3,6 +3,10 @@ const jobCategoriesService = {
     return db.select().from('customer_job_categories').where('account_id', accountID).where('is_job_category_active', true);
   },
 
+  getSingleJobCategory(db, jobCategoryID) {
+    return db.select().from('customer_job_categories').where('customer_job_category_id', jobCategoryID);
+  },
+
   createJobCategory(db, newJobCategory) {
     return db
       .insert(newJobCategory)
@@ -15,9 +19,7 @@ const jobCategoriesService = {
     return db
       .update(updatedJobCategory)
       .into('customer_job_categories')
-      .where('customer_job_category_id', '=', updatedJobCategory.customer_job_category_id)
-      .returning('*')
-      .then(rows => rows[0]);
+      .where('customer_job_category_id', '=', updatedJobCategory.customer_job_category_id);
   },
 
   deleteJobCategory(db, jobCategoryID) {

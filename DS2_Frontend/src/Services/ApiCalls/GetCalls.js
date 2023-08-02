@@ -25,6 +25,20 @@ export const getCustomerJobsList = async (accountID, userID, customerID, token) 
   }
 };
 
+export const fetchSingleJobCategory = async (jobCategoryID, accountID, userID, token) => {
+  try {
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/jobCategories/getSingleJobCategory/${jobCategoryID}/${accountID}/${userID}`,
+      headers(token)
+    );
+    const jobCategoryData = response.data;
+    return jobCategoryData;
+  } catch (error) {
+    console.error('Error fetching job category data:', error);
+    return [];
+  }
+};
+
 export const getInitialAppData = async (accountID, userID, token) => {
   try {
     const response = await axios.get(`${config.API_ENDPOINT}/initialData/initialBlob/${accountID}/${userID}`, headers(token));
