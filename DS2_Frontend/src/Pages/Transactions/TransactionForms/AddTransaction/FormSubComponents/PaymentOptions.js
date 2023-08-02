@@ -6,7 +6,7 @@ export default function PaymentOptions({ selectedItems, setSelectedItems, custom
   const paymentFormsTwo = ['Cash', 'Check', 'Credit Card', 'Debit Card', 'ACH', 'Other'];
   const paymentForms = page !== 'NewRetainer' ? paymentFormsOne : paymentFormsTwo;
 
-  const { unitCost, formOfPayment, paymentReferenceNumber, selectedRetainer } = selectedItems;
+  const { unitCost, formOfPayment, paymentReferenceNumber, selectedRetainer, currentAmount } = selectedItems;
 
   const { customerRetainerData = [] } = customerProfileData?.customerRetainerData || {};
 
@@ -75,10 +75,20 @@ export default function PaymentOptions({ selectedItems, setSelectedItems, custom
             sx={{ width: 350 }}
             variant='standard'
             type='number'
-            label='Payment Amount'
+            label={page === 'editRetainer' ? 'Starting Amount' : 'Payment Amount'}
             value={unitCost}
             onChange={e => setSelectedItems(prevItems => ({ ...prevItems, unitCost: -Math.abs(e.target.value) }))}
           />
+          {page === 'editRetainer' && (
+            <TextField
+              sx={{ width: 350, marginTop: '15px' }}
+              variant='standard'
+              type='number'
+              label='Remaining Amount'
+              value={currentAmount}
+              onChange={e => setSelectedItems(prevItems => ({ ...prevItems, currentAmount: -Math.abs(e.target.value) }))}
+            />
+          )}
         </Stack>
       </Stack>
     </>

@@ -10,7 +10,7 @@ export default function WriteOffOptions({ selectedItems, setSelectedItems }) {
         <TextField
           sx={{ width: 350 }}
           variant='standard'
-          type='number'
+          type='string'
           label='Reason For Write Off'
           value={writeoffReason}
           onChange={e => setSelectedItems(otherItems => ({ ...otherItems, writeoffReason: e.target.value }))}

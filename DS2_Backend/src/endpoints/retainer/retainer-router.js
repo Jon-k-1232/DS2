@@ -52,7 +52,7 @@ retainerRouter.route('/getActiveRetainers/:accountID/:userID').get(async (req, r
 });
 
 // Update a retainer
-retainerRouter.route('/updateRetainer').patch(jsonParser, async (req, res) => {
+retainerRouter.route('/updateRetainer/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
   const sanitizedUpdatedRetainer = sanitizeFields(req.body.retainer);
 
@@ -63,18 +63,15 @@ retainerRouter.route('/updateRetainer').patch(jsonParser, async (req, res) => {
   await retainerService.updateRetainer(db, retainerTableFields);
 
   // Get all retainers
-  const retainersData = await retainerService.getActiveRetainers(db, retainerTableFields.account_id);
+  const activeRetainers = await retainerService.getActiveRetainers(db, retainerTableFields.account_id);
 
-  // Create grid for Mui Grid
-  const grid = createGrid(retainersData);
-
-  const retainer = {
-    retainersData,
-    grid
+  const activeRetainerData = {
+    activeRetainers,
+    grid: createGrid(activeRetainers)
   };
 
   res.send({
-    retainer,
+    accountRetainersList: { activeRetainerData },
     message: 'Successfully updated retainer.',
     status: 200
   });

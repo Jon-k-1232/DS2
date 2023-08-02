@@ -13,12 +13,7 @@ const retainersService = {
   },
 
   updateRetainer(db, updatedRetainer) {
-    return db
-      .update(updatedRetainer)
-      .into('customer_retainers_and_prepayments')
-      .where('retainer_id', '=', updatedRetainer.retainer_id)
-      .returning('*')
-      .then(rows => rows[0]);
+    return db.update(updatedRetainer).into('customer_retainers_and_prepayments').where('retainer_id', '=', updatedRetainer.retainer_id);
   },
 
   deleteRetainer(db, retainerID, accountID) {

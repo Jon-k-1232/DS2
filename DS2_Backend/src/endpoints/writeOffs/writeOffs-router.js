@@ -74,34 +74,34 @@ writeOffsRouter.route('/getSingleWriteOff/:writeOffID/:accountID/:userID').get(a
 });
 
 // update a writeOff
-writeOffsRouter.route('/updateWriteOffs/:accountID/:userID').patch(jsonParser, async (req, res) => {
+writeOffsRouter.route('/updateWriteOffs/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
   const sanitizedUpdatedWriteOffs = sanitizeFields(req.body.writeOff);
 
   // Create new object with sanitized fields
   const writeOffTableFields = restoreDataTypesWriteOffsTableOnUpdate(sanitizedUpdatedWriteOffs);
-  const { customer_invoice_id, writeoff_id } = writeOffTableFields;
+  const { customer_invoice_id, account_id } = writeOffTableFields;
 
   // If payment is attached to an invoice, do not allow delete
   if (customer_invoice_id) {
-    const reason = 'Payment is attached to an invoice and cannot be deleted.';
+    const reason = 'Record is attached to an invoice and cannot be deleted or modified.';
     unableToCompleteRequest(res, reason, 423);
     return;
   }
 
   // Update writeOff
-  await writeOffsService.updateWriteOffs(db, writeoff_id, writeOffTableFields);
+  await writeOffsService.updateWriteOff(db, writeOffTableFields);
 
   // Get all writeOff
-  const writeOffsData = await writeOffsService.getActiveWriteOffs(db, writeOffTableFields.account_id);
+  const activeWriteOffs = await writeOffsService.getActiveWriteOffs(db, account_id);
 
-  const writeOff = {
-    writeOffsData,
-    grid: createGrid(writeOffsData)
+  const activeWriteOffsData = {
+    activeWriteOffs,
+    grid: createGrid(activeWriteOffs)
   };
 
   res.send({
-    writeOff,
+    writeOffsList: { activeWriteOffsData },
     message: 'Successfully updated writeOff.',
     status: 200
   });

@@ -75,7 +75,7 @@ export default function EditJob({ customerData, setCustomerData, jobData }) {
     setPostStatus(postedItem);
 
     if (postedItem.status === 200) {
-      setCustomerData({ ...customerData, accountJobsList: postedItem.accountJobsList });
+      setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList });
       setTimeout(() => setPostStatus(null), 2000);
       navigate('/jobs/jobsList');
       setSelectedItems(initialState);

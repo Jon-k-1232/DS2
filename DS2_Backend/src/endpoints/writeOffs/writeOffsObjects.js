@@ -19,8 +19,8 @@ const restoreDataTypesWriteOffsTableOnUpdate = data => ({
   customer_job_id: Number(data.selectedJobID) || null,
   writeoff_date: data.selectedDate,
   writeoff_amount: -Math.abs(data.unitCost),
-  transaction_type: 'Writeoff',
-  writeoff_reason: data.writeOffReason || null,
+  transaction_type: data.transactionType || 'Write Off',
+  writeoff_reason: data.writeoffReason || null,
   created_by_user_id: Number(data.loggedByUserID),
   note: data.note || null
 });

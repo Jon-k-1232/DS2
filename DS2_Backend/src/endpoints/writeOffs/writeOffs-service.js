@@ -8,12 +8,7 @@ const writeOffsService = {
   },
 
   updateWriteOff(db, updatedWriteOff) {
-    return db
-      .update(updatedWriteOff)
-      .into('customer_writeoffs')
-      .where('writeoff_id', '=', updatedWriteOff.writeoff_id)
-      .returning('*')
-      .then(rows => rows[0]);
+    return db.update(updatedWriteOff).into('customer_writeoffs').where('writeoff_id', '=', updatedWriteOff.writeoff_id);
   },
 
   deleteWriteOff(db, writeOffID, accountID) {

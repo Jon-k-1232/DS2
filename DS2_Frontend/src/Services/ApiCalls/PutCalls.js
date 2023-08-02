@@ -87,3 +87,25 @@ export const postEditJobType = async (data, accountID, userID, token) => {
     throw error;
   }
 };
+
+export const postEditWriteOff = async (data, accountID, userID, token) => {
+  const url = `${config.API_ENDPOINT}/writeOffs/updateWriteOffs/${accountID}/${userID}`;
+  try {
+    const response = await axios.put(url, { writeOff: data }, headers(token));
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting new write off:', error);
+    throw error;
+  }
+};
+
+export const postEditRetainer = async (data, accountID, userID, token) => {
+  const url = `${config.API_ENDPOINT}/retainers/updateRetainer/${accountID}/${userID}`;
+  try {
+    const response = await axios.put(url, { retainer: data }, headers(token));
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting new retainer:', error);
+    throw error;
+  }
+};

@@ -173,6 +173,7 @@ export default function InitialSelectionOptions({
               value={selectedTeamMember}
               onChange={(event, value) => handleAutocompleteChange('selectedTeamMember', value)}
               getOptionLabel={option => option.user_name || option.display_name || ''}
+              // isOptionEqualToValue={(option, value) => option.user_id === value.user_id}
               options={activeUsers || []}
               renderInput={params => <TextField {...params} label='Select Team Member' variant='standard' />}
             />
