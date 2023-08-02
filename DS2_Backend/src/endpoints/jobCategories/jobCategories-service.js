@@ -23,12 +23,7 @@ const jobCategoriesService = {
   },
 
   deleteJobCategory(db, jobCategoryID) {
-    return db
-      .delete()
-      .from('customer_job_categories')
-      .where('customer_job_category_id', '=', jobCategoryID)
-      .returning('*')
-      .then(rows => rows[0]);
+    return db.delete().from('customer_job_categories').where('customer_job_category_id', '=', jobCategoryID);
   }
 };
 

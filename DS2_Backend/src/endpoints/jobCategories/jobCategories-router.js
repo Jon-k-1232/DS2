@@ -90,18 +90,14 @@ jobCategoriesRouter.route('/deleteJobCategory/:jobCategoryID/:accountID/:userID'
   await jobCategoriesService.deleteJobCategory(db, jobCategoryID);
 
   // Get all Job Categories
-  const jobCategoriesData = await jobCategoriesService.getActiveJobCategories(db, accountID);
+  const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, accountID);
 
-  // Create grid for Mui Grid
-  const grid = createGrid(jobCategoriesData);
-
-  const jobCategory = {
-    jobCategoriesData,
-    grid
+  const activeJobCategoriesData = {
+    activeJobCategories,
+    grid: createGrid(activeJobCategories)
   };
-
   res.send({
-    jobCategory,
+    jobCategoriesList: { activeJobCategoriesData },
     message: 'Successfully deleted job category.',
     status: 200
   });

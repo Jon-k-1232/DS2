@@ -90,3 +90,14 @@ export const deleteRetainer = async (retainerID, accountID, userID, token) => {
     console.log(error);
   }
 };
+
+export const deleteJobCategory = async (jobCategoryID, accountID, userID, token) => {
+  try {
+    const response = await axios.delete(`${config.API_ENDPOINT}/jobCategories/deleteJobCategory/${jobCategoryID}/${accountID}/${userID}`, {
+      headers: { ...headers(token) }
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
