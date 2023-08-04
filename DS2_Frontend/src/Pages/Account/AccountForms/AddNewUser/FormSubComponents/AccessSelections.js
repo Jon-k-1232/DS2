@@ -1,7 +1,7 @@
 import { Stack, TextField, Autocomplete } from '@mui/material';
 
 export default function AccessSelections({ selectedItems, setSelectedItems }) {
-  const { role, accessLevel } = selectedItems;
+  const { role, accessLevel } = selectedItems; // accessLevel is a string or undefined
 
   return (
     <>
@@ -18,7 +18,7 @@ export default function AccessSelections({ selectedItems, setSelectedItems }) {
             size='small'
             value={accessLevel}
             onChange={(event, newValue) => setSelectedItems(otherItems => ({ ...otherItems, accessLevel: newValue }))}
-            getOptionLabel={option => option.display || ''}
+            isOptionEqualToValue={(option, value) => option === value || value === ''} // Accept empty string
             options={accessLevels || []}
             sx={{ width: 350 }}
             renderInput={params => <TextField {...params} label='Access Level' variant='standard' />}
@@ -29,8 +29,4 @@ export default function AccessSelections({ selectedItems, setSelectedItems }) {
   );
 }
 
-const accessLevels = [
-  { display: 'Admin', value: 'Admin' },
-  { display: 'Manager', value: 'Manager' },
-  { display: 'User', value: 'User' }
-];
+const accessLevels = ['Admin', 'Manager', 'User'];

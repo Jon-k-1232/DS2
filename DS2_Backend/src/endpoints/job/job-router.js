@@ -12,25 +12,18 @@ jobRouter.route('/createJob/:accountID/:userID').post(jsonParser, async (req, re
   const db = req.app.get('db');
   const sanitizedNewJob = sanitizeFields(req.body.job);
 
-  // Create new object with sanitized fields
-  const jobTableFields = restoreDataTypesJobTableOnCreate(sanitizedNewJob);
-
-  // Post new job
-  await jobService.createJob(db, jobTableFields);
-
-  // Get all jobs
-  const activeJobs = await jobService.getActiveJobs(db, jobTableFields.account_id);
-
-  const activeJobData = {
-    activeJobs,
-    grid: createGrid(activeJobs)
-  };
-
-  res.send({
-    accountJobsList: { activeJobData },
-    message: 'Successfully created new job.',
-    status: 200
-  });
+  try {
+    // Create new object with sanitized fields
+    const jobTableFields = restoreDataTypesJobTableOnCreate(sanitizedNewJob);
+    // Post new job
+    await jobService.createJob(db, jobTableFields);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while creating the Job.',
+      status: 500
+    });
+  }
 });
 
 // Get job for a company
@@ -80,53 +73,25 @@ jobRouter
     });
   });
 
-// Get all active jobs
-jobRouter.route('/getActiveJobs/:accountID/:userID').get(async (req, res) => {
-  const db = req.app.get('db');
-  const { accountID } = req.params;
-
-  const activeJobs = await jobService.getActiveJobs(db, accountID);
-
-  // Return Object
-  const activeJobData = {
-    activeJobs,
-    grid: createGrid(activeJobs)
-  };
-
-  res.send({
-    activeJobData,
-    message: 'Successfully retrieved active jobs.',
-    status: 200
-  });
-});
-
 // Update a job
 jobRouter.route('/updateJob/:accountID/:userID').put(jsonParser, async (req, res) => {
-  const db = req.app.get( 'db' );
-  const {accountID} = req.params;
-  
-  const sanitizedUpdatedJob = sanitizeFields( req.body.job );
-  
-  // Create new object with sanitized fields
-  const jobTableFields = restoreDataTypesJobTableOnUpdate( sanitizedUpdatedJob );
-  
-  // Update job
-  await jobService.updateJob(db, jobTableFields);
+  const db = req.app.get('db');
+  const { accountID } = req.params;
+  const sanitizedUpdatedJob = sanitizeFields(req.body.job);
 
-  // Get all jobs
-  const activeJobs = await jobService.getActiveJobs(db, accountID);
-
-  // Return Object
-  const activeJobData = {
-    activeJobs,
-    grid: createGrid(activeJobs)
-  };
-
-  res.send({
-    accountJobsList: {activeJobData},
-    message: 'Successfully updated job.',
-    status: 200
-  });
+  try {
+    // Create new object with sanitized fields
+    const jobTableFields = restoreDataTypesJobTableOnUpdate(sanitizedUpdatedJob);
+    // Update job
+    await jobService.updateJob(db, jobTableFields);
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (error) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while updating the Job.',
+      status: 500
+    });
+  }
 });
 
 // Delete a job
@@ -134,22 +99,17 @@ jobRouter.route('/deleteJob/:jobID/:accountID/:userID').delete(jsonParser, async
   const db = req.app.get('db');
   const { accountID, jobID } = req.params;
 
-  // Delete job
-  await jobService.deleteJob(db, jobID);
-
-  // Get all jobs
-  const activeJobs = await jobService.getActiveJobs(db, accountID);
-
-  const activeJobData = {
-    activeJobs,
-    grid: createGrid(activeJobs)
-  };
-
-  res.send({
-    accountJobsList: { activeJobData },
-    message: 'Successfully deleted job.',
-    status: 200
-  });
+  try {
+    // Delete job
+    await jobService.deleteJob(db, jobID);
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (error) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while updating the Job.',
+      status: 500
+    });
+  }
 });
 
 module.exports = jobRouter;
@@ -171,4 +131,20 @@ const findMostRecentJobRecords = jobs => {
   }, {});
 
   return Object.values(mostRecentJobs);
+};
+
+const sendUpdatedTableWith200Response = async (db, res, accountID) => {
+  // Get all jobs
+  const activeJobs = await jobService.getActiveJobs(db, accountID);
+
+  const activeJobData = {
+    activeJobs,
+    grid: createGrid(activeJobs)
+  };
+
+  res.send({
+    accountJobsList: { activeJobData },
+    message: 'Successfully created new job.',
+    status: 200
+  });
 };

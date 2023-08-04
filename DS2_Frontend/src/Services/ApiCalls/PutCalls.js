@@ -120,3 +120,25 @@ export const postEditJobCategory = async (data, accountID, userID, token) => {
     throw error;
   }
 };
+
+export const putEditTeamMember = async (data, accountID, userID, token) => {
+  const url = `${config.API_ENDPOINT}/user/updateUser/${accountID}/${userID}`;
+  try {
+    const response = await axios.put(url, { user: data }, headers(token));
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting new team member:', error);
+    throw error;
+  }
+};
+
+export const putEditUserLogin = async (data, accountID, userID, token) => {
+  const url = `${config.API_ENDPOINT}/user/updateUserLogin/${accountID}/${userID}`;
+  try {
+    const response = await axios.put(url, { userLogin: data }, headers(token));
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting new team member:', error);
+    throw error;
+  }
+};

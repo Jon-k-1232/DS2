@@ -16,7 +16,7 @@ import {
   DialogTitle
 } from '@mui/material';
 import CreateInvoiceGrid from '../InvoiceGrids/CreateInvoiceGrid';
-import { getOutstandingBalanceList, getZippedInvoices } from '../../../Services/ApiCalls/GetCalls';
+import { getOutstandingBalanceList, getZippedInvoices } from '../../../Services/ApiCalls/FetchCalls';
 import CreateInvoiceCheckBoxes from './SubComponents/CreateInvoiceCheckBoxes';
 import { postInvoiceCreation } from '../../../Services/ApiCalls/PostCalls';
 import { formObjectForInvoiceCreation } from '../../../Services/SharedPostObjects/SharedPostObjects';

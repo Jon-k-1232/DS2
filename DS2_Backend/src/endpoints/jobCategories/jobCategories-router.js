@@ -6,79 +6,58 @@ const { sanitizeFields } = require('../../utils');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
 const { restoreDataTypesJobCategoriesOnCreate, restoreDataTypesJobCategoriesOnUpdate } = require('./jobCategoriesObjects');
 
-// Get all active job categories
-jobCategoriesRouter.route('/getActiveJobCategories/:accountID/:userID').get(async (req, res) => {
-  const db = req.app.get('db');
-  const { accountID } = req.params;
-
-  const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, accountID);
-
-  // Create Mui Grid
-  const grid = createGrid(activeJobCategories);
-
-  // Return Object
-  const activeJobCategoriesData = {
-    activeJobCategories,
-    grid
-  };
-
-  res.send({
-    activeJobCategoriesData,
-    message: 'Successfully retrieved active job categories.',
-    status: 200
-  });
-});
-
 // Create a new job category
 jobCategoriesRouter.route('/createJobCategory/:accountID/:userID').post(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedNewJobCategory = sanitizeFields(req.body.jobCategory);
+  const { accountID } = req.params;
 
-  // Create new object with sanitized fields
-  const jobCategoriesTableFields = restoreDataTypesJobCategoriesOnCreate(sanitizedNewJobCategory);
+  const createNewJobCategory = async () => {
+    const sanitizedNewJobCategory = sanitizeFields(req.body.jobCategory);
 
-  // Post new job category
-  await jobCategoriesService.createJobCategory(db, jobCategoriesTableFields);
+    // Create new object with sanitized fields
+    const jobCategoriesTableFields = restoreDataTypesJobCategoriesOnCreate(sanitizedNewJobCategory);
 
-  // Get all Job Categories
-  const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, jobCategoriesTableFields.account_id);
-
-  const activeJobCategoriesData = {
-    activeJobCategories,
-    grid: createGrid(activeJobCategories)
+    // Post new job category
+    await jobCategoriesService.createJobCategory(db, jobCategoriesTableFields);
   };
 
-  res.send({
-    jobCategoriesList: { activeJobCategoriesData },
-    message: 'Successfully created job category.',
-    status: 200
-  });
+  try {
+    await createNewJobCategory();
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while updating the Job Category.',
+      status: 500
+    });
+  }
 });
 
-// Update a job category
+// Edit a job category
 jobCategoriesRouter.route('/updateJobCategory/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedUpdatedJobCategory = sanitizeFields(req.body.jobCategory);
+  const { accountID } = req.params;
 
-  // Create new object with sanitized fields
-  const jobCategoriesTableFields = restoreDataTypesJobCategoriesOnUpdate(sanitizedUpdatedJobCategory);
+  const updateJobCategory = async () => {
+    const sanitizedUpdatedJobCategory = sanitizeFields(req.body.jobCategory);
 
-  // Update the Job category
-  await jobCategoriesService.updateJobCategory(db, jobCategoriesTableFields);
+    // Create new object with sanitized fields
+    const jobCategoriesTableFields = restoreDataTypesJobCategoriesOnUpdate(sanitizedUpdatedJobCategory);
 
-  // Get all Job Categories
-  const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, jobCategoriesTableFields.account_id);
-
-  const activeJobCategoriesData = {
-    activeJobCategories,
-    grid: createGrid(activeJobCategories)
+    // Update the Job category
+    await jobCategoriesService.updateJobCategory(db, jobCategoriesTableFields);
   };
 
-  res.send({
-    jobCategoriesList: { activeJobCategoriesData },
-    message: 'Successfully updated job category.',
-    status: 200
-  });
+  try {
+    await updateJobCategory();
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while updating the Job Category.',
+      status: 500
+    });
+  }
 });
 
 // Delete a job category
@@ -86,28 +65,27 @@ jobCategoriesRouter.route('/deleteJobCategory/:jobCategoryID/:accountID/:userID'
   const db = req.app.get('db');
   const { jobCategoryID, accountID } = req.params;
 
-  // Delete the Job category
-  await jobCategoriesService.deleteJobCategory(db, jobCategoryID);
-
-  // Get all Job Categories
-  const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, accountID);
-
-  const activeJobCategoriesData = {
-    activeJobCategories,
-    grid: createGrid(activeJobCategories)
+  const deleteJobCategory = async () => {
+    // Delete the Job category
+    await jobCategoriesService.deleteJobCategory(db, jobCategoryID);
   };
-  res.send({
-    jobCategoriesList: { activeJobCategoriesData },
-    message: 'Successfully deleted job category.',
-    status: 200
-  });
+
+  try {
+    await deleteJobCategory();
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while updating the Job Category.',
+      status: 500
+    });
+  }
 });
 
 // get single job category
 jobCategoriesRouter.route('/getSingleJobCategory/:jobCategoryID/:accountID/:userID').get(async (req, res) => {
   const db = req.app.get('db');
   const { jobCategoryID } = req.params;
-
   const activeJobCategory = await jobCategoriesService.getSingleJobCategory(db, jobCategoryID);
 
   const activeJobCategoriesData = {
@@ -123,3 +101,19 @@ jobCategoriesRouter.route('/getSingleJobCategory/:jobCategoryID/:accountID/:user
 });
 
 module.exports = jobCategoriesRouter;
+
+const sendUpdatedTableWith200Response = async (db, res, accountID) => {
+  // Get all Job Categories
+  const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, accountID);
+
+  const activeJobCategoriesData = {
+    activeJobCategories,
+    grid: createGrid(activeJobCategories)
+  };
+
+  res.send({
+    jobCategoriesList: { activeJobCategoriesData },
+    message: 'Successfully deleted job category.',
+    status: 200
+  });
+};

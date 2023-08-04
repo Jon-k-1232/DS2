@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import PageNavigationHeader from '../../../Components/PageNavigationHeader/PageNavigationHeader';
-import { fetchSingleRetainer } from '../../../Services/ApiCalls/GetCalls';
+import { fetchSingleRetainer } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeleteRetainer from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeleteRetainer';
 import EditRetainer from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditRetainer';

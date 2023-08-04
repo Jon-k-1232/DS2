@@ -9,10 +9,10 @@ import DashboardRoutes from './GroupedRoutes/DashboardRoutes';
 import CustomerRoutes from './GroupedRoutes/CustomerRoutes/CustomerRoutes';
 import TransactionsRoutes from './GroupedRoutes/TransactionRoutes/TransactionsRoutes';
 import InvoiceRoutes from './GroupedRoutes/InvoiceRoutes';
-import AccountRoutes from './GroupedRoutes/AccountRoutes';
+import AccountRoutes from './GroupedRoutes/AccountRoutes/AccountRoutes';
 import JobRoutes from './GroupedRoutes/JobRoutes/JobRoutes';
 import { context } from '../App';
-import { getInitialAppData, fetchSingleUser } from '../Services/ApiCalls/GetCalls';
+import { getInitialAppData, fetchSingleUser } from '../Services/ApiCalls/FetchCalls';
 
 // loaders
 // https://awesome-loaders.netlify.app/docs/loaders/wifiloader/
@@ -22,14 +22,14 @@ export default function Router() {
   const location = useLocation();
 
   const { loggedInUser, setLoggedInUser } = useContext(context);
-  const {accountID, userID, displayName, token} = loggedInUser;
-  
+  const { accountID, userID, displayName, token } = loggedInUser;
+
   // const [timeLeft, setTimeLeft] = useState(0);
   const [pageTitle, setPageTitle] = useState('');
   const [customerData, setCustomerData] = useState({});
 
-  console.log( customerData );
-  
+  console.log(customerData);
+
   useEffect(() => {
     // With every route check if token is still good or not.
     const checkedToken = token && TokenService.isTokenExpired(token);
@@ -49,7 +49,7 @@ export default function Router() {
 
   const apiCall = async () => {
     const initialData = await getInitialAppData(accountID, userID, token);
-    setCustomerData( {...customerData, ...initialData} );
+    setCustomerData({ ...customerData, ...initialData });
 
     // Need this condition for reloads. DisplayName on reload is null, so we need to catch it along with others.
     // Additionally when this re runs since token will be pulled again, server will re authenticate jwt.

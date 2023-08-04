@@ -5,7 +5,6 @@ import AccessSelections from './FormSubComponents/AccessSelections';
 import RateSelections from './FormSubComponents/RateSelections';
 import UserLoginSelections from './FormSubComponents/UserLoginSelections';
 import { postNewTeamMember } from '../../../../Services/ApiCalls/PostCalls';
-import { formObjectForTeamMemberPost } from '../../../../Services/SharedPostObjects/SharedPostObjects';
 import { useContext } from 'react';
 import { context } from '../../../../App';
 
@@ -23,24 +22,20 @@ const initialState = {
 };
 
 export default function AddUser({ customerData, setCustomerData }) {
-  const { loggedInUser } = useContext(context);
   const { accountID, userID } = useContext(context).loggedInUser;
 
   const [postStatus, setPostStatus] = useState(null);
   const [selectedItems, setSelectedItems] = useState(initialState);
 
   const handleSubmit = async () => {
-    const dataToPost = formObjectForTeamMemberPost(selectedItems, loggedInUser);
-    const postedItem = await postNewTeamMember(dataToPost, accountID, userID);
+    const postedItem = await postNewTeamMember(selectedItems, accountID, userID);
 
     setPostStatus(postedItem);
-    if (postedItem.status === 200) resetState(postedItem);
-  };
-
-  const resetState = postedItem => {
-    setCustomerData({ ...customerData, teamMembersList: postedItem.teamMembersList });
-    setSelectedItems(initialState);
-    setTimeout(() => setPostStatus(null), 4000);
+    if (postedItem.status === 200) {
+      setCustomerData({ ...customerData, teamMembersList: postedItem.teamMembersList });
+      setSelectedItems(initialState);
+      setTimeout(() => setPostStatus(null), 2000);
+    }
   };
 
   return (

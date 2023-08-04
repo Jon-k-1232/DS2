@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import NewJob from '../../../../Jobs/JobForms/AddJob/NewJob';
 import NewCustomer from '../../../../Customer/CustomerForms/AddCustomer/NewCustomer';
 import AutoCompleteWithDialog from '../../../../../Components/Dialogs/AutoCompleteWithDialog';
-import { getCustomerJobsList } from '../../../../../Services/ApiCalls/GetCalls';
+import { getCustomerJobsList } from '../../../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../../../App';
 import './Transactions.css';
 import SplitOptionLabel from '../../../../../Components/SplitOptionLabel';

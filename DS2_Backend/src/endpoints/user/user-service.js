@@ -23,39 +23,28 @@ const accountUserService = {
       });
   },
 
-  updateUserLogin(db, accountTableFields) {
-    return db
-      .update(accountTableFields)
-      .into('user_login')
-      .where('user_login_id', '=', accountTableFields.user_login_id)
-      .returning('*')
-      .then(rows => rows[0]);
+  updateUserLogin(db, updateFields, userLoginID) {
+    return db('user_login').update(updateFields).where('user_login_id', '=', userLoginID);
   },
 
-  updateUser(db, accountTableFields) {
-    return db
-      .update(accountTableFields)
-      .into('users')
-      .where('user_id', '=', accountTableFields.user_id)
-      .returning('*')
-      .then(rows => {
-        // Remove the password_hash property from the query results
-        delete rows[0].password_hash;
-        return rows[0];
-      });
+  updateUser(db, userFields) {
+    return db.update(userFields).into('users').where('user_id', '=', userFields.user_id);
   },
 
   deleteUser(db, userID) {
-    return db
-      .delete()
-      .from('users')
-      .where('user_id', '=', userID)
-      .returning('*')
-      .then(rows => rows[0]);
+    return db.delete().from('users').where('user_id', '=', userID);
+  },
+
+  deleteUserLogin(db, userID) {
+    return db.delete().from('user_login').where('user_id', '=', userID);
   },
 
   fetchUser(db, accountID, userID) {
     return db.select().from('users').where('account_id', '=', accountID).andWhere('user_id', '=', userID).returning('*');
+  },
+
+  fetchUserLogin(db, user) {
+    return db.select('user_login_id').from('user_login').where('user_id', '=', user.user_id).returning('*');
   }
 };
 

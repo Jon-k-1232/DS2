@@ -88,7 +88,7 @@ export default function DeleteJob({ customerData, setCustomerData, jobData }) {
         isQuote: is_quote,
         jobQuoteAmount: job_quote_amount,
         jobTypeID: foundJobType ? foundJobType.job_description : null,
-        notes: notes
+        notes
       });
     }
     // eslint-disable-next-line

@@ -28,7 +28,14 @@ export default function AccountUsersGrid({ customerData, setCustomerData }) {
   return (
     <>
       <Stack spacing={3}>
-        <DataGridTable title='Account Users' tableData={activeUserData.grid} checkboxSelection={false} arrayOfButtons={gridButtons} />
+        <DataGridTable
+          title='Account Users'
+          tableData={activeUserData.grid}
+          checkboxSelection={false}
+          arrayOfButtons={gridButtons}
+          enableSingleRowClick
+          routeToPass={'/account/accountUsers/deleteUser'}
+        />
       </Stack>
     </>
   );

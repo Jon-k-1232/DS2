@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import PageNavigationHeader from '../../../Components/PageNavigationHeader/PageNavigationHeader';
-import { fetchSingleJobCategory } from '../../../Services/ApiCalls/GetCalls';
+import { fetchSingleJobCategory } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeleteJobCategory from '../../../Pages/Jobs/JobForms/DeleteJob/DeleteJobCategory';
 import EditJobCategory from '../../../Pages/Jobs/JobForms/EditJob/EditJobCategory';

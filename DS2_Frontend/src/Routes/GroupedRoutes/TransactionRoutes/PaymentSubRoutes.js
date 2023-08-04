@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import PageNavigationHeader from '../../../Components/PageNavigationHeader/PageNavigationHeader';
-import { fetchSinglePayment, fetchCustomerProfileInformation } from '../../../Services/ApiCalls/GetCalls';
+import { fetchSinglePayment, fetchCustomerProfileInformation } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeletePayment from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeletePayment';
 import EditPayment from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditPayment';

@@ -5,7 +5,7 @@ import InitialSelectionOptions from './FormSubComponents/InitialSelectionOptions
 import PaymentOptions from './FormSubComponents/PaymentOptions';
 import { postNewPayment } from '../../../../Services/ApiCalls/PostCalls';
 import { formObjectForPaymentPost } from '../../../../Services/SharedPostObjects/SharedPostObjects';
-import { fetchCustomerProfileInformation } from '../../../../Services/ApiCalls/GetCalls';
+import { fetchCustomerProfileInformation } from '../../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../../App';
 import InvoiceConfirmation from './FormSubComponents/InvoiceConfirmation';
 import InformationDialog from '../../../../Components/Dialogs/InformationDialog';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Stack, Typography } from '@mui/material';
-import UpdateAccount from '../AccountForms/UpdateAccount/UpdateAccount';
-import UpdateAccountAddress from '../AccountForms/UpdateAccount/UpdateAccountAddress';
+import UpdateAccount from '../AccountForms/EditAccount/UpdateAccount';
+import UpdateAccountAddress from '../AccountForms/EditAccount/UpdateAccountAddress';
 
 export default function AccountSettings() {
   return (

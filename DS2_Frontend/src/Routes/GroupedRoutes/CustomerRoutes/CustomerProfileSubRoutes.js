@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import PageNavigationHeader from '../../../Components/PageNavigationHeader/PageNavigationHeader';
-import { fetchCustomerProfileInformation } from '../../../Services/ApiCalls/GetCalls';
+import { fetchCustomerProfileInformation } from '../../../Services/ApiCalls/FetchCalls';
 import CustomerProfile from '../../../Pages/Customer/CustomerProfile/CustomerProfile';
 import CustomerProfileInvoices from '../../../Pages/Customer/CustomerProfile/CustomerProfileInvoices';
 import CustomerProfileTransactions from '../../../Pages/Customer/CustomerProfile/CustomerProfileTransactions';

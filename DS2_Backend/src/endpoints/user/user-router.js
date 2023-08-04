@@ -11,52 +11,166 @@ const {
   restoreDataTypesUserLoginOnUpdate
 } = require('./userObjects');
 
-// Get all active users for an account
-userRouter.route('/accountUsers/:accountID/:userID').get(async (req, res) => {
+// Create a new user
+userRouter.route('/createUser/:accountID/:userID').post(jsonParser, async (req, res) => {
   const db = req.app.get('db');
   const { accountID } = req.params;
 
-  // Get active users
-  const activeUsers = await accountUserService.getActiveAccountUsers(db, accountID);
+  const insertNewUser = async () => {
+    const userWithAccountID = { ...req.body.user, accountID };
+    const sanitizedNewUser = sanitizeFields(userWithAccountID);
 
-  // Create Mui Grid
-  const grid = createGrid(activeUsers);
+    // Create new object with sanitized fields
+    const userDataTypes = restoreDataTypesUserOnCreate(sanitizedNewUser);
+    // Post new account
+    const userData = await accountUserService.createUser(db, userDataTypes);
+    // Gets the user id that was created by user table
+    const { user_id, account_id } = userData;
+    // Merging the new user_id with the sanitizedNewAccount object
+    const updatedWithAccountID = { ...sanitizedNewUser, user_id };
+
+    // Create new object with sanitized fields
+    const userLoginDataTypes = await restoreDataTypesUserLoginOnCreate(updatedWithAccountID);
+    // Post new account login
+    await accountUserService.createAccountLogin(db, userLoginDataTypes);
+
+    // Get all active users and send 200 status
+    await updatedTeamMembers(db, res, account_id);
+  };
+
+  try {
+    await insertNewUser();
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while creating the user.',
+      status: 500
+    });
+  }
+});
+
+// Edit User
+userRouter.route('/updateUser/:accountID/:userID').put(jsonParser, async (req, res) => {
+  const db = req.app.get('db');
+  const { accountID } = req.params;
+
+  const updateUser = async () => {
+    // Sanitize fields
+    const sanitizedUpdatedUser = sanitizeFields(req.body.user);
+
+    // Create new object with sanitized fields
+    const userDataTypes = restoreDataTypesUserOnUpdate(sanitizedUpdatedUser);
+
+    // Update user
+    await accountUserService.updateUser(db, userDataTypes);
+
+    // Get all active users and send 200 status
+    await updatedTeamMembers(db, res, accountID);
+  };
+
+  try {
+    await updateUser();
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while creating the user.',
+      status: 500
+    });
+  }
+});
+
+// Edit User Login
+userRouter.route('/updateUserLogin/:accountID/:userID').put(jsonParser, async (req, res) => {
+  const db = req.app.get('db');
+  const userLoginDetails = req.body.userLogin;
+
+  const updateUserLogin = async () => {
+    // Sanitize fields
+    const sanitizedUpdatedUserLogin = sanitizeFields(userLoginDetails);
+    const updatedData = await restoreDataTypesUserLoginOnUpdate(sanitizedUpdatedUserLogin);
+
+    // Create an object to store the properties that need to be updated
+    let updateObject = {
+      is_login_active: updatedData.is_login_active
+    };
+
+    if (sanitizedUpdatedUserLogin.userLoginPassword && sanitizedUpdatedUserLogin.userLoginPassword.length) {
+      updateObject.password_hash = updatedData.password_hash;
+    }
+
+    if (sanitizedUpdatedUserLogin.userLoginName && sanitizedUpdatedUserLogin.userLoginName.length) {
+      updateObject.user_name = updatedData.user_name;
+    }
+
+    // Update user
+    await accountUserService.updateUserLogin(db, updateObject, updatedData.user_login_id);
+
+    // Get all active users and send 200 status
+    await updatedTeamMembers(db, res, updatedData.account_id);
+  };
+
+  try {
+    await updateUserLogin();
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while updating the user.',
+      status: 500
+    });
+  }
+});
+
+// Delete user
+userRouter.route('/deleteUser/:accountID/:userID').delete(async (req, res) => {
+  const db = req.app.get('db');
+  const { userID, accountID } = req.params;
+
+  const deleteUser = async () => {
+    await accountUserService.deleteUserLogin(db, userID);
+    await accountUserService.deleteUser(db, userID);
+
+    // Get all active users and send 200 status
+    await updatedTeamMembers(db, res, accountID);
+  };
+
+  try {
+    await deleteUser();
+  } catch {
+    res.send({
+      message: 'The user cannot be deleted because data tied to this user exists.',
+      status: 500
+    });
+  }
+});
+
+// fetch single user
+userRouter.route('/fetchSingleUser/:accountID/:userID').get(async (req, res) => {
+  const db = req.app.get('db');
+  const { accountID, userID } = req.params;
+
+  // Get user
+  const [activeUser] = await accountUserService.fetchUser(db, accountID, userID);
+  const [activeUserLogin] = await accountUserService.fetchUserLogin(db, activeUser);
+  activeUser.user_login_id = activeUserLogin.user_login_id;
 
   // Return Object
   const activeUserData = {
-    activeUsers,
-    grid
+    activeUser,
+    grid: createGrid(activeUser)
   };
 
   res.send({
     activeUserData,
-    message: 'Success',
+    message: 'Successfully fetched',
     status: 200
   });
 });
 
-// Create a new user
-userRouter.route('/createUser/:accountID/:userID').post(jsonParser, async (req, res) => {
-  const db = req.app.get('db');
-  const sanitizedNewUser = sanitizeFields(req.body.user);
+module.exports = userRouter;
 
-  // Create new object with sanitized fields
-  const userDataTypes = restoreDataTypesUserOnCreate(sanitizedNewUser);
-
-  // Post new account
-  const userData = await accountUserService.createUser(db, userDataTypes);
-
-  // Gets the user id that was created by user table
-  const { user_id, account_id } = userData;
-  // Merging the user_id with the sanitizedNewAccount object
-  const updatedWithAccountID = { ...sanitizedNewUser, user_id };
-  // Create new object with sanitized fields
-  const userLoginDataTypes = restoreDataTypesUserLoginOnCreate(updatedWithAccountID);
-  // Post new account login
-  await accountUserService.createAccountLogin(db, userLoginDataTypes);
-
+const updatedTeamMembers = async (db, res, accountID) => {
   // Get all active users
-  const activeUsers = await accountUserService.getActiveAccountUsers(db, account_id);
+  const activeUsers = await accountUserService.getActiveAccountUsers(db, accountID);
 
   // Return Object
   const activeUserData = {
@@ -69,113 +183,4 @@ userRouter.route('/createUser/:accountID/:userID').post(jsonParser, async (req, 
     message: 'Success',
     status: 200
   });
-});
-
-// Update user_login table
-userRouter.route('/updateUserLogin').put(jsonParser, async (req, res) => {
-  const db = req.app.get('db');
-  // Sanitize fields
-  const sanitizedUpdatedUser = sanitizeFields(req.body.user);
-
-  // Create new object with sanitized fields
-  const userDataTypes = restoreDataTypesUserLoginOnUpdate(sanitizedUpdatedUser);
-
-  // Update user
-  const returnedFields = await accountUserService.updateUserLogin(db, userDataTypes);
-
-  // Create grid for Mui Grid
-  const grid = createGrid([returnedFields]);
-
-  // Return Object
-  const userLogin = {
-    returnedFields,
-    grid
-  };
-
-  res.send({
-    userLogin,
-    message: 'Successfully updated',
-    status: 200
-  });
-});
-
-// Update user
-userRouter.route('/updateUser').put(jsonParser, async (req, res) => {
-  const db = req.app.get('db');
-  // Sanitize fields
-  const sanitizedUpdatedUser = sanitizeFields(req.body.user);
-
-  // Create new object with sanitized fields
-  const userDataTypes = restoreDataTypesUserOnUpdate(sanitizedUpdatedUser);
-
-  // Update user
-  const returnedFields = await accountUserService.updateUser(db, userDataTypes);
-
-  // Create grid for Mui Grid
-  const grid = createGrid([returnedFields]);
-
-  // Return Object
-  const user = {
-    returnedFields,
-    grid
-  };
-
-  res.send({
-    user,
-    message: 'Successfully updated',
-    status: 200
-  });
-});
-
-// Delete user
-userRouter.route('/deleteUser/:userID/:accountID').delete(async (req, res) => {
-  const db = req.app.get('db');
-  const { userID, accountID } = req.params;
-
-  // Delete user
-  await accountUserService.deleteUser(db, userID);
-
-  // Get all active users
-  const activeUsers = await accountUserService.getActiveAccountUsers(db, accountID);
-
-  // Create grid for Mui Grid
-  const grid = createGrid(activeUsers);
-
-  // Return Object
-  const user = {
-    activeUsers,
-    grid
-  };
-
-  res.send({
-    user,
-    message: 'Successfully deleted',
-    status: 200
-  });
-});
-
-// fetch single user
-userRouter
-  .route('/fetchSingleUser/:accountID/:userID')
-  // .all( requireAuth )
-  .get(async (req, res) => {
-    const db = req.app.get('db');
-    const { accountID, userID } = req.params;
-
-    // Get user
-    const [activeUser] = await accountUserService.fetchUser(db, accountID, userID);
-
-    // Return Object
-    const activeUserData = {
-      activeUser,
-      grid: createGrid(activeUser)
-    };
-
-    res.send({
-      activeUserData,
-      message: 'Successfully fetched',
-      status: 200
-    });
-  });
-
-module.exports = userRouter;
+};

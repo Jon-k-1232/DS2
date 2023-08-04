@@ -19,6 +19,20 @@ initialDataRouter.route('/initialBlob/:accountID/:userID').get(async (req, res) 
   const db = req.app.get('db');
   const { accountID } = req.params;
 
+  try {
+    await initialData(db, res, accountID);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while retrieving the initial data.',
+      status: 500
+    });
+  }
+});
+
+module.exports = initialDataRouter;
+
+const initialData = async (db, res, accountID) => {
   const services = [
     {
       service: customerService.getActiveCustomers,
@@ -90,6 +104,4 @@ initialDataRouter.route('/initialBlob/:accountID/:userID').get(async (req, res) 
   });
 
   res.send(responseData);
-});
-
-module.exports = initialDataRouter;
+};

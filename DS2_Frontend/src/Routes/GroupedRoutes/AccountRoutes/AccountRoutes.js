@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import AccountUsersGrid from '../../Pages/Account/AccountGrids/AccountUsersGrid';
-import AccountSettings from '../../Pages/Account/AccountSettings/AccountSettings';
-import Page from '../../Components/Page';
+import AccountUsersGrid from '../../../Pages/Account/AccountGrids/AccountUsersGrid';
+import AccountSettings from '../../../Pages/Account/AccountSettings/AccountSettings';
+import UsersSubRoutes from './UsersSubRoutes';
+import Page from '../../../Components/Page';
 import { Stack } from '@mui/material';
 
 export default function AccountRoutes({ setPageTitle, customerData, setCustomerData }) {
@@ -18,6 +19,10 @@ export default function AccountRoutes({ setPageTitle, customerData, setCustomerD
           <Route
             path='accountUsers'
             element={<AccountUsersGrid customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
+          />
+          <Route
+            path='/accountUsers/*'
+            element={<UsersSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
           />
           <Route path='accountSettings' element={<AccountSettings />} />
         </Routes>
