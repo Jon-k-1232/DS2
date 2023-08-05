@@ -6,6 +6,7 @@ import { context } from '../../../App';
 import DeleteUser from '../../../Pages/Account/AccountForms/DeleteUser/DeleteUser';
 import EditUser from '../../../Pages/Account/AccountForms/EditAccount/EditUser';
 import EditUserCredentials from '../../../Pages/Account/AccountForms/EditAccount/EditUserCredentials';
+import ErrorBoundary from '../../../Pages/ErrorBoundary';
 
 export default function UsersSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
@@ -35,15 +36,27 @@ export default function UsersSubRoutes({ customerData, setCustomerData }) {
       <Routes>
         <Route
           path='deleteUser'
-          element={<DeleteUser customerData={customerData} setCustomerData={data => setCustomerData(data)} userData={userData} />}
+          element={
+            <ErrorBoundary fallbackComponent='/account/accountUsers'>
+              <DeleteUser customerData={customerData} setCustomerData={data => setCustomerData(data)} userData={userData} />
+            </ErrorBoundary>
+          }
         />
         <Route
           path='editUser'
-          element={<EditUser customerData={customerData} setCustomerData={data => setCustomerData(data)} userData={userData} />}
+          element={
+            <ErrorBoundary fallbackComponent='/account/accountUsers'>
+              <EditUser customerData={customerData} setCustomerData={data => setCustomerData(data)} userData={userData} />
+            </ErrorBoundary>
+          }
         />
         <Route
           path='editUserCredentials'
-          element={<EditUserCredentials customerData={customerData} setCustomerData={data => setCustomerData(data)} userData={userData} />}
+          element={
+            <ErrorBoundary fallbackComponent='/account/accountUsers'>
+              <EditUserCredentials customerData={customerData} setCustomerData={data => setCustomerData(data)} userData={userData} />
+            </ErrorBoundary>
+          }
         />
       </Routes>
     </>

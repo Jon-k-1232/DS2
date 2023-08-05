@@ -5,6 +5,7 @@ import DeleteTimeOrCharge from '../../../Pages/Transactions/TransactionForms/Del
 import EditTransaction from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditTransaction';
 import { fetchSingleTransaction } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
+import ErrorBoundary from '../../../Pages/ErrorBoundary';
 
 export default function TransactionSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
@@ -35,21 +36,25 @@ export default function TransactionSubRoutes({ customerData, setCustomerData }) 
         <Route
           path='deleteTimeOrCharge'
           element={
-            <DeleteTimeOrCharge
-              customerData={customerData}
-              setCustomerData={data => setCustomerData(data)}
-              transactionData={transactionData}
-            />
+            <ErrorBoundary fallbackComponent='/transactions/customerTransactions'>
+              <DeleteTimeOrCharge
+                customerData={customerData}
+                setCustomerData={data => setCustomerData(data)}
+                transactionData={transactionData}
+              />
+            </ErrorBoundary>
           }
         />
         <Route
           path='editTransaction'
           element={
-            <EditTransaction
-              customerData={customerData}
-              setCustomerData={data => setCustomerData(data)}
-              transactionData={transactionData}
-            />
+            <ErrorBoundary fallbackComponent='/transactions/customerTransactions'>
+              <EditTransaction
+                customerData={customerData}
+                setCustomerData={data => setCustomerData(data)}
+                transactionData={transactionData}
+              />
+            </ErrorBoundary>
           }
         />
       </Routes>

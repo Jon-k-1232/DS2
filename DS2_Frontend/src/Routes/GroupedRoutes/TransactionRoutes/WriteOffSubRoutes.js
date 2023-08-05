@@ -5,6 +5,7 @@ import { fetchSingleWriteOff } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeleteWriteOff from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeleteWriteOff';
 import EditWriteOff from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditWriteOff';
+import ErrorBoundary from '../../../Pages/ErrorBoundary';
 
 export default function WriteOffSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
@@ -35,12 +36,18 @@ export default function WriteOffSubRoutes({ customerData, setCustomerData }) {
         <Route
           path='deleteWriteOff'
           element={
-            <DeleteWriteOff customerData={customerData} setCustomerData={data => setCustomerData(data)} writeOffData={writeOffData} />
+            <ErrorBoundary fallbackComponent='/transactions/customerWriteOffs'>
+              <DeleteWriteOff customerData={customerData} setCustomerData={data => setCustomerData(data)} writeOffData={writeOffData} />
+            </ErrorBoundary>
           }
         />
         <Route
           path='editWriteOff'
-          element={<EditWriteOff customerData={customerData} setCustomerData={data => setCustomerData(data)} writeOffData={writeOffData} />}
+          element={
+            <ErrorBoundary fallbackComponent='/transactions/customerWriteOffs'>
+              <EditWriteOff customerData={customerData} setCustomerData={data => setCustomerData(data)} writeOffData={writeOffData} />
+            </ErrorBoundary>
+          }
         />
       </Routes>
     </>

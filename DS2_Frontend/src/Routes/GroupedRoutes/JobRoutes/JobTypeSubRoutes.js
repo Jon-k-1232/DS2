@@ -5,6 +5,7 @@ import { fetchSingleJobType } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeleteJobTypes from '../../../Pages/Jobs/JobForms/DeleteJob/DeleteJobTypes';
 import EditJobTypes from '../../../Pages/Jobs/JobForms/EditJob/EditJobTypes';
+import ErrorBoundary from '../../../Pages/ErrorBoundary';
 
 export default function JobTypeSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
@@ -34,11 +35,19 @@ export default function JobTypeSubRoutes({ customerData, setCustomerData }) {
       <Routes>
         <Route
           path='deleteJobType'
-          element={<DeleteJobTypes customerData={customerData} setCustomerData={data => setCustomerData(data)} jobTypeData={jobTypeData} />}
+          element={
+            <ErrorBoundary fallbackComponent='/jobs/jobTypesList'>
+              <DeleteJobTypes customerData={customerData} setCustomerData={data => setCustomerData(data)} jobTypeData={jobTypeData} />
+            </ErrorBoundary>
+          }
         />
         <Route
           path='editJobType'
-          element={<EditJobTypes customerData={customerData} setCustomerData={data => setCustomerData(data)} jobTypeData={jobTypeData} />}
+          element={
+            <ErrorBoundary fallbackComponent='/jobs/jobTypesList'>
+              <EditJobTypes customerData={customerData} setCustomerData={data => setCustomerData(data)} jobTypeData={jobTypeData} />
+            </ErrorBoundary>
+          }
         />
       </Routes>
     </>

@@ -5,6 +5,7 @@ import Customers from '../../../Pages/Customer/CustomerGrids/CustomerGrid';
 import CustomerProfileSubRoutes from './CustomerProfileSubRoutes';
 import Page from '../../../Components/Page';
 import { Stack } from '@mui/material';
+import ErrorBoundary from '../../../Pages/ErrorBoundary';
 
 export default function CustomerRoutes({ setPageTitle, customerData, setCustomerData }) {
   useEffect(() => {
@@ -25,7 +26,11 @@ export default function CustomerRoutes({ setPageTitle, customerData, setCustomer
           />
           <Route
             path='/customersList/customerProfile/*'
-            element={<CustomerProfileSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
+            element={
+              <ErrorBoundary fallbackComponent='/customersList'>
+                <CustomerProfileSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />
+              </ErrorBoundary>
+            }
           />
         </Routes>
       </Stack>

@@ -5,6 +5,7 @@ import { fetchSinglePayment, fetchCustomerProfileInformation } from '../../../Se
 import { context } from '../../../App';
 import DeletePayment from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeletePayment';
 import EditPayment from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditPayment';
+import ErrorBoundary from '../../../Pages/ErrorBoundary';
 
 export default function PaymentSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
@@ -38,23 +39,27 @@ export default function PaymentSubRoutes({ customerData, setCustomerData }) {
         <Route
           path='deletePayment'
           element={
-            <DeletePayment
-              customerData={customerData}
-              setCustomerData={data => setCustomerData(data)}
-              paymentData={paymentData}
-              customerProfileData={customerProfileData}
-            />
+            <ErrorBoundary fallbackComponent='/transactions/customerPayments'>
+              <DeletePayment
+                customerData={customerData}
+                setCustomerData={data => setCustomerData(data)}
+                paymentData={paymentData}
+                customerProfileData={customerProfileData}
+              />
+            </ErrorBoundary>
           }
         />
         <Route
           path='editPayment'
           element={
-            <EditPayment
-              customerData={customerData}
-              setCustomerData={data => setCustomerData(data)}
-              paymentData={paymentData}
-              customerProfileData={customerProfileData}
-            />
+            <ErrorBoundary fallbackComponent='/transactions/customerPayments'>
+              <EditPayment
+                customerData={customerData}
+                setCustomerData={data => setCustomerData(data)}
+                paymentData={paymentData}
+                customerProfileData={customerProfileData}
+              />
+            </ErrorBoundary>
           }
         />
       </Routes>

@@ -5,6 +5,7 @@ import { fetchSingleRetainer } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeleteRetainer from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeleteRetainer';
 import EditRetainer from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditRetainer';
+import ErrorBoundary from '../../../Pages/ErrorBoundary';
 
 export default function RetainerSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
@@ -35,12 +36,18 @@ export default function RetainerSubRoutes({ customerData, setCustomerData }) {
         <Route
           path='deleteRetainer'
           element={
-            <DeleteRetainer customerData={customerData} setCustomerData={data => setCustomerData(data)} retainerData={retainerData} />
+            <ErrorBoundary fallbackComponent='/transactions/customerRetainers'>
+              <DeleteRetainer customerData={customerData} setCustomerData={data => setCustomerData(data)} retainerData={retainerData} />
+            </ErrorBoundary>
           }
         />
         <Route
           path='editRetainer'
-          element={<EditRetainer customerData={customerData} setCustomerData={data => setCustomerData(data)} retainerData={retainerData} />}
+          element={
+            <ErrorBoundary fallbackComponent='/transactions/customerRetainers'>
+              <EditRetainer customerData={customerData} setCustomerData={data => setCustomerData(data)} retainerData={retainerData} />
+            </ErrorBoundary>
+          }
         />
       </Routes>
     </>
