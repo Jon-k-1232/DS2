@@ -105,6 +105,11 @@ export const sidebarRoutes = [
         title: 'Job Categories',
         path: '/jobs/jobCategoriesList',
         icon: getIcon(clockFill)
+      },
+      {
+        title: 'Work Descriptions',
+        path: '/jobs/workDescriptionsList',
+        icon: getIcon(clockFill)
       }
     ]
   },

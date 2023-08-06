@@ -142,3 +142,14 @@ export const postLoginAuth = async (suppliedUsername, suppliedPassword, token) =
     return error;
   }
 };
+
+export const postWorkDescription = async (data, accountID, userID, token) => {
+  const url = `${config.API_ENDPOINT}/workDescriptions/createWorkDescription/${accountID}/${userID}`;
+  try {
+    const response = await axios.post(url, { workDescription: data }, headers(token));
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting new work description:', error);
+    throw error;
+  }
+};

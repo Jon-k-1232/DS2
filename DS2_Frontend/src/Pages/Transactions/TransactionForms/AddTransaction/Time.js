@@ -12,6 +12,7 @@ const initialState = {
   selectedCustomer: null,
   selectedJob: null,
   selectedTeamMember: null,
+  selectedGeneralWorkDescription: null,
   detailedJobDescription: '',
   selectedDate: dayjs(),
   isTransactionBillable: true,
@@ -65,7 +66,7 @@ export default function Time({ customerData, setCustomerData }) {
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
-          <TimeOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
+          <TimeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
         </Stack>
 
         <Typography variant='body1'>

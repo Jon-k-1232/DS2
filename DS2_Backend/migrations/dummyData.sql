@@ -82,18 +82,31 @@ INSERT INTO customer_invoices(parent_invoice_id, account_id, customer_id, custom
 (NULL, 2, 3, 3, 'INV-2023-00003', '2023-01-01', '2023-02-01', 0.00, 0.00, 1000.00, 0.00, 0.00, 1000.00, 1000, FALSE, NULL, 3, '2023-01-01', '2023-01-01', 'Invoice for custom project'),
 (NULL, 2, 1, 1, 'INV-2023-00004', '2023-01-01', '2023-02-01', 0.00, 0.00, 700.00, 0.00, 0.00, 700.00, 700, FALSE, NULL, 1, '2023-01-01', '2023-01-01', 'Second invoice for additional work');
 
+-- Sample data for customer_general_work_descriptions table
+INSERT INTO customer_general_work_descriptions(account_id, general_work_description, estimated_time, is_general_work_description_active, created_by_user_id, created_at)
+     VALUES (1, 'admin', 60, TRUE, 1, '2023-08-01 08:00:00'),
+(2, 'lunch', 30, TRUE, 1, '2023-08-02 09:00:00'),
+(3, 'processing application', 120, TRUE, 1, '2023-08-03 10:00:00'),
+(1, 'admin', 60, FALSE, 2, '2023-08-04 11:00:00'),
+(2, 'processing application', 120, TRUE, 2, '2023-08-05 12:00:00'),
+(4, 'admin', 60, TRUE, 2, '2023-08-06 13:00:00'),
+(5, 'lunch', 30, FALSE, 3, '2023-08-07 14:00:00'),
+(3, 'admin', 60, TRUE, 3, '2023-08-08 15:00:00'),
+(4, 'processing application', 120, FALSE, 3, '2023-08-09 16:00:00'),
+(5, 'admin', 60, TRUE, 4, '2023-08-10 17:00:00');
+
 -- Sample data for customer_transactions table
-INSERT INTO customer_transactions(account_id, customer_id, customer_job_id, customer_invoice_id, logged_for_user_id, detailed_work_description, transaction_date, transaction_type, quantity, unit_cost, total_transaction, is_transaction_billable, is_excess_to_subscription, created_by_user_id)
-     VALUES (2, 1, 1, 1, 1, 'Fixed a leak in the roof', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1),
-(2, 1, 1, 1, 1, 'Fixed a leak in the roof', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1),
-(2, 1, 2, 1, 2, 'Invoice processing fee', '2023-01-10', 'Time', 1, 75.00, 75.00, TRUE, FALSE, 1),
-(2, 1, 2, 1, 2, 'Invoice processing fee', '2023-01-10', 'Time', 1, 100.00, 100.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 1, 'Replaced a light fixture', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 1, 'Replaced a light fixture', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1),
-(2, 3, 6, NULL, 1, 'Cleaned gutters', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1),
-(2, 3, 5, NULL, 1, 'Cleaned gutters other job', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 2, 'test', '2023-01-10', 'Charge', 1, 100.00, 100.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 2, 'test', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1);
+INSERT INTO customer_transactions(account_id, customer_id, customer_job_id, customer_invoice_id, logged_for_user_id, general_work_description_id, detailed_work_description, transaction_date, transaction_type, quantity, unit_cost, total_transaction, is_transaction_billable, is_excess_to_subscription, created_by_user_id)
+     VALUES (2, 1, 1, 1, 1, 1, 'Fixed a leak in the roof', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1),
+(2, 1, 1, 1, 1, 2, 'Fixed a leak in the roof', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1),
+(2, 1, 2, 1, 2, 3, 'Invoice processing fee', '2023-01-10', 'Time', 1, 75.00, 75.00, TRUE, FALSE, 1),
+(2, 1, 2, 1, 2, 4, 'Invoice processing fee', '2023-01-10', 'Time', 1, 100.00, 100.00, TRUE, FALSE, 1),
+(2, 2, 3, NULL, 1, 5, 'Replaced a light fixture', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1),
+(2, 2, 3, NULL, 1, 6, 'Replaced a light fixture', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1),
+(2, 3, 6, NULL, 1, 7, 'Cleaned gutters', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1),
+(2, 3, 5, NULL, 1, 8, 'Cleaned gutters other job', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1),
+(2, 2, 3, NULL, 2, 9, 'test', '2023-01-10', 'Charge', 1, 100.00, 100.00, TRUE, FALSE, 1),
+(2, 2, 3, NULL, 2, 10, 'test', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1);
 
 -- Sample data for customer_payments table
 INSERT INTO customer_payments(customer_id, account_id, customer_job_id, retainer_id, customer_invoice_id, payment_date, payment_amount, form_of_payment, payment_reference_number, is_transaction_billable, created_by_user_id, note)

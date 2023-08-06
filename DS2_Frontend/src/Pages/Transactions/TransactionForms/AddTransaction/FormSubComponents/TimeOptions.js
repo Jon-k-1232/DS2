@@ -1,15 +1,22 @@
 import { useState } from 'react';
-import { Box, TextField, Checkbox, FormControlLabel, Radio, RadioGroup, FormControl, Typography } from '@mui/material';
+import { Box, TextField, Checkbox, FormControlLabel, Radio, RadioGroup, FormControl, Typography, Autocomplete } from '@mui/material';
 import { sixMinuteIncrementTimeCalculation } from './TimeTrackingIncrements';
 import dayjs from 'dayjs';
 
-export default function TimeOptions({ selectedItems, setSelectedItems }) {
-  const { selectedTeamMember, isTransactionBillable, detailedJobDescription, isInAdditionToMonthlyCharge, selectedCustomer } =
-    selectedItems;
-
+export default function TimeOptions({ customerData, selectedItems, setSelectedItems }) {
   const [minutes, setMinutes] = useState('');
   const [startTime, setStartTime] = useState(dayjs().format());
   const [endTime, setEndTime] = useState(dayjs().format());
+
+  const { workDescriptionsList: { activeWorkDescriptionsData: { workDescriptions } = [] } = [] } = { ...customerData };
+  const {
+    selectedTeamMember,
+    isTransactionBillable,
+    detailedJobDescription,
+    isInAdditionToMonthlyCharge,
+    selectedCustomer,
+    selectedGeneralWorkDescription
+  } = selectedItems;
 
   const updateSelectedItems = (key, value) => {
     setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));
@@ -34,6 +41,19 @@ export default function TimeOptions({ selectedItems, setSelectedItems }) {
 
   return (
     <Box sx={{ display: 'grid', gap: 2 }}>
+      <Autocomplete
+        required
+        size='small'
+        sx={{ width: 350, marginTop: '10px' }}
+        value={selectedGeneralWorkDescription}
+        onChange={(e, value) => {
+          updateSelectedItems('selectedGeneralWorkDescription', value);
+        }}
+        getOptionLabel={option => (option ? option.general_work_description : '') || ''}
+        options={workDescriptions || []}
+        renderInput={params => <TextField {...params} label='General Work Description' variant='standard' />}
+      />
+
       <TextField
         sx={{ width: 350, marginTop: '10px' }}
         variant='standard'

@@ -1,8 +1,17 @@
-import { Stack, TextField, Checkbox, FormControlLabel, FormControl, Typography, RadioGroup, Radio } from '@mui/material';
+import { Stack, TextField, Checkbox, FormControlLabel, FormControl, Typography, RadioGroup, Radio, Autocomplete } from '@mui/material';
 
-export default function ChargeOptions({ selectedItems, setSelectedItems }) {
-  const { detailedJobDescription, quantity, unitCost, isTransactionBillable, isInAdditionToMonthlyCharge, selectedCustomer } =
-    selectedItems;
+export default function ChargeOptions({ customerData, selectedItems, setSelectedItems }) {
+  const { workDescriptionsList: { activeWorkDescriptionsData: { workDescriptions } = [] } = [] } = { ...customerData };
+
+  const {
+    detailedJobDescription,
+    quantity,
+    unitCost,
+    isTransactionBillable,
+    isInAdditionToMonthlyCharge,
+    selectedCustomer,
+    selectedGeneralWorkDescription
+  } = selectedItems;
 
   const updateSelectedItems = (key, value) => {
     setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));
@@ -10,6 +19,18 @@ export default function ChargeOptions({ selectedItems, setSelectedItems }) {
 
   return (
     <Stack spacing={3}>
+      <Autocomplete
+        required
+        size='small'
+        sx={{ width: 350, marginTop: '10px' }}
+        value={selectedGeneralWorkDescription}
+        onChange={(e, value) => {
+          updateSelectedItems('selectedGeneralWorkDescription', value);
+        }}
+        getOptionLabel={option => (option ? option.general_work_description : '') || ''}
+        options={workDescriptions}
+        renderInput={params => <TextField {...params} label='General Work Description' variant='standard' />}
+      />
       <TextField
         sx={{ width: 350, marginTop: '10px' }}
         variant='standard'

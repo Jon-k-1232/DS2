@@ -11,6 +11,7 @@ const initialState = {
   selectedCustomer: null,
   selectedJob: null,
   selectedTeamMember: null,
+  selectedGeneralWorkDescription: null,
   detailedJobDescription: '',
   selectedDate: dayjs(),
   isTransactionBillable: true,
@@ -60,7 +61,7 @@ export default function Charge({ customerData, setCustomerData }) {
           initialState={initialState}
         />
 
-        <ChargeOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
+        <ChargeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 
         <Typography variant='body1'>Total: {formatTotal(quantity * unitCost)}</Typography>
 

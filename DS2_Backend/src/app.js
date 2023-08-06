@@ -24,6 +24,7 @@ const writeOffsRouter = require('./endpoints/writeOffs/writeOffs-router');
 const initialDataRouter = require('./endpoints/initialData/initialData-router');
 const cookieParser = require('cookie-parser');
 const { requireAuth } = require('./endpoints/auth/jwt-auth');
+const workDescriptionsRouter = require('./endpoints/workDescriptions/workDescriptions-router');
 
 // Middleware
 app.use(cookieParser());
@@ -65,6 +66,7 @@ app.use('/recurringCustomer', requireAuth, recurringCustomerRouter);
 app.use('/retainers', requireAuth, retainerRouter);
 app.use('/writeOffs', requireAuth, writeOffsRouter);
 app.use('/initialData', requireAuth, initialDataRouter);
+app.use('/workDescriptions', requireAuth, workDescriptionsRouter);
 
 /* ///////////////////////////\\\\  ERROR HANDLER  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 

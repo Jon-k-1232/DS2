@@ -8,6 +8,8 @@ import JobTypesGrid from '../../../Pages/Jobs/JobGrids/JobTypesGrid';
 import JobSubRoutes from './JobSubRoutes';
 import JobTypeSubRoutes from './JobTypeSubRoutes';
 import JobCategorySubRoutes from './JobCategorySubRoutes';
+import WorkDescriptionsGrid from '../../../Pages/WorkDescriptions/WorkDescriptionGrids/WorkDescriptionGrids';
+import WorkDescriptionSubRoutes from './WorkDescriptionSubRoutes';
 
 export default function JobRoutes({ setPageTitle, customerData, setCustomerData }) {
   useEffect(() => {
@@ -25,6 +27,10 @@ export default function JobRoutes({ setPageTitle, customerData, setCustomerData 
             element={<JobCatagoriesGrid customerData={customerData} setCustomerData={e => setCustomerData(e)} />}
           />
           <Route path='jobTypesList' element={<JobTypesGrid customerData={customerData} setCustomerData={e => setCustomerData(e)} />} />
+          <Route
+            path='workDescriptionsList'
+            element={<WorkDescriptionsGrid customerData={customerData} setCustomerData={e => setCustomerData(e)} />}
+          />
 
           <Route
             path='/jobsList/*'
@@ -37,6 +43,10 @@ export default function JobRoutes({ setPageTitle, customerData, setCustomerData 
           <Route
             path='/jobCategoriesList/*'
             element={<JobCategorySubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
+          />
+          <Route
+            path='/workDescriptionsList/*'
+            element={<WorkDescriptionSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
           />
         </Routes>
       </Stack>

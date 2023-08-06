@@ -142,3 +142,14 @@ export const putEditUserLogin = async (data, accountID, userID, token) => {
     throw error;
   }
 };
+
+export const postEditWorkDescriptions = async (data, accountID, userID, token) => {
+  const url = `${config.API_ENDPOINT}/workDescriptions/updateWorkDescription/${accountID}/${userID}`;
+  try {
+    const response = await axios.put(url, { workDescription: data }, headers(token));
+    return response.data;
+  } catch (error) {
+    console.error('Error while posting new work description:', error);
+    throw error;
+  }
+};

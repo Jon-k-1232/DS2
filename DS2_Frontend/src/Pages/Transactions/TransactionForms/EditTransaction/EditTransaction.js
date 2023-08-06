@@ -13,6 +13,7 @@ const initialState = {
   transactionID: null,
   selectedDate: dayjs(),
   selectedCustomer: null,
+  selectedGeneralWorkDescription: null,
   selectedJob: null,
   selectedTeamMember: null,
   detailedJobDescription: '',
@@ -36,7 +37,8 @@ export default function EditTransaction({ customerData, setCustomerData, transac
   const {
     customersList: { activeCustomerData: { activeCustomers } = [] } = [],
     teamMembersList: { activeUserData: { activeUsers } = [] } = [],
-    accountJobsList: { activeJobData: { activeJobs } = [] } = []
+    accountJobsList: { activeJobData: { activeJobs } = [] } = [],
+    workDescriptionsList: { activeWorkDescriptionsData: { workDescriptions } = [] } = []
   } = { ...customerData };
 
   const {
@@ -49,7 +51,8 @@ export default function EditTransaction({ customerData, setCustomerData, transac
     logged_for_user_id,
     unit_cost,
     transaction_date,
-    transaction_type
+    transaction_type,
+    general_work_description_id
   } = transactionData || {};
 
   useEffect(() => {
@@ -65,7 +68,10 @@ export default function EditTransaction({ customerData, setCustomerData, transac
         isInAdditionToMonthlyCharge: is_excess_to_subscription,
         unitCost: unit_cost,
         selectedDate: dayjs(transaction_date),
-        transactionType: transaction_type || 'Charge'
+        transactionType: transaction_type || 'Charge',
+        selectedGeneralWorkDescription: workDescriptions.find(
+          workDescription => workDescription.general_work_description_id === general_work_description_id
+        )
       });
     }
     // eslint-disable-next-line
@@ -118,11 +124,11 @@ export default function EditTransaction({ customerData, setCustomerData, transac
         />
 
         {transactionType.toUpperCase() === 'CHARGE' && (
-          <ChargeOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
+          <ChargeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
         )}
 
         {transactionType.toUpperCase() === 'TIME' && (
-          <TimeOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
+          <TimeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
         )}
 
         <Typography style={{ marginTop: '10px', fontSize: '18px' }} variant='body1'>

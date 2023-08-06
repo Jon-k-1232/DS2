@@ -12,6 +12,7 @@ const jobCategoriesService = require('../jobCategories/jobCategories-service');
 const jobTypeService = require('../jobType/jobType-service');
 const writeOffsService = require('../writeOffs/writeOffs-service');
 const paymentsService = require('../payments/payments-service');
+const workDescriptionService = require('../workDescriptions/workDescriptions-service');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
 
 // Initial data object on app load
@@ -80,6 +81,12 @@ const initialData = async (db, res, accountID) => {
       dataName: 'activeRetainers',
       listName: 'accountRetainersList',
       itemName: 'activeRetainerData'
+    },
+    {
+      service: workDescriptionService.getActiveWorkDescriptions,
+      dataName: 'workDescriptions',
+      listName: 'workDescriptionsList',
+      itemName: 'activeWorkDescriptionsData'
     }
   ];
 

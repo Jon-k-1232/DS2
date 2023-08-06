@@ -185,3 +185,17 @@ export const fetchSingleRetainer = async (retainerID, accountID, userID, token) 
     return [];
   }
 };
+
+export const fetchSingleWorkDescription = async (workDescriptionID, accountID, userID, token) => {
+  try {
+    const response = await axios.get(
+      `${config.API_ENDPOINT}/workDescriptions/getSingleWorkDescription/${workDescriptionID}/${accountID}/${userID}`,
+      headers(token)
+    );
+    const workDescription = response.data;
+    return workDescription;
+  } catch (error) {
+    console.error('Error fetching single work description:', error);
+    return [];
+  }
+};

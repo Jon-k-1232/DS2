@@ -37,6 +37,7 @@ const formBaseObject = (selectedItems, loggedInUser, extraProperties) => {
 
 export const formObjectForTransactionPost = (selectedItems, loggedInUser) =>
   formBaseObject(selectedItems, loggedInUser, {
+    selectedGeneralWorkDescriptionID: selectedItems.selectedGeneralWorkDescription.general_work_description_id,
     customerJobID: selectedItems.selectedJob.customer_job_id,
     loggedForUserID: selectedItems.selectedTeamMember.user_id,
     transactionDate: dayjs(selectedItems.selectedDate).format(),
