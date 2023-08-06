@@ -68,30 +68,6 @@ customerRouter.route('/createCustomer/:accountID/:userID').post(jsonParser, asyn
   });
 });
 
-// Get active customers
-customerRouter.route('/activeCustomers/:accountID/:userID').get(async (req, res) => {
-  const db = req.app.get('db');
-  const { accountID } = req.params;
-
-  // Get active customers
-  const activeCustomers = await customerService.getActiveCustomers(db, accountID);
-
-  // Create Mui Grid
-  const grid = createGrid(activeCustomers);
-
-  // Return Object
-  const activeCustomerData = {
-    activeCustomers,
-    grid
-  };
-
-  res.send({
-    activeCustomerData,
-    message: 'Success',
-    status: 200
-  });
-});
-
 // Get customer by ID, and all associated data for customer profile
 customerRouter
   .route('/activeCustomers/customerByID/:accountID/:userID/:customerID')

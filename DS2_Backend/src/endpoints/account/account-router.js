@@ -32,12 +32,9 @@ accountRouter.route('/createAccount').post(jsonParser, async (req, res) => {
   // Join account and accountInfo returned values
   const returnedFields = { ...accountData, ...accountInfoData };
 
-  // Create grid for Mui Grid
-  const grid = createGrid([returnedFields]);
-
   const account = {
     returnedFields,
-    grid
+    grid: createGrid([returnedFields])
   };
 
   res.send({
@@ -63,12 +60,9 @@ accountRouter.route('/updateAccount').put(jsonParser, async (req, res) => {
   // Join account and accountInfo returned values
   const returnedFields = { ...accountData, ...accountInfoData };
 
-  // Create grid for Mui Grid
-  const grid = createGrid([returnedFields]);
-
   const account = {
     returnedFields,
-    grid
+    grid: createGrid([returnedFields])
   };
 
   res.send({
@@ -84,13 +78,10 @@ accountRouter.route('/getAccount/:accountID').get(async (req, res) => {
   const { accountID } = req.params;
   const accountData = await accountService.getAccount(db, accountID);
 
-  // Create Mui Grid
-  const grid = createGrid(accountData);
-
   // Return Object
   const account = {
     accountData,
-    grid
+    grid: createGrid(accountData)
   };
 
   res.send({
@@ -106,11 +97,9 @@ accountRouter.route('/deleteAccount/:accountID').delete(async (req, res) => {
   const { accountID } = req.params;
   const accountData = await accountService.deleteAccount(db, accountID);
 
-  const grid = createGrid([accountData]);
-
   const account = {
     accountData,
-    grid
+    grid: createGrid([accountData])
   };
 
   res.send({

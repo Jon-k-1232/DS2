@@ -16,7 +16,7 @@ userRouter.route('/createUser/:accountID/:userID').post(jsonParser, async (req, 
   const db = req.app.get('db');
   const { accountID } = req.params;
 
-  const insertNewUser = async () => {
+  try {
     const userWithAccountID = { ...req.body.user, accountID };
     const sanitizedNewUser = sanitizeFields(userWithAccountID);
 
@@ -35,11 +35,7 @@ userRouter.route('/createUser/:accountID/:userID').post(jsonParser, async (req, 
     await accountUserService.createAccountLogin(db, userLoginDataTypes);
 
     // Get all active users and send 200 status
-    await updatedTeamMembers(db, res, account_id);
-  };
-
-  try {
-    await insertNewUser();
+    await sendUpdatedTableWith200Response(db, res, account_id);
   } catch (err) {
     console.log(err);
     res.send({
@@ -54,7 +50,7 @@ userRouter.route('/updateUser/:accountID/:userID').put(jsonParser, async (req, r
   const db = req.app.get('db');
   const { accountID } = req.params;
 
-  const updateUser = async () => {
+  try {
     // Sanitize fields
     const sanitizedUpdatedUser = sanitizeFields(req.body.user);
 
@@ -65,11 +61,7 @@ userRouter.route('/updateUser/:accountID/:userID').put(jsonParser, async (req, r
     await accountUserService.updateUser(db, userDataTypes);
 
     // Get all active users and send 200 status
-    await updatedTeamMembers(db, res, accountID);
-  };
-
-  try {
-    await updateUser();
+    await sendUpdatedTableWith200Response(db, res, accountID);
   } catch (err) {
     console.log(err);
     res.send({
@@ -84,7 +76,7 @@ userRouter.route('/updateUserLogin/:accountID/:userID').put(jsonParser, async (r
   const db = req.app.get('db');
   const userLoginDetails = req.body.userLogin;
 
-  const updateUserLogin = async () => {
+  try {
     // Sanitize fields
     const sanitizedUpdatedUserLogin = sanitizeFields(userLoginDetails);
     const updatedData = await restoreDataTypesUserLoginOnUpdate(sanitizedUpdatedUserLogin);
@@ -106,11 +98,7 @@ userRouter.route('/updateUserLogin/:accountID/:userID').put(jsonParser, async (r
     await accountUserService.updateUserLogin(db, updateObject, updatedData.user_login_id);
 
     // Get all active users and send 200 status
-    await updatedTeamMembers(db, res, updatedData.account_id);
-  };
-
-  try {
-    await updateUserLogin();
+    await sendUpdatedTableWith200Response(db, res, updatedData.account_id);
   } catch (err) {
     console.log(err);
     res.send({
@@ -125,16 +113,12 @@ userRouter.route('/deleteUser/:accountID/:userID').delete(async (req, res) => {
   const db = req.app.get('db');
   const { userID, accountID } = req.params;
 
-  const deleteUser = async () => {
+  try {
     await accountUserService.deleteUserLogin(db, userID);
     await accountUserService.deleteUser(db, userID);
 
     // Get all active users and send 200 status
-    await updatedTeamMembers(db, res, accountID);
-  };
-
-  try {
-    await deleteUser();
+    await sendUpdatedTableWith200Response(db, res, accountID);
   } catch {
     res.send({
       message: 'The user cannot be deleted because data tied to this user exists.',
@@ -168,7 +152,7 @@ userRouter.route('/fetchSingleUser/:accountID/:userID').get(async (req, res) => 
 
 module.exports = userRouter;
 
-const updatedTeamMembers = async (db, res, accountID) => {
+const sendUpdatedTableWith200Response = async (db, res, accountID) => {
   // Get all active users
   const activeUsers = await accountUserService.getActiveAccountUsers(db, accountID);
 

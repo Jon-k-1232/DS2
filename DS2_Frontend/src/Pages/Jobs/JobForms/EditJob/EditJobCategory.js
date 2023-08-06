@@ -34,7 +34,7 @@ export default function EditJobCategory({ customerData, setCustomerData, jobCate
       });
     }
     // eslint-disable-next-line
-  }, []);
+  }, [jobCategoryData]);
 
   const handleSubmit = async () => {
     const postedItem = await postEditJobCategory(selectedItems, accountID, userID);

@@ -5,7 +5,7 @@ import { fetchSingleJob } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeleteJob from '../../../Pages/Jobs/JobForms/DeleteJob/DeleteJob';
 import EditJob from '../../../Pages/Jobs/JobForms/EditJob/EditJob';
-import ErrorBoundary from '../../../Pages/ErrorBoundary';
+import ErrorBoundary from '../../../Components/ErrorBoundary';
 
 export default function JobSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();

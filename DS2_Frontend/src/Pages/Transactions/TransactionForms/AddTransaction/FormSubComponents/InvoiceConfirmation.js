@@ -10,6 +10,7 @@ export default function InvoiceConfirmation({ selectedItems, setSelectedItems, c
   const invoiceNumber = selectedInvoice?.invoice_number || '';
 
   useEffect(() => {
+    if (customerInvoiceData) setInvoiceConfirmation(invoiceNumber?.toLowerCase());
     const match = invoiceNumber?.toLowerCase() === invoiceConfirmation?.toLowerCase();
     setInvoicesMatch(match);
 
@@ -27,7 +28,6 @@ export default function InvoiceConfirmation({ selectedItems, setSelectedItems, c
           <TextField
             sx={{ width: 350 }}
             variant='standard'
-            type='string'
             label='Invoice Number'
             value={invoiceNumber}
             onChange={e => setSelectedItems(otherItems => ({ ...otherItems, invoiceNumber: e.target.value }))}
@@ -39,7 +39,6 @@ export default function InvoiceConfirmation({ selectedItems, setSelectedItems, c
           <TextField
             sx={{ width: 350 }}
             variant='standard'
-            type='string'
             label='Confirm Invoice Number'
             value={invoiceConfirmationOverride ? invoiceNumber : invoiceConfirmation}
             onChange={e => setInvoiceConfirmation(e.target.value)}

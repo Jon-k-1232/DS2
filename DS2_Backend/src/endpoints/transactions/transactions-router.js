@@ -11,136 +11,102 @@ const { unableToCompleteRequest } = require('../../serverResponses/errors');
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedNewTransaction = sanitizeFields(req.body.transaction);
+  try {
+    const sanitizedNewTransaction = sanitizeFields(req.body.transaction);
 
-  // Create new object with sanitized fields
-  const transactionTableFields = restoreDataTypesTransactionsTableOnCreate(sanitizedNewTransaction);
-  const { total_transaction, customer_job_id, account_id } = transactionTableFields;
+    // Create new object with sanitized fields
+    const transactionTableFields = restoreDataTypesTransactionsTableOnCreate(sanitizedNewTransaction);
+    const { total_transaction, customer_job_id, account_id } = transactionTableFields;
 
-  // Update job total
-  await updateRecentJobTotal(db, customer_job_id, account_id, total_transaction);
+    // Update job total
+    await updateRecentJobTotal(db, customer_job_id, account_id, total_transaction);
 
-  // Post new transaction
-  await transactionsService.createTransaction(db, transactionTableFields);
-
-  // Get all transactions
-  const activeTransactions = await transactionsService.getActiveTransactions(db, account_id);
-
-  const activeTransactionsData = {
-    activeTransactions,
-    grid: createGrid(activeTransactions)
-  };
-
-  res.send({
-    transactionsList: { activeTransactionsData },
-    message: 'Successfully created new transaction.',
-    status: 200
-  });
-});
-
-// Get all active transactions
-transactionsRouter.route('/getActiveTransactions/:accountID/:userID').get(async (req, res) => {
-  const db = req.app.get('db');
-  const { accountID } = req.params;
-
-  // Per user request combine, transactions, writeOffs, and payments for grid, sorted by date oldest to newest.
-  const activeTransactions = await transactionsService.getActiveTransactions(db, accountID);
-
-  // Return Object
-  const activeTransactionsData = {
-    activeTransactions,
-    grid: createGrid(activeTransactions)
-  };
-
-  res.send({
-    activeTransactionsData,
-    message: 'Successfully retrieved all active transactions.',
-    status: 200
-  });
+    // Post new transaction
+    await transactionsService.createTransaction(db, transactionTableFields);
+    await sendUpdatedTableWith200Response(db, res, account_id);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while creating the transaction.',
+      status: 500
+    });
+  }
 });
 
 // Update a transaction
 transactionsRouter.route('/updateTransaction/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedUpdatedTransaction = sanitizeFields(req.body.transaction);
+  try {
+    const sanitizedUpdatedTransaction = sanitizeFields(req.body.transaction);
 
-  // Create new object with sanitized fields
-  const transactionTableFields = restoreDataTypesTransactionsTableOnUpdate(sanitizedUpdatedTransaction);
-  const { account_id, customer_job_id, customer_invoice_id } = transactionTableFields;
+    // Create new object with sanitized fields
+    const transactionTableFields = restoreDataTypesTransactionsTableOnUpdate(sanitizedUpdatedTransaction);
+    const { account_id, customer_job_id, customer_invoice_id } = transactionTableFields;
 
-  // If transaction is attached to an invoice, do not allow update
-  if (customer_invoice_id) {
-    const reason = 'Transaction is attached to an invoice and cannot be updated.';
-    unableToCompleteRequest(res, reason, 423);
-    return;
+    // If transaction is attached to an invoice, do not allow update
+    if (customer_invoice_id) {
+      const reason = 'Transaction is attached to an invoice and cannot be updated.';
+      unableToCompleteRequest(res, reason, 423);
+      return;
+    }
+
+    // Get original transaction and decide if a positive or negative change in order to update the job record
+    const changeJobTotal = await differenceBetweenOldAndNewTransaction(db, transactionTableFields);
+    const { areAmountsDifferent, amountToChangeJob } = changeJobTotal;
+
+    // Update job total
+    if (areAmountsDifferent) {
+      await updateRecentJobTotal(db, customer_job_id, account_id, amountToChangeJob);
+    }
+
+    // Update transaction
+    await transactionsService.updateTransaction(db, transactionTableFields);
+
+    await sendUpdatedTableWith200Response(db, res, account_id);
+  } catch (error) {
+    console.log(error);
+    res.send({
+      message: error.message || 'An error occurred while updating the transaction.',
+      status: 500
+    });
   }
-
-  // Get original transaction and decide if a positive or negative change in order to update the job record
-  const changeJobTotal = await differenceBetweenOldAndNewTransaction(db, transactionTableFields);
-  const { areAmountsDifferent, amountToChangeJob } = changeJobTotal;
-
-  // Update job total
-  if (areAmountsDifferent) {
-    await updateRecentJobTotal(db, customer_job_id, account_id, amountToChangeJob);
-  }
-
-  // Update transaction
-  await transactionsService.updateTransaction(db, transactionTableFields);
-
-  // Get all transactions
-  const activeTransactions = await transactionsService.getActiveTransactions(db, account_id);
-
-  const activeTransactionsData = {
-    activeTransactions,
-    grid: createGrid(activeTransactions)
-  };
-
-  res.send({
-    transactionsList: { activeTransactionsData },
-    message: 'Successfully updated transaction.',
-    status: 200
-  });
 });
 
 // Delete a transaction
 transactionsRouter.route('/deleteTransaction/:accountID/:userID').delete(async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedUpdatedTransaction = sanitizeFields(req.body.transaction);
 
-  // Create new object with sanitized fields
-  const transactionTableFields = restoreDataTypesTransactionsTableOnUpdate(sanitizedUpdatedTransaction);
-  const { customer_job_id, transaction_id, account_id, customer_invoice_id } = transactionTableFields;
+  try {
+    const sanitizedUpdatedTransaction = sanitizeFields(req.body.transaction);
 
-  // If transaction is attached to an invoice, do not allow delete
-  if (customer_invoice_id) {
-    const reason = 'Transaction is attached to an invoice and cannot be deleted.';
-    unableToCompleteRequest(res, reason, 423);
-    return;
+    // Create new object with sanitized fields
+    const transactionTableFields = restoreDataTypesTransactionsTableOnUpdate(sanitizedUpdatedTransaction);
+    const { customer_job_id, transaction_id, account_id, customer_invoice_id } = transactionTableFields;
+
+    // If transaction is attached to an invoice, do not allow delete
+    if (customer_invoice_id) {
+      const reason = 'Transaction is attached to an invoice and cannot be deleted.';
+      unableToCompleteRequest(res, reason, 423);
+      return;
+    }
+
+    // Get original transaction and decide if a positive or negative change in order to update the job record
+    const changeJobTotal = await differenceBetweenOldAndNewTransaction(db, transactionTableFields, 'delete');
+    const { amountToChangeJob } = changeJobTotal;
+
+    // Update job total
+    await updateRecentJobTotal(db, customer_job_id, account_id, amountToChangeJob);
+
+    // Delete transaction
+    await transactionsService.deleteTransaction(db, transaction_id);
+    await sendUpdatedTableWith200Response(db, res, account_id);
+  } catch (error) {
+    console.log(error);
+    res.send({
+      message: error.message || 'An error occurred while deleting the transaction.',
+      status: 500
+    });
   }
-
-  // Get original transaction and decide if a positive or negative change in order to update the job record
-  const changeJobTotal = await differenceBetweenOldAndNewTransaction(db, transactionTableFields, 'delete');
-  const { amountToChangeJob } = changeJobTotal;
-
-  // Update job total
-  await updateRecentJobTotal(db, customer_job_id, account_id, amountToChangeJob);
-
-  // Delete transaction
-  await transactionsService.deleteTransaction(db, transaction_id);
-
-  // Get all transactions
-  const activeTransactions = await transactionsService.getActiveTransactions(db, account_id);
-
-  const activeTransactionsData = {
-    activeTransactions,
-    grid: createGrid(activeTransactions)
-  };
-
-  res.send({
-    transactionsList: { activeTransactionsData },
-    message: 'Successfully deleted transaction.',
-    status: 200
-  });
 });
 
 // Get a specific transaction
@@ -202,4 +168,20 @@ const updateRecentJobTotal = async (db, customerJobID, accountID, amountToChange
 
   // Post new Job record
   await jobService.createJob(db, updatedJob);
+};
+
+const sendUpdatedTableWith200Response = async (db, res, accountID) => {
+  // Get all transactions
+  const activeTransactions = await transactionsService.getActiveTransactions(db, accountID);
+
+  const activeTransactionsData = {
+    activeTransactions,
+    grid: createGrid(activeTransactions)
+  };
+
+  res.send({
+    transactionsList: { activeTransactionsData },
+    message: 'Successfully deleted transaction.',
+    status: 200
+  });
 };

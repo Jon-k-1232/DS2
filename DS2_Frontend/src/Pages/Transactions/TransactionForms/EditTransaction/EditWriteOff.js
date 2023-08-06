@@ -67,7 +67,7 @@ export default function EditWriteOff({ customerData, setCustomerData, writeOffDa
       });
     }
     // eslint-disable-next-line
-  }, []);
+  }, [writeOffData]);
 
   const handleSubmit = async () => {
     const dataToPost = formObjectForWriteOffPost(selectedItems, loggedInUser);

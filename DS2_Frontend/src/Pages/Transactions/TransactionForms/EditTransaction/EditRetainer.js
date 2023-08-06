@@ -75,7 +75,7 @@ export default function EditRetainer({ customerData, setCustomerData, retainerDa
       });
     }
     // eslint-disable-next-line
-  }, []);
+  }, [retainerData]);
 
   const handleSubmit = async () => {
     const dataToPost = formObjectForRetainerPost(selectedItems, loggedInUser);

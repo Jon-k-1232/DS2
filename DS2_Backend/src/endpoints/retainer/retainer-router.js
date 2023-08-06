@@ -9,72 +9,47 @@ const { createGrid } = require('../../helperFunctions/helperFunctions');
 // Create a new retainer
 retainerRouter.route('/createRetainer/:accountID/:userID').post(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedNewRetainer = sanitizeFields(req.body.retainer);
-
-  // Create new object with sanitized fields
-  const retainerTableFields = restoreDataTypesRetainersTableOnCreate(sanitizedNewRetainer);
-
-  // Post new retainer
-  await retainerService.createRetainer(db, retainerTableFields);
-
-  // Get all retainers
-  const activeRetainers = await retainerService.getActiveRetainers(db, retainerTableFields.account_id);
-
-  const activeRetainerData = {
-    activeRetainers,
-    grid: createGrid(activeRetainers)
-  };
-
-  res.send({
-    accountRetainersList: { activeRetainerData },
-    message: 'Successfully created new retainer.',
-    status: 200
-  });
-});
-
-// Get all active retainers
-retainerRouter.route('/getActiveRetainers/:accountID/:userID').get(async (req, res) => {
-  const db = req.app.get('db');
   const { accountID } = req.params;
 
-  const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
+  try {
+    const sanitizedNewRetainer = sanitizeFields(req.body.retainer);
 
-  const activeRetainerData = {
-    activeRetainers,
-    grid: createGrid(activeRetainers)
-  };
+    // Create new object with sanitized fields
+    const retainerTableFields = restoreDataTypesRetainersTableOnCreate(sanitizedNewRetainer);
 
-  res.send({
-    accountRetainersList: { activeRetainerData },
-    message: 'Successfully retrieved all active retainers.',
-    status: 200
-  });
+    // Post new retainer
+    await retainerService.createRetainer(db, retainerTableFields);
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while creating the Retainer.',
+      status: 500
+    });
+  }
 });
 
 // Update a retainer
 retainerRouter.route('/updateRetainer/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedUpdatedRetainer = sanitizeFields(req.body.retainer);
+  const { accountID } = req.params;
 
-  // Create new object with sanitized fields
-  const retainerTableFields = restoreDataTypesRetainersTableOnUpdate(sanitizedUpdatedRetainer);
+  try {
+    const sanitizedUpdatedRetainer = sanitizeFields(req.body.retainer);
 
-  // Update retainer
-  await retainerService.updateRetainer(db, retainerTableFields);
+    // Create new object with sanitized fields
+    const retainerTableFields = restoreDataTypesRetainersTableOnUpdate(sanitizedUpdatedRetainer);
 
-  // Get all retainers
-  const activeRetainers = await retainerService.getActiveRetainers(db, retainerTableFields.account_id);
-
-  const activeRetainerData = {
-    activeRetainers,
-    grid: createGrid(activeRetainers)
-  };
-
-  res.send({
-    accountRetainersList: { activeRetainerData },
-    message: 'Successfully updated retainer.',
-    status: 200
-  });
+    // Update retainer
+    await retainerService.updateRetainer(db, retainerTableFields);
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while updating the Retainer.',
+      status: 500
+    });
+  }
 });
 
 // Delete a retainer
@@ -82,22 +57,17 @@ retainerRouter.route('/deleteRetainer/:retainerID/:accountID/:userID').delete(js
   const db = req.app.get('db');
   const { retainerID, accountID } = req.params;
 
-  // Delete retainer
-  await retainerService.deleteRetainer(db, retainerID, accountID);
-
-  // Get all retainers
-  const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
-
-  const activeRetainerData = {
-    activeRetainers,
-    grid: createGrid(activeRetainers)
-  };
-
-  res.send({
-    accountRetainersList: { activeRetainerData },
-    message: 'Successfully deleted retainer.',
-    status: 200
-  });
+  try {
+    // Delete retainer
+    await retainerService.deleteRetainer(db, retainerID, accountID);
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: err.message || 'An error occurred while deleting the Retainer.',
+      status: 500
+    });
+  }
 });
 
 // get single retainer
@@ -123,3 +93,19 @@ retainerRouter
   });
 
 module.exports = retainerRouter;
+
+const sendUpdatedTableWith200Response = async (db, res, accountID) => {
+  // Get all retainers
+  const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
+
+  const activeRetainerData = {
+    activeRetainers,
+    grid: createGrid(activeRetainers)
+  };
+
+  res.send({
+    accountRetainersList: { activeRetainerData },
+    message: 'Successfully created new retainer.',
+    status: 200
+  });
+};

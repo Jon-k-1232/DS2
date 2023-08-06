@@ -66,7 +66,7 @@ export default function EditJob({ customerData, setCustomerData, jobData }) {
       });
     }
     // eslint-disable-next-line
-  }, []);
+  }, [jobData]);
 
   const handleSubmit = async () => {
     const dataToPost = formObjectForJobPost(selectedItems, loggedInUser);

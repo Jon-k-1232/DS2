@@ -10,9 +10,9 @@ const dayjs = require('dayjs');
 // Create a new job
 jobRouter.route('/createJob/:accountID/:userID').post(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedNewJob = sanitizeFields(req.body.job);
 
   try {
+    const sanitizedNewJob = sanitizeFields(req.body.job);
     // Create new object with sanitized fields
     const jobTableFields = restoreDataTypesJobTableOnCreate(sanitizedNewJob);
     // Post new job
@@ -77,18 +77,18 @@ jobRouter
 jobRouter.route('/updateJob/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
   const { accountID } = req.params;
-  const sanitizedUpdatedJob = sanitizeFields(req.body.job);
 
   try {
+    const sanitizedUpdatedJob = sanitizeFields(req.body.job);
     // Create new object with sanitized fields
     const jobTableFields = restoreDataTypesJobTableOnUpdate(sanitizedUpdatedJob);
     // Update job
     await jobService.updateJob(db, jobTableFields);
     await sendUpdatedTableWith200Response(db, res, accountID);
   } catch (error) {
-    console.log(err);
+    console.log(error);
     res.send({
-      message: err.message || 'An error occurred while updating the Job.',
+      message: error.message || 'An error occurred while updating the Job.',
       status: 500
     });
   }
@@ -104,9 +104,9 @@ jobRouter.route('/deleteJob/:jobID/:accountID/:userID').delete(jsonParser, async
     await jobService.deleteJob(db, jobID);
     await sendUpdatedTableWith200Response(db, res, accountID);
   } catch (error) {
-    console.log(err);
+    console.log(error);
     res.send({
-      message: err.message || 'An error occurred while updating the Job.',
+      message: error.message || 'An error occurred while updating the Job.',
       status: 500
     });
   }

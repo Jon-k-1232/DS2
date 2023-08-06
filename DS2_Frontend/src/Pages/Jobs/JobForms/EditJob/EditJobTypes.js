@@ -52,7 +52,7 @@ export default function EditJobTypes({ customerData, setCustomerData, jobTypeDat
       });
     }
     // eslint-disable-next-line
-  }, []);
+  }, [jobTypeData]);
 
   const handleSubmit = async () => {
     const dataToPost = formObjectForJobTypePost(selectedItems, loggedInUser);

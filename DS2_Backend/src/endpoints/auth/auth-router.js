@@ -61,6 +61,7 @@ authentication.post('/login', jsonParser, async (req, res, next) => {
       status: 200
     });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 });
@@ -86,6 +87,7 @@ authentication.post('/renew', async (req, res, next) => {
       status: 200
     });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 });

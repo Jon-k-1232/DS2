@@ -9,27 +9,24 @@ const { createGrid } = require('../../helperFunctions/helperFunctions');
 // Create a new jobType
 jobTypeRouter.route('/createJobType/:accountID/:userID').post(jsonParser, async (req, res) => {
   const db = req.app.get('db');
-  const sanitizedNewJobType = sanitizeFields(req.body.jobType);
+  const { accountID } = req.params;
 
-  // Create new object with sanitized fields
-  const jobTypeTableFields = restoreDataTypesJobTypeTableOnCreate(sanitizedNewJobType);
+  try {
+    const sanitizedNewJobType = sanitizeFields(req.body.jobType);
 
-  // Post new jobType
-  await jobTypeService.createJobType(db, jobTypeTableFields);
+    // Create new object with sanitized fields
+    const jobTypeTableFields = restoreDataTypesJobTypeTableOnCreate(sanitizedNewJobType);
 
-  // Get all jobTypes
-  const jobTypesData = await jobTypeService.getActiveJobTypes(db, jobTypeTableFields.account_id);
-
-  const activeJobTypesData = {
-    jobTypesData,
-    grid: createGrid(jobTypesData)
-  };
-
-  res.send({
-    jobTypesList: { activeJobTypesData },
-    message: 'Successfully created new jobType.',
-    status: 200
-  });
+    // Post new jobType
+    await jobTypeService.createJobType(db, jobTypeTableFields);
+    await sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (error) {
+    console.error(error.message);
+    res.send({
+      message: error.message || 'Error creating jobType.',
+      status: 500
+    });
+  }
 });
 
 // Get single jobType
@@ -54,51 +51,26 @@ jobTypeRouter
     });
   });
 
-// Get all active jobTypes
-jobTypeRouter.route('/getActiveJobTypes/:accountID/:userID').get(async (req, res) => {
-  const db = req.app.get('db');
-  const { accountID } = req.params;
-
-  const jobTypesData = await jobTypeService.getActiveJobTypes(db, accountID);
-
-  // Return Object
-  const activeJobTypesData = {
-    jobTypesData,
-    grid: createGrid(jobTypesData)
-  };
-
-  res.send({
-    activeJobTypesData,
-    message: 'Successfully retrieved all active jobTypes.',
-    status: 200
-  });
-});
-
 // Update a jobType
 jobTypeRouter.route('/updateJobType/:accountID/:userID').put(jsonParser, async (req, res) => {
   const db = req.app.get('db');
   const { accountID } = req.params;
-  const sanitizedUpdatedJobType = sanitizeFields(req.body.jobType);
 
-  // Create new object with sanitized fields
-  const jobTypeTableFields = restoreDataTypesJobTypeTableOnUpdate(sanitizedUpdatedJobType);
+  try {
+    const sanitizedUpdatedJobType = sanitizeFields(req.body.jobType);
+    // Create new object with sanitized fields
+    const jobTypeTableFields = restoreDataTypesJobTypeTableOnUpdate(sanitizedUpdatedJobType);
 
-  // Update jobType
-  await jobTypeService.updateJobType(db, jobTypeTableFields);
-
-  // Get all jobTypes
-  const jobTypesData = await jobTypeService.getActiveJobTypes(db, accountID);
-
-  const activeJobTypesData = {
-    jobTypesData,
-    grid: createGrid(jobTypesData)
-  };
-
-  res.send({
-    jobTypesList: { activeJobTypesData },
-    message: 'Successfully updated jobType.',
-    status: 200
-  });
+    // Update jobType
+    await jobTypeService.updateJobType(db, jobTypeTableFields);
+    sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (error) {
+    console.error(error.message);
+    res.send({
+      message: error.message || 'Error updating jobType.',
+      status: 500
+    });
+  }
 });
 
 // Delete a jobType
@@ -106,9 +78,22 @@ jobTypeRouter.route('/deleteJobType/:jobTypeID/:accountID/:userID').delete(async
   const db = req.app.get('db');
   const { jobTypeID, accountID } = req.params;
 
-  // Delete jobType
-  await jobTypeService.deleteJobType(db, jobTypeID);
+  try {
+    // Delete jobType
+    await jobTypeService.deleteJobType(db, jobTypeID);
+    sendUpdatedTableWith200Response(db, res, accountID);
+  } catch (error) {
+    console.error(error.message);
+    res.send({
+      message: error.message || 'Error deleting jobType.',
+      status: 500
+    });
+  }
+});
 
+module.exports = jobTypeRouter;
+
+const sendUpdatedTableWith200Response = async (db, res, accountID) => {
   // Get all jobTypes
   const jobTypesData = await jobTypeService.getActiveJobTypes(db, accountID);
 
@@ -122,6 +107,4 @@ jobTypeRouter.route('/deleteJobType/:jobTypeID/:accountID/:userID').delete(async
     message: 'Successfully deleted jobType.',
     status: 200
   });
-});
-
-module.exports = jobTypeRouter;
+};

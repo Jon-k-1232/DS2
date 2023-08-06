@@ -5,7 +5,7 @@ import Customers from '../../../Pages/Customer/CustomerGrids/CustomerGrid';
 import CustomerProfileSubRoutes from './CustomerProfileSubRoutes';
 import Page from '../../../Components/Page';
 import { Stack } from '@mui/material';
-import ErrorBoundary from '../../../Pages/ErrorBoundary';
+import ErrorBoundary from '../../../Components/ErrorBoundary';
 
 export default function CustomerRoutes({ setPageTitle, customerData, setCustomerData }) {
   useEffect(() => {

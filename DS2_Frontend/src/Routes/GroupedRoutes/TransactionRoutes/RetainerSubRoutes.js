@@ -5,7 +5,7 @@ import { fetchSingleRetainer } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
 import DeleteRetainer from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeleteRetainer';
 import EditRetainer from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditRetainer';
-import ErrorBoundary from '../../../Pages/ErrorBoundary';
+import ErrorBoundary from '../../../Components/ErrorBoundary';
 
 export default function RetainerSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();

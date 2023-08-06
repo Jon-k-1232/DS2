@@ -11,7 +11,7 @@ jobCategoriesRouter.route('/createJobCategory/:accountID/:userID').post(jsonPars
   const db = req.app.get('db');
   const { accountID } = req.params;
 
-  const createNewJobCategory = async () => {
+  try {
     const sanitizedNewJobCategory = sanitizeFields(req.body.jobCategory);
 
     // Create new object with sanitized fields
@@ -19,10 +19,6 @@ jobCategoriesRouter.route('/createJobCategory/:accountID/:userID').post(jsonPars
 
     // Post new job category
     await jobCategoriesService.createJobCategory(db, jobCategoriesTableFields);
-  };
-
-  try {
-    await createNewJobCategory();
     await sendUpdatedTableWith200Response(db, res, accountID);
   } catch (err) {
     console.log(err);
@@ -38,7 +34,7 @@ jobCategoriesRouter.route('/updateJobCategory/:accountID/:userID').put(jsonParse
   const db = req.app.get('db');
   const { accountID } = req.params;
 
-  const updateJobCategory = async () => {
+  try {
     const sanitizedUpdatedJobCategory = sanitizeFields(req.body.jobCategory);
 
     // Create new object with sanitized fields
@@ -46,10 +42,6 @@ jobCategoriesRouter.route('/updateJobCategory/:accountID/:userID').put(jsonParse
 
     // Update the Job category
     await jobCategoriesService.updateJobCategory(db, jobCategoriesTableFields);
-  };
-
-  try {
-    await updateJobCategory();
     await sendUpdatedTableWith200Response(db, res, accountID);
   } catch (err) {
     console.log(err);
@@ -65,13 +57,9 @@ jobCategoriesRouter.route('/deleteJobCategory/:jobCategoryID/:accountID/:userID'
   const db = req.app.get('db');
   const { jobCategoryID, accountID } = req.params;
 
-  const deleteJobCategory = async () => {
+  try {
     // Delete the Job category
     await jobCategoriesService.deleteJobCategory(db, jobCategoryID);
-  };
-
-  try {
-    await deleteJobCategory();
     await sendUpdatedTableWith200Response(db, res, accountID);
   } catch (err) {
     console.log(err);

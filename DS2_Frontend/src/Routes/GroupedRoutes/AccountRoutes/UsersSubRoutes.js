@@ -6,7 +6,7 @@ import { context } from '../../../App';
 import DeleteUser from '../../../Pages/Account/AccountForms/DeleteUser/DeleteUser';
 import EditUser from '../../../Pages/Account/AccountForms/EditAccount/EditUser';
 import EditUserCredentials from '../../../Pages/Account/AccountForms/EditAccount/EditUserCredentials';
-import ErrorBoundary from '../../../Pages/ErrorBoundary';
+import ErrorBoundary from '../../../Components/ErrorBoundary';
 
 export default function UsersSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();

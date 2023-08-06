@@ -5,7 +5,7 @@ import { fetchSinglePayment, fetchCustomerProfileInformation } from '../../../Se
 import { context } from '../../../App';
 import DeletePayment from '../../../Pages/Transactions/TransactionForms/DeleteTransaction/DeletePayment';
 import EditPayment from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditPayment';
-import ErrorBoundary from '../../../Pages/ErrorBoundary';
+import ErrorBoundary from '../../../Components/ErrorBoundary';
 
 export default function PaymentSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();

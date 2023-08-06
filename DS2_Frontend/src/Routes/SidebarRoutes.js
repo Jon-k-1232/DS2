@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import pieChart2Fill from '@iconify/icons-eva/pie-chart-2-fill';
+// import pieChart2Fill from '@iconify/icons-eva/pie-chart-2-fill';
 import peopleFill from '@iconify/icons-eva/people-fill';
 import fileTextFill from '@iconify/icons-eva/file-text-fill';
 import clockFill from '@iconify/icons-eva/clock-fill';
@@ -9,12 +9,12 @@ import baselineWork from '@iconify/icons-ic/baseline-work';
 const getIcon = name => <Icon icon={name} width={22} height={22} />;
 
 export const sidebarRoutes = [
-  {
-    title: 'Dashboard',
-    path: '/dashboard',
-    icon: getIcon(pieChart2Fill),
-    children: []
-  },
+  // {
+  //   title: 'Dashboard',
+  //   path: '/dashboard',
+  //   icon: getIcon(pieChart2Fill),
+  //   children: []
+  // },
   {
     title: 'Customers',
     path: '/customers',

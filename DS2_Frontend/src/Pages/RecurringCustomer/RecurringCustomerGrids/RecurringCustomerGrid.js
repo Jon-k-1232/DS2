@@ -1,6 +1,6 @@
 import { Stack } from '@mui/material';
 import DataGridTable from '../../../Components/DataGrids/DataGrid';
-import AddRecurringCustomer from '../RecurringCustomerGridsForms/AddCustomer/AddRecurringCustomer';
+import AddRecurringCustomer from '../RecurringCustomerForms/AddCustomer/AddRecurringCustomer';
 import AddIcon from '@mui/icons-material/Add';
 import palette from '../../../Theme/palette';
 

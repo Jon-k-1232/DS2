@@ -5,7 +5,7 @@ import DeleteTimeOrCharge from '../../../Pages/Transactions/TransactionForms/Del
 import EditTransaction from '../../../Pages/Transactions/TransactionForms/EditTransaction/EditTransaction';
 import { fetchSingleTransaction } from '../../../Services/ApiCalls/FetchCalls';
 import { context } from '../../../App';
-import ErrorBoundary from '../../../Pages/ErrorBoundary';
+import ErrorBoundary from '../../../Components/ErrorBoundary';
 
 export default function TransactionSubRoutes({ customerData, setCustomerData }) {
   const navigate = useNavigate();
