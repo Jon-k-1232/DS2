@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Stack, TextField, Checkbox, FormControlLabel, FormControl, Typography, RadioGroup, Radio, Autocomplete } from '@mui/material';
 
 export default function ChargeOptions({ customerData, selectedItems, setSelectedItems }) {
@@ -12,6 +13,16 @@ export default function ChargeOptions({ customerData, selectedItems, setSelected
     selectedCustomer,
     selectedGeneralWorkDescription
   } = selectedItems;
+
+  useEffect(() => {
+    if (selectedCustomer?.is_recurring && !isInAdditionToMonthlyCharge && isTransactionBillable) {
+      updateSelectedItems('isTransactionBillable', false);
+    }
+    if (selectedCustomer?.is_recurring && isInAdditionToMonthlyCharge && !isTransactionBillable) {
+      updateSelectedItems('isTransactionBillable', true);
+    }
+    // eslint-disable-next-line
+  }, [isInAdditionToMonthlyCharge]);
 
   const updateSelectedItems = (key, value) => {
     setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));

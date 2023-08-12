@@ -1,8 +1,8 @@
 import React from 'react';
 import { Stack } from '@mui/material';
-import DataGridTable from '../../../Components/DataGrids/DataGrid';
+import CreateInvoiceGridTable from '../../../Components/DataGrids/CreateInvoiceGrid';
 
-export default function CreateInvoiceGrid({ outstandingBalanceData, setSelectedRows }) {
+export default function CreateInvoiceGrid({ outstandingBalanceData, setSelectedRowsToInvoice }) {
   if (
     !outstandingBalanceData ||
     !outstandingBalanceData.outstandingBalanceList ||
@@ -16,12 +16,9 @@ export default function CreateInvoiceGrid({ outstandingBalanceData, setSelectedR
   return (
     <>
       <Stack spacing={3}>
-        <DataGridTable
-          title='Customers With Balances'
-          tableData={activeOutstandingBalancesData.grid}
-          checkboxSelection={true}
-          setSingleSelectedRow={true}
-          setArrayOfSelectedRows={e => setSelectedRows(e)}
+        <CreateInvoiceGridTable
+          gridData={activeOutstandingBalancesData.grid}
+          setSelectedRowsToInvoice={data => setSelectedRowsToInvoice(data)}
         />
       </Stack>
     </>

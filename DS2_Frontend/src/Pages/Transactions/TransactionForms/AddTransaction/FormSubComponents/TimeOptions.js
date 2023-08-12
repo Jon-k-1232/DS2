@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, TextField, Checkbox, FormControlLabel, Radio, RadioGroup, FormControl, Typography, Autocomplete } from '@mui/material';
 import { sixMinuteIncrementTimeCalculation } from './TimeTrackingIncrements';
 import dayjs from 'dayjs';
@@ -21,6 +21,16 @@ export default function TimeOptions({ customerData, selectedItems, setSelectedIt
   const updateSelectedItems = (key, value) => {
     setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));
   };
+
+  useEffect(() => {
+    if (selectedCustomer?.is_recurring && !isInAdditionToMonthlyCharge && isTransactionBillable) {
+      updateSelectedItems('isTransactionBillable', false);
+    }
+    if (selectedCustomer?.is_recurring && isInAdditionToMonthlyCharge && !isTransactionBillable) {
+      updateSelectedItems('isTransactionBillable', true);
+    }
+    // eslint-disable-next-line
+  }, [isInAdditionToMonthlyCharge]);
 
   const handleTimeCalculation = minuteDuration => {
     if (Object.keys(selectedTeamMember).length && minuteDuration && !isNaN(minuteDuration)) {

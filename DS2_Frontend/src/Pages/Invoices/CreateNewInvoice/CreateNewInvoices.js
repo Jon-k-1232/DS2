@@ -15,37 +15,33 @@ import {
   DialogContentText,
   DialogTitle
 } from '@mui/material';
+import LinearProgress from '@mui/material/LinearProgress';
 import CreateInvoiceGrid from '../InvoiceGrids/CreateInvoiceGrid';
-import { getOutstandingBalanceList, getZippedInvoices } from '../../../Services/ApiCalls/FetchCalls';
+import { getOutstandingBalanceList } from '../../../Services/ApiCalls/FetchCalls';
 import CreateInvoiceCheckBoxes from './SubComponents/CreateInvoiceCheckBoxes';
 import { postInvoiceCreation } from '../../../Services/ApiCalls/PostCalls';
-import { formObjectForInvoiceCreation } from '../../../Services/SharedPostObjects/SharedPostObjects';
 import { useContext } from 'react';
 import { context } from '../../../App';
 
 const initialState = {
-  selectedCustomers: [],
-  showWriteOffs: false,
-  isRoughDraft: true,
-  isFinalized: false,
-  isCsvOnly: false,
-  manualInvoiceNote: ''
+  invoicesToCreate: [],
+  invoiceCreationSettings: { isFinalized: false, isRoughDraft: false, isCsvOnly: true, globalInvoiceNote: '' }
 };
 
 export default function CreateNewInvoices({ customerData, setCustomerData }) {
+  const [postStatus, setPostStatus] = useState(null);
+  const [selectedRowsToInvoice, setSelectedRowsToInvoice] = useState(initialState);
+  const [outstandingBalanceData, setOutstandingBalanceData] = useState([]);
+  const [submitError, setSubmitError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+
   const {
-    loggedInUser,
     loggedInUser: { accountID, userID, token }
   } = useContext(context);
 
-  const [postStatus, setPostStatus] = useState(null);
-  const [selectedItems, setSelectedItems] = useState(initialState);
-  const [outstandingBalanceData, setOutstandingBalanceData] = useState([]);
-  const [submitError, setSubmitError] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [gridKey, setGridKey] = useState(0);
-
-  const { manualInvoiceNote, isRoughDraft, isFinalized } = selectedItems;
+  const { invoicesToCreate, invoiceCreationSettings } = selectedRowsToInvoice;
+  const { isFinalized, isRoughDraft, isCsvOnly, globalInvoiceNote } = invoiceCreationSettings;
 
   useEffect(() => {
     const getOutstandingInvoices = async () => {
@@ -57,50 +53,53 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
   }, []);
 
   const handleSubmit = () => {
-    if (selectedItems.selectedCustomers.length === 0) {
-      setSubmitError('You need to select customers to create invoices for.');
+    if (invoicesToCreate.length === 0) {
+      setSubmitError('Selection Error: Select Invoices');
       return;
     }
-    if (!(selectedItems.showWriteOffs || selectedItems.isRoughDraft || selectedItems.isFinalized || selectedItems.isCsvOnly)) {
-      setSubmitError('You need to select at least one checkbox.');
+
+    if (!isFinalized && !isRoughDraft && !isCsvOnly) {
+      setSubmitError('Selection Error: Select checkbox to create Invoices, Rough Draft, or CSV');
       return;
     }
-    if (selectedItems.isFinalized) {
+
+    if (isFinalized) {
       setOpenDialog(true);
       return;
     }
+
     submitInvoice();
   };
 
   const submitInvoice = async () => {
+    setIsLoading(true);
     setSubmitError(null);
     setOpenDialog(false);
 
-    const dataToPost = formObjectForInvoiceCreation(selectedItems, loggedInUser);
-    const postedItem = await postInvoiceCreation(dataToPost, accountID, userID);
-    setPostStatus(postedItem);
-    setTimeout(() => setPostStatus(null), 4000);
+    const postedItem = await postInvoiceCreation(selectedRowsToInvoice, accountID, userID);
 
     if (postedItem.status === 200) {
-      resetState();
+      setIsLoading(false);
+      setTimeout(() => setPostStatus(null), 2000);
+      setSelectedRowsToInvoice(initialState);
       setCustomerData({ ...customerData, invoicesList: postedItem.invoicesList });
-
-      // fetch the zip file
-      if (isRoughDraft || isFinalized) {
-        const zippedFilePath = postedItem.zipPath;
-        getZippedInvoices(zippedFilePath, accountID, userID);
-      }
+    } else {
+      setIsLoading(false);
+      setPostStatus(postedItem);
     }
   };
 
-  // Reset the state and grid
-  const resetState = () => {
-    setSelectedItems(initialState);
-    setGridKey(prevKey => prevKey + 1);
+  const handleSelectedRowsChange = selectedRows => {
+    setSelectedRowsToInvoice({ ...selectedRowsToInvoice, invoicesToCreate: selectedRows });
+    if (submitError === 'Selection Error: Select Invoices') setSubmitError(null);
   };
 
-  const handleSelectedRowsChange = selectedRows => {
-    setSelectedItems({ ...selectedItems, selectedCustomers: selectedRows });
+  const handleCreationSettings = (propertyName, propertyValue) => {
+    if (submitError === 'Selection Error: Select checkbox to create Invoices, Rough Draft, or CSV') setSubmitError(null);
+    setSelectedRowsToInvoice({
+      ...selectedRowsToInvoice,
+      invoiceCreationSettings: { ...invoiceCreationSettings, [propertyName]: propertyValue }
+    });
   };
 
   const handleCloseDialog = () => setOpenDialog(false);
@@ -111,44 +110,54 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
         <Typography variant='h6'>Create New Invoices</Typography>
 
         <Divider />
-
-        <Box display='flex' alignItems='end' gap={4}>
-          <TextField
-            size='small'
-            variant='standard'
-            sx={{ width: 350 }}
-            label='Add Note To Appear On Selected Invoices'
-            value={manualInvoiceNote}
-            onChange={e => setSelectedItems({ ...selectedItems, manualInvoiceNote: e.target.value })}
-          />
-
-          <CreateInvoiceCheckBoxes selectedItems={selectedItems} setSelectedItems={setSelectedItems} />
-        </Box>
-
-        <Box>
-          <Box display='flex' alignItems='center' gap={4}>
-            <Button onClick={handleSubmit}>Submit</Button>
-            <FormControl error={submitError !== null}>
-              {submitError && <FormHelperText style={{ color: 'red' }}>{submitError}</FormHelperText>}
-            </FormControl>
+        <Box style={{ maxWidth: '820px', display: 'flex', flexDirection: 'column', alignSelf: 'center' }}>
+          <Box display='flex' alignItems='end' gap={4}>
+            <CreateInvoiceCheckBoxes
+              invoiceCreationSettings={invoiceCreationSettings}
+              setInvoiceCreationSettings={handleCreationSettings}
+            />
           </Box>
-          {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
+
+          <Box>
+            <TextField
+              size='small'
+              variant='standard'
+              sx={{ width: 715 }}
+              label='(Optional) Add Note To Appear On All Invoices'
+              value={globalInvoiceNote}
+              onChange={e => handleCreationSettings('globalInvoiceNote', e.target.value)}
+            />
+          </Box>
+
+          <Box display='flex' justifyContent='flex-end'>
+            <Button onClick={handleSubmit}>Submit</Button>
+          </Box>
+          <Box display='flex' justifyContent='flex-end'>
+            {submitError && (
+              <FormControl error={submitError !== null}>
+                {submitError && <FormHelperText style={{ color: 'red' }}>{submitError}</FormHelperText>}
+              </FormControl>
+            )}
+
+            {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
+          </Box>
+          {isLoading && <LinearProgress />}
         </Box>
 
         <Divider />
 
-        <CreateInvoiceGrid outstandingBalanceData={outstandingBalanceData} setSelectedRows={handleSelectedRowsChange} key={gridKey} />
+        <CreateInvoiceGrid outstandingBalanceData={outstandingBalanceData} setSelectedRowsToInvoice={handleSelectedRowsChange} />
       </Stack>
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Confirm Finalization</DialogTitle>
         <DialogContent>
           <DialogContentText>You are finalizing these invoices, please confirm.</DialogContentText>
-          {selectedItems.selectedCustomers.map((customer, index) => (
+          {/* {selectedRowsToInvoice.invoicesToCreate.map((customer, index) => (
             <Typography variant='subtitle1' key={index} sx={{ paddingTop: '5px' }}>
               {customer.display_name}
             </Typography>
-          ))}
+          ))} */}
         </DialogContent>
         <DialogActions>
           <Button onClick={submitInvoice}>Confirm</Button>
