@@ -102,7 +102,7 @@ export const postNewTeamMember = async (data, accountID, userID, token) => {
 export const postInvoiceCreation = async (data, accountID, userID, token) => {
   const url = `${config.API_ENDPOINT}/invoices/createInvoice/${accountID}/${userID}`;
   try {
-    const response = await axios.post(url, { invoice: data }, headers(token));
+    const response = await axios.post(url, { invoiceConfiguration: data }, headers(token));
     return response.data;
   } catch (error) {
     console.error('Error while posting new invoice:', error);

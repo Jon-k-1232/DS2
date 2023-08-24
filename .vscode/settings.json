@@ -1,4 +1,12 @@
 {
-  "html.format.wrapLineLength": 200,
-  "json.format.enable": true
+     "html.format.wrapLineLength": 200,
+     "json.format.enable": true,
+     "prettier.withNodeModules": true,
+     "prettier.trailingComma": "none",
+     "prettier.tabWidth": 3,
+     "prettier.singleQuote": true,
+     "prettier.printWidth": 200,
+     "prettier.jsxSingleQuote": true,
+     "prettier.arrowParens": "avoid",
+     "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

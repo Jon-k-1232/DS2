@@ -96,17 +96,17 @@ INSERT INTO customer_general_work_descriptions(account_id, general_work_descript
 (5, 'admin', 60, TRUE, 4, '2023-08-10 17:00:00');
 
 -- Sample data for customer_transactions table
-INSERT INTO customer_transactions(account_id, customer_id, customer_job_id, customer_invoice_id, logged_for_user_id, general_work_description_id, detailed_work_description, transaction_date, transaction_type, quantity, unit_cost, total_transaction, is_transaction_billable, is_excess_to_subscription, created_by_user_id)
-     VALUES (2, 1, 1, 1, 1, 1, 'Fixed a leak in the roof', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1),
-(2, 1, 1, 1, 1, 2, 'Fixed a leak in the roof', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1),
-(2, 1, 2, 1, 2, 3, 'Invoice processing fee', '2023-01-10', 'Time', 1, 75.00, 75.00, TRUE, FALSE, 1),
-(2, 1, 2, 1, 2, 4, 'Invoice processing fee', '2023-01-10', 'Time', 1, 100.00, 100.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 1, 5, 'Replaced a light fixture', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 1, 6, 'Replaced a light fixture', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1),
-(2, 3, 6, NULL, 1, 7, 'Cleaned gutters', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1),
-(2, 3, 5, NULL, 1, 8, 'Cleaned gutters other job', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 2, 9, 'test', '2023-01-10', 'Charge', 1, 100.00, 100.00, TRUE, FALSE, 1),
-(2, 2, 3, NULL, 2, 10, 'test', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1);
+INSERT INTO customer_transactions(account_id, customer_id, customer_job_id, retainer_id, customer_invoice_id, logged_for_user_id, general_work_description_id, detailed_work_description, transaction_date, transaction_type, quantity, unit_cost, total_transaction, is_transaction_billable, is_excess_to_subscription, created_by_user_id, note)
+     VALUES (2, 1, 1, NULL, 1, 1, 1, 'Fixed a leak in the roof', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1, 'no note'),
+(2, 1, 1, NULL, 1, 1, 2, 'Fixed a leak in the roof', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1, 'no note'),
+(2, 1, 2, NULL, 1, 2, 3, 'Invoice processing fee', '2023-01-10', 'Time', 1, 75.00, 75.00, TRUE, FALSE, 1, 'no note'),
+(2, 1, 2, NULL, 1, 2, 4, 'Invoice processing fee', '2023-01-10', 'Time', 1, 100.00, 100.00, TRUE, FALSE, 1, 'no note'),
+(2, 2, 3, NULL, NULL, 1, 5, 'Replaced a light fixture', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1, 'no note'),
+(2, 2, 3, NULL, NULL, 1, 6, 'Replaced a light fixture', '2023-01-10', 'Time', 1, 150.00, 150.00, TRUE, FALSE, 1, 'no note'),
+(2, 3, 6, NULL, NULL, 1, 7, 'Cleaned gutters', '2023-01-10', 'Charge', 1, 5.00, 5.00, TRUE, FALSE, 1, 'no note'),
+(2, 3, 5, NULL, NULL, 1, 8, 'Cleaned gutters other job', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1, 'no note'),
+(2, 2, 3, NULL, NULL, 2, 9, 'test', '2023-01-10', 'Charge', 1, 100.00, 100.00, TRUE, FALSE, 1, 'no note'),
+(2, 2, 3, NULL, NULL, 2, 10, 'test', '2023-01-10', 'Charge', 1, 75.00, 75.00, TRUE, FALSE, 1, 'no note');
 
 -- Sample data for customer_payments table
 INSERT INTO customer_payments(customer_id, account_id, customer_job_id, retainer_id, customer_invoice_id, payment_date, payment_amount, form_of_payment, payment_reference_number, is_transaction_billable, created_by_user_id, note)
@@ -124,17 +124,17 @@ INSERT INTO customer_writeOffs(customer_id, account_id, customer_invoice_id, cus
 (1, 2, NULL, NULL, '2023-04-03', -25.00, 'Write Off', 'Non-Payment', 2, 'Note 3');
 
 -- Sample data for customer_retainers_and_prepayments table
-INSERT INTO customer_retainers_and_prepayments(parent_retainer_id, customer_id, account_id, type_of_hold, starting_amount, current_amount, form_of_payment, payment_reference_number, is_retainer_active, created_at, created_by_user_id, note)
-     VALUES (NULL, 1, 2, 'Retainer', -1000.00, -750.00, 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for legal services'),
-(NULL, 1, 2, 'Prepayment', -500.00, -0.00, 'Card', 'xd1234', FALSE, '2023-04-03', 2, 'Prepayment for future legal services'),
-(NULL, 2, 2, 'Retainer', -2000.00, -2000.00, 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for accounting services'),
-(NULL, 3, 2, 'Prepayment', -1000.00, -500.00, 'Card', 'xd1234', TRUE, '2023-04-03', 3, 'Prepayment for marketing services'),
-(NULL, 4, 2, 'Retainer', -1500.00, -500.00, 'Card', 'xd1234', TRUE, '2023-04-03', 2, 'Retainer for consulting services'),
-(NULL, 1, 2, 'Retainer', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for legal services'),
-(NULL, 1, 2, 'Prepayment', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 2, 'Prepayment for future legal services'),
-(NULL, 2, 2, 'Retainer', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for accounting services'),
-(NULL, 3, 2, 'Prepayment', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 3, 'Prepayment for marketing services'),
-(NULL, 4, 2, 'Retainer', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 2, 'Retainer for consulting services');
+INSERT INTO customer_retainers_and_prepayments(parent_retainer_id, customer_id, account_id, display_name, type_of_hold, starting_amount, current_amount, form_of_payment, payment_reference_number, is_retainer_active, created_at, created_by_user_id, note)
+     VALUES (NULL, 1, 2, 'Retainer', -1000.00, -750.00, 'test name 1', 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for legal services'),
+(NULL, 1, 2, 'test name 2', 'Prepayment', -500.00, -0.00, 'Card', 'xd1234', FALSE, '2023-04-03', 2, 'Prepayment for future legal services'),
+(NULL, 2, 2, 'test name 3', 'Retainer', -2000.00, -2000.00, 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for accounting services'),
+(NULL, 3, 2, 'test name 4', 'Prepayment', -1000.00, -500.00, 'Card', 'xd1234', TRUE, '2023-04-03', 3, 'Prepayment for marketing services'),
+(NULL, 4, 2, 'test name 5', 'Retainer', -1500.00, -500.00, 'Card', 'xd1234', TRUE, '2023-04-03', 2, 'Retainer for consulting services'),
+(NULL, 1, 2, 'test name 6', 'Retainer', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for legal services'),
+(NULL, 1, 2, 'test name 7', 'Prepayment', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 2, 'Prepayment for future legal services'),
+(NULL, 2, 2, 'test name 8', 'Retainer', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 1, 'Retainer for accounting services'),
+(NULL, 3, 2, 'test name 9', 'Prepayment', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 3, 'Prepayment for marketing services'),
+(NULL, 4, 2, 'test name 10', 'Retainer', -100.00, -100.00, 'Card', 'xd1234', TRUE, '2023-04-03', 2, 'Retainer for consulting services');
 
 -- Sample data for customer_notes table
 INSERT INTO customer_notes(customer_id, account_id, is_note_active, created_by_user_id, clearance_level, note_title, note)

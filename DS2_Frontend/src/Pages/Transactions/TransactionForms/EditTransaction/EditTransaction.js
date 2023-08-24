@@ -3,6 +3,7 @@ import { TextField, Typography, Autocomplete, Box, Alert, Button } from '@mui/ma
 import InitialSelectionOptions from '../AddTransaction/FormSubComponents/InitialSelectionOptions';
 import ChargeOptions from '../AddTransaction/FormSubComponents/ChargeOptions';
 import TimeOptions from '../AddTransaction/FormSubComponents/TimeOptions';
+import RetainerSelection from '../AddTransaction/FormSubComponents/RetainerSelection';
 import { putEditTransaction } from '../../../../Services/ApiCalls/PutCalls';
 import { formObjectForTransactionPost } from '../../../../Services/SharedPostObjects/SharedPostObjects';
 import { context } from '../../../../App';
@@ -10,136 +11,132 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 
 const initialState = {
-  transactionID: null,
-  selectedDate: dayjs(),
-  selectedCustomer: null,
-  selectedGeneralWorkDescription: null,
-  selectedJob: null,
-  selectedTeamMember: null,
-  detailedJobDescription: '',
-  isTransactionBillable: null,
-  isInAdditionToMonthlyCharge: null,
-  unitCost: '',
-  quantity: 1,
-  transactionType: 'Charge'
+   transactionID: null,
+   selectedDate: dayjs(),
+   selectedCustomer: null,
+   selectedGeneralWorkDescription: null,
+   selectedJob: null,
+   selectedTeamMember: null,
+   detailedJobDescription: '',
+   isTransactionBillable: null,
+   isInAdditionToMonthlyCharge: null,
+   unitCost: '',
+   quantity: 1,
+   transactionType: 'Charge',
+   selectedRetainerPayment: null
 };
 
 export default function EditTransaction({ customerData, setCustomerData, transactionData }) {
-  const navigate = useNavigate();
-  const { loggedInUser } = useContext(context);
-  const { accountID, userID } = loggedInUser;
+   const navigate = useNavigate();
+   const { loggedInUser } = useContext(context);
+   const { accountID, userID } = loggedInUser;
 
-  const [selectedItems, setSelectedItems] = useState(initialState);
-  const [postStatus, setPostStatus] = useState(null);
+   const [selectedItems, setSelectedItems] = useState(initialState);
+   const [postStatus, setPostStatus] = useState(null);
 
-  const { quantity, unitCost, transactionType } = selectedItems;
+   const { quantity, unitCost, transactionType } = selectedItems;
 
-  const {
-    customersList: { activeCustomerData: { activeCustomers } = [] } = [],
-    teamMembersList: { activeUserData: { activeUsers } = [] } = [],
-    accountJobsList: { activeJobData: { activeJobs } = [] } = [],
-    workDescriptionsList: { activeWorkDescriptionsData: { workDescriptions } = [] } = []
-  } = { ...customerData };
+   const {
+      customersList: { activeCustomerData: { activeCustomers } = [] } = [],
+      teamMembersList: { activeUserData: { activeUsers } = [] } = [],
+      accountJobsList: { activeJobData: { activeJobs } = [] } = [],
+      workDescriptionsList: { activeWorkDescriptionsData: { workDescriptions } = [] } = [],
+      accountRetainersList: { activeRetainerData: { activeRetainers } = [] } = []
+   } = { ...customerData };
 
-  const {
-    transaction_id,
-    customer_id,
-    customer_job_id,
-    detailed_work_description,
-    is_excess_to_subscription,
-    is_transaction_billable,
-    logged_for_user_id,
-    unit_cost,
-    transaction_date,
-    transaction_type,
-    general_work_description_id
-  } = transactionData || {};
+   const {
+      transaction_id,
+      customer_id,
+      customer_job_id,
+      detailed_work_description,
+      is_excess_to_subscription,
+      is_transaction_billable,
+      logged_for_user_id,
+      unit_cost,
+      transaction_date,
+      transaction_type,
+      general_work_description_id,
+      retainer_id
+   } = transactionData || {};
 
-  useEffect(() => {
-    if (transactionData && Object.keys(transactionData).length) {
-      setSelectedItems({
-        ...selectedItems,
-        transactionID: transaction_id,
-        selectedCustomer: activeCustomers.find(customer => customer.customer_id === customer_id),
-        selectedJob: activeJobs.find(job => job.customer_job_id === customer_job_id),
-        selectedTeamMember: activeUsers.find(user => user.user_id === logged_for_user_id),
-        isTransactionBillable: is_transaction_billable,
-        detailedJobDescription: detailed_work_description,
-        isInAdditionToMonthlyCharge: is_excess_to_subscription,
-        unitCost: unit_cost,
-        selectedDate: dayjs(transaction_date),
-        transactionType: transaction_type || 'Charge',
-        selectedGeneralWorkDescription: workDescriptions.find(
-          workDescription => workDescription.general_work_description_id === general_work_description_id
-        )
-      });
-    }
-    // eslint-disable-next-line
-  }, [transactionData]);
+   useEffect(() => {
+      if (transactionData && Object.keys(transactionData).length) {
+         setSelectedItems({
+            ...selectedItems,
+            transactionID: transaction_id,
+            selectedCustomer: activeCustomers.find(customer => customer.customer_id === customer_id),
+            selectedJob: activeJobs.find(job => job.customer_job_id === customer_job_id),
+            selectedTeamMember: activeUsers.find(user => user.user_id === logged_for_user_id),
+            isTransactionBillable: is_transaction_billable,
+            detailedJobDescription: detailed_work_description,
+            isInAdditionToMonthlyCharge: is_excess_to_subscription,
+            unitCost: unit_cost,
+            selectedDate: dayjs(transaction_date),
+            transactionType: transaction_type || 'Charge',
+            selectedGeneralWorkDescription: workDescriptions.find(workDescription => workDescription.general_work_description_id === general_work_description_id),
+            retainer_id: activeRetainers.find(retainer => retainer.retainer_id === retainer_id)
+         });
+      }
+      // eslint-disable-next-line
+   }, [transactionData]);
 
-  const formatTotal = value => {
-    return value
-      .toFixed(2)
-      .toString()
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  };
+   const formatTotal = value => {
+      return value
+         .toFixed(2)
+         .toString()
+         .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+   };
 
-  const handleSubmit = async () => {
-    const dataToPost = formObjectForTransactionPost(selectedItems, loggedInUser);
-    const postedItem = await putEditTransaction(dataToPost, accountID, userID);
+   const handleSubmit = async () => {
+      const dataToPost = formObjectForTransactionPost(selectedItems, loggedInUser);
+      const postedItem = await putEditTransaction(dataToPost, accountID, userID);
 
-    setPostStatus(postedItem);
-    if (postedItem.status === 200) {
-      setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList });
-      resetState();
-    }
-  };
+      setPostStatus(postedItem);
+      if (postedItem.status === 200) {
+         setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList });
+         resetState();
+      }
+   };
 
-  const resetState = () => {
-    setSelectedItems(initialState);
-    setTimeout(() => {
-      setPostStatus(null);
-      navigate('/transactions/customerTransactions');
-    }, 2000);
-  };
+   const resetState = () => {
+      setSelectedItems(initialState);
+      setTimeout(() => {
+         setPostStatus(null);
+         navigate('/transactions/customerTransactions');
+      }, 2000);
+   };
 
-  return (
-    <>
-      <Box style={{ width: 'fit-content' }}>
-        <InitialSelectionOptions
-          customerData={customerData}
-          selectedItems={selectedItems}
-          setSelectedItems={data => setSelectedItems(data)}
-        />
+   return (
+      <>
+         <Box style={{ width: 'fit-content' }}>
+            <InitialSelectionOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 
-        <Autocomplete
-          size='small'
-          sx={{ width: 350, marginTop: '10px' }}
-          options={['Time', 'Charge']}
-          getOptionLabel={option => option || ''}
-          value={transactionType || 'Charge'}
-          isOptionEqualToValue={(option, value) => option === value || true}
-          onChange={(e, value) => setSelectedItems({ ...selectedItems, transactionType: value })}
-          renderInput={params => <TextField {...params} label='Transaction Type' variant='standard' />}
-        />
+            <Autocomplete
+               size='small'
+               sx={{ width: 350, marginTop: '10px' }}
+               options={['Time', 'Charge']}
+               getOptionLabel={option => option || ''}
+               value={transactionType || 'Charge'}
+               isOptionEqualToValue={(option, value) => option === value || true}
+               onChange={(e, value) => setSelectedItems({ ...selectedItems, transactionType: value })}
+               renderInput={params => <TextField {...params} label='Transaction Type' variant='standard' />}
+            />
 
-        {transactionType.toUpperCase() === 'CHARGE' && (
-          <ChargeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
-        )}
+            <RetainerSelection selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 
-        {transactionType.toUpperCase() === 'TIME' && (
-          <TimeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
-        )}
+            {transactionType.toUpperCase() === 'CHARGE' && <ChargeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />}
 
-        <Typography style={{ marginTop: '10px', fontSize: '18px' }} variant='body1'>
-          Total: {formatTotal(quantity * unitCost)}
-        </Typography>
+            {transactionType.toUpperCase() === 'TIME' && <TimeOptions customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />}
 
-        <Box style={{ margin: '10px', textAlign: 'center' }}>
-          <Button onClick={handleSubmit}>Submit</Button>
-          {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
-        </Box>
-      </Box>
-    </>
-  );
+            <Typography style={{ marginTop: '10px', fontSize: '18px' }} variant='body1'>
+               Total: {formatTotal(quantity * unitCost)}
+            </Typography>
+
+            <Box style={{ margin: '10px', textAlign: 'center' }}>
+               <Button onClick={handleSubmit}>Submit</Button>
+               {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
+            </Box>
+         </Box>
+      </>
+   );
 }

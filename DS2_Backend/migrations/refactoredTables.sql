@@ -204,6 +204,7 @@ CREATE TABLE customer_transactions(
      account_id integer NOT NULL REFERENCES accounts(account_id) ON DELETE CASCADE,
      customer_id integer NOT NULL REFERENCES customers(customer_id) ON DELETE CASCADE,
      customer_job_id integer REFERENCES customer_jobs(customer_job_id),
+     retainer_id integer NULL,
      customer_invoice_id integer NULL,
      logged_for_user_id integer NOT NULL REFERENCES users(user_id),
      general_work_description_id integer NOT NULL REFERENCES customer_general_work_descriptions(general_work_description_id),
@@ -216,7 +217,8 @@ CREATE TABLE customer_transactions(
      is_transaction_billable boolean NOT NULL,
      is_excess_to_subscription boolean NOT NULL,
      created_at timestamp DEFAULT NOW(),
-     created_by_user_id integer NOT NULL REFERENCES users(user_id)
+     created_by_user_id integer NOT NULL REFERENCES users(user_id),
+     note text
 );
 
 CREATE TABLE customer_payments(
@@ -271,6 +273,7 @@ CREATE TABLE customer_retainers_and_prepayments(
      parent_retainer_id integer NULL,
      customer_id integer NOT NULL REFERENCES customers(customer_id) ON DELETE CASCADE,
      account_id integer NOT NULL REFERENCES accounts(account_id) ON DELETE CASCADE,
+     display_name varchar(100) NULL,
      type_of_hold varchar(50) NOT NULL,
      starting_amount DECIMAL(10, 2) NOT NULL,
      current_amount DECIMAL(10, 2) NOT NULL,

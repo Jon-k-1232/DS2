@@ -1,256 +1,245 @@
 const invoiceService = {
-  // Must stay desc, used in finding if an invoice has to be created
-  getInvoices(db, accountID) {
-    return db.select('*').from('customer_invoices').where('account_id', accountID).orderBy('invoice_date', 'desc');
-  },
+   // Must stay desc, used in finding if an invoice has to be created
+   getInvoices(db, accountID) {
+      return db.select('*').from('customer_invoices').where('account_id', accountID).orderBy('invoice_date', 'desc');
+   },
 
-  getCustomerInvoiceByID(db, accountID, customerID) {
-    return db
-      .select('*')
-      .from('customer_invoices')
-      .where('account_id', accountID)
-      .andWhere('customer_id', customerID)
-      .orderBy('invoice_date', 'desc');
-  },
+   getCustomerInvoiceByID(db, accountID, customerID) {
+      return db.select('*').from('customer_invoices').where('account_id', accountID).andWhere('customer_id', customerID).orderBy('invoice_date', 'asc');
+   },
 
-  // Create an invoice
-  createInvoice(db, invoice) {
-    return db
-      .insert(invoice)
-      .into('customer_invoices')
-      .returning('*')
-      .then(rows => rows[0]);
-  },
+   getInvoiceByInvoiceRowID(db, accountID, invoiceRowID) {
+      return db.select('*').from('customer_invoices').where('account_id', accountID).andWhere('customer_invoice_id', invoiceRowID);
+   },
 
-  // Delete an invoice
-  deleteInvoice(db, invoiceID) {
-    return db
-      .from('customer_invoices')
-      .where('invoice_id', invoiceID)
-      .delete()
-      .then(rows => rows[0]);
-  },
+   getLastInvoiceNumber(db, accountID) {
+      return db.select('invoice_number').from('customer_invoices').where('account_id', accountID).orderBy('invoice_date', 'desc').first();
+   },
 
-  // Update an invoice
-  updateInvoice(db, invoice) {
-    return db
-      .from('customer_invoices')
-      .where('invoice_id', invoice.invoice_id)
-      .update(invoice)
-      .then(rows => rows[0]);
-  },
+   createInvoice(db, invoice) {
+      return db
+         .insert(invoice)
+         .into('customer_invoices')
+         .returning('*')
+         .then(rows => rows[0]);
+   },
 
-  // getContactInfoForArrayOfCustomers(db, accountID, customerIDs) {
-  //   return db
-  //     .select(
-  //       'customers.*',
-  //       'customer_information.customer_street',
-  //       'customer_information.customer_city',
-  //       'customer_information.customer_state',
-  //       'customer_information.customer_zip',
-  //       'customer_information.customer_email',
-  //       'customer_information.customer_phone'
-  //     )
-  //     .from('customers')
-  //     .leftJoin('customer_information', function () {
-  //       this.on('customers.customer_id', '=', 'customer_information.customer_id')
-  //         .andOn('customer_information.is_customer_mailing_address', db.raw('?', [true]))
-  //         .andOn('customer_information.is_this_address_active', db.raw('?', [true]));
-  //     })
-  //     .whereIn('customers.customer_id', customerIDs)
-  //     .where('customers.account_id', accountID)
-  //     .orderBy('customers.customer_name', 'asc');
-  // },
+   // Returns an object vs array.
+   getAccountPayToInfo(db, accountID) {
+      return db
+         .select(
+            'accounts.*',
+            'account_information.account_street',
+            'account_information.account_city',
+            'account_information.account_state',
+            'account_information.account_zip',
+            'account_information.account_email',
+            'account_information.account_phone'
+         )
+         .from('accounts')
+         .leftJoin('account_information', function () {
+            this.on('accounts.account_id', '=', 'account_information.account_id')
+               .andOn('account_information.is_account_mailing_address', db.raw('?', [true]))
+               .andOn('account_information.is_this_address_active', db.raw('?', [true]));
+         })
+         .where('accounts.account_id', accountID)
+         .then(rows => rows[0]);
+   },
 
-  // For each invoice for each customer, it will join the payment table and group by invoice id
-  getInvoicesForArrayOfCustomers(db, accountID, customerIDs) {
-    return db
-      .select(
-        'customer_invoices.*',
-        db.raw('COALESCE(customer_payments.payment_date, NULL) as payment_date'),
-        db.raw('COALESCE(customer_payments.payment_amount, NULL) as payment_amount')
-      )
-      .from('customer_invoices')
-      .whereIn('customer_invoices.customer_id', customerIDs)
-      .where('customer_invoices.account_id', accountID)
-      .orderBy('customer_invoices.invoice_date', 'desc')
-      .leftJoin('customer_payments', function () {
-        this.on('customer_invoices.customer_invoice_id', '=', 'customer_payments.customer_invoice_id').andOn(
-          'customer_payments.account_id',
-          '=',
-          'customer_invoices.account_id'
-        );
-      })
-      .groupBy('customer_invoices.customer_invoice_id', 'customer_payments.payment_id', 'customer_invoices.customer_id');
-  },
+   async getLastInvoiceDatesByCustomerID(db, accountID, customerIDs) {
+      const data = await db
+         .select('customer_id')
+         .max('invoice_date as last_invoice_date')
+         .from('customer_invoices')
+         .where('account_id', accountID)
+         .whereIn('customer_id', customerIDs)
+         .andWhere(function () {
+            this.whereNull('parent_invoice_id').orWhereRaw('parent_invoice_id = customer_invoice_id');
+         })
+         .groupBy('customer_id')
+         .orderBy('last_invoice_date', 'desc');
 
-  getPaymentsForCustomer(db, accountID, customerID, lastInvoiceDate) {
-    return db
-      .select('customer_payments.*', 'customer_invoices.*')
-      .from('customer_payments')
-      .leftJoin('customer_invoices', 'customer_payments.customer_invoice_id', '=', 'customer_invoices.customer_invoice_id')
-      .where('customer_payments.customer_id', customerID)
-      .where('customer_payments.account_id', accountID)
-      .groupBy('customer_payments.payment_id', 'customer_invoices.customer_invoice_id')
-      .orderBy('customer_payments.payment_date', 'desc');
-  },
+      return data.reduce((result, { customer_id, last_invoice_date }) => ({ ...result, [customer_id]: last_invoice_date }), {});
+   },
 
-  getTransactionsForArrayOfCustomers(db, accountID, customerID, lastInvoiceDate) {
-    return db
-      .select('customer_transactions.*', 'customer_jobs.customer_job_id', 'customer_job_types.job_description')
-      .from('customer_transactions')
-      .leftJoin('customer_jobs', 'customer_transactions.customer_job_id', 'customer_jobs.customer_job_id')
-      .leftJoin('customer_job_types', 'customer_jobs.job_type_id', 'customer_job_types.job_type_id')
-      .where('customer_transactions.customer_id', customerID)
-      .where('customer_transactions.account_id', accountID)
-      .where(builder => {
-        if (lastInvoiceDate) {
-          builder.where('transaction_date', '>', lastInvoiceDate);
-        }
-      })
-      .orderBy('customer_transactions.transaction_date', 'desc');
-  },
+   getCustomerInvoicesByCustomerID(db, customerIDs, accountID) {
+      return db
+         .select('*')
+         .from('customer_invoices')
+         .where('account_id', accountID)
+         .whereIn('customer_id', customerIDs)
+         .andWhere('is_invoice_paid_in_full', false)
+         .andWhere('remaining_balance_on_invoice', '>', 0)
+         .orderBy('created_at', 'desc');
+   },
 
-  getWriteOffsForArrayOfCustomers(db, accountID, customerID, lastInvoiceDate) {
-    return db
-      .select(
-        'customer_writeoffs.*',
-        'customer_invoices.invoice_number',
-        'customer_invoices.invoice_date',
-        'customer_invoices.total_amount_due',
-        'customer_transactions.transaction_id',
-        'customer_transactions.transaction_date',
-        'customer_transactions.transaction_type',
-        'customer_transactions.total_transaction'
-      )
-      .from('customer_writeoffs')
-      .leftJoin('customer_invoices', 'customer_writeoffs.customer_invoice_id', 'customer_invoices.customer_invoice_id')
-      .leftJoin('customer_transactions', 'customer_writeoffs.transaction_id', 'customer_transactions.transaction_id')
-      .where('customer_writeoffs.customer_id', customerID)
-      .where('customer_writeoffs.account_id', accountID)
-      .where(builder => {
-        if (lastInvoiceDate) {
-          builder.where('customer_writeoffs.writeoff_date', '>', lastInvoiceDate);
-        }
-      })
-      .orderBy('customer_writeoffs.writeoff_date', 'desc');
-  },
+   async getCustomerInformation(db, accountID, customerIDs) {
+      const data = await db
+         .from('customers')
+         .join('customer_information', 'customers.customer_id', '=', 'customer_information.customer_id')
+         .select('customers.*', 'customer_information.*')
+         .whereIn('customers.customer_id', customerIDs)
+         .where({
+            'customers.account_id': accountID,
+            'customer_information.is_customer_mailing_address': true,
+            'customer_information.is_this_address_active': true,
+            'customer_information.account_id': accountID
+         });
 
-  customersLastInvoiceDate(db, accountID, customerIDs) {
-    return db
-      .select('c.customer_id', db.raw("COALESCE(MAX(max_inv.invoice_date), '1900-01-01') as invoice_date"))
-      .from('customers as c')
-      .leftJoin(
-        db.raw(`
-      (SELECT customer_id, MAX(invoice_date) as invoice_date
-      FROM customer_invoices
-      WHERE account_id = ${accountID}
-      GROUP BY customer_id) as max_inv
-    `),
-        'c.customer_id',
-        'max_inv.customer_id'
-      )
-      .whereIn('c.customer_id', customerIDs)
-      .groupBy('c.customer_id', 'max_inv.invoice_date');
-  },
+      return data.reduce((result, { customer_id, ...info }) => ({ ...result, [customer_id]: info }), {});
+   },
 
-  getLastInvoiceNumberInDB(db, accountID) {
-    return db
-      .select(db.raw('MAX(invoice_number)'))
-      .from('customer_invoices')
-      .where('account_id', accountID)
-      .first()
-      .then(result => {
-        // Extract the maximum invoice number from the result object, or return null if no rows are found
-        const maxInvoiceNumber = result ? result.max : null;
-        // Return just the string value, or null if no rows are found
-        return maxInvoiceNumber || new Date();
+   // Based off the last date, finds all transactions
+   async getTransactionsByCustomerID(db, accountID, customerIDs, lastBillDateLookup) {
+      const data = await db('customer_transactions')
+         .join('customer_jobs', 'customer_jobs.customer_job_id', '=', 'customer_transactions.customer_job_id')
+         .join('customer_job_types', 'customer_job_types.job_type_id', '=', 'customer_jobs.job_type_id')
+         .select('customer_transactions.*', 'customer_jobs.*', 'customer_job_types.*')
+         .where({
+            'customer_transactions.account_id': accountID
+         })
+         .andWhere(builder => {
+            customerIDs.forEach(id => {
+               // Handles query if there is a id in the lastBillDateLookup
+               if (lastBillDateLookup[id]) {
+                  builder.orWhere(subQuery => {
+                     subQuery.where('customer_transactions.customer_id', id).andWhere('customer_transactions.transaction_date', '>', lastBillDateLookup[id]);
+                  });
+                  // Handles query if there is no id in the lastBillDateLookup
+               } else {
+                  builder.orWhere('customer_transactions.customer_id', id);
+               }
+            });
+         });
+
+      return data.reduce((result, transaction) => {
+         const { customer_id } = transaction;
+         if (!result[customer_id]) result[customer_id] = [];
+         result[customer_id].push(transaction);
+         return result;
+      }, {});
+   },
+
+   async getPaymentsByCustomerID(db, accountID, customerIDs, lastBillDateLookup) {
+      const data = await db('customer_payments')
+         .select('customer_payments.*')
+         .where({
+            'customer_payments.account_id': accountID
+         })
+         .andWhere(builder => {
+            customerIDs.forEach(id => {
+               // Handles query if there is an ID in the lastBillDateLookup
+               if (lastBillDateLookup[id]) {
+                  builder.orWhere(subQuery => {
+                     subQuery.where('customer_payments.customer_id', id).andWhere('customer_payments.payment_date', '>', lastBillDateLookup[id]);
+                  });
+                  // Handles query if there is no ID in the lastBillDateLookup
+               } else {
+                  builder.orWhere('customer_payments.customer_id', id);
+               }
+            });
+         });
+
+      return data.reduce((result, payment) => {
+         const { customer_id } = payment;
+         if (!result[customer_id]) result[customer_id] = [];
+         result[customer_id].push(payment);
+         return result;
+      }, {});
+   },
+
+   async getWriteOffsByCustomerID(db, accountID, customerIDs, lastBillDateLookup) {
+      const data = await db('customer_writeoffs')
+         .join('customer_jobs', 'customer_jobs.customer_job_id', '=', 'customer_writeoffs.customer_job_id')
+         .join('customer_job_types', 'customer_job_types.job_type_id', '=', 'customer_jobs.job_type_id')
+         .select('customer_writeoffs.*', 'customer_jobs.job_type_id', 'customer_job_types.job_description')
+         .where({
+            'customer_writeoffs.account_id': accountID
+         })
+         .andWhere(builder => {
+            customerIDs.forEach(id => {
+               // Handles query if there is a id in the lastBillDateLookup
+               if (lastBillDateLookup[id]) {
+                  builder.orWhere(subQuery => {
+                     subQuery.where('customer_writeoffs.customer_id', id).andWhere('customer_writeoffs.writeoff_date', '>', lastBillDateLookup[id]);
+                  });
+                  // Handles query if there is no id in the lastBillDateLookup
+               } else {
+                  builder.orWhere('customer_writeoffs.customer_id', id);
+               }
+            });
+         });
+
+      return data.reduce((result, writeoff) => {
+         const { customer_id } = writeoff;
+         if (!result[customer_id]) result[customer_id] = [];
+         result[customer_id].push(writeoff);
+         return result;
+      }, {});
+   },
+
+   async getRetainersByCustomerID(db, accountID, customerIDs, lastBillDateLookup) {
+      const data = await db('customer_retainers_and_prepayments')
+         .select('customer_retainers_and_prepayments.*')
+         .where('customer_retainers_and_prepayments.account_id', accountID)
+         .andWhere(builder => {
+            customerIDs.forEach(id => {
+               if (lastBillDateLookup[id]) {
+                  builder.orWhere(subQuery => {
+                     subQuery.where('customer_retainers_and_prepayments.customer_id', id).andWhere('customer_retainers_and_prepayments.created_at', '>', lastBillDateLookup[id]);
+                  });
+               } else {
+                  builder.orWhere('customer_retainers_and_prepayments.customer_id', id);
+               }
+            });
+         });
+
+      return data.reduce((result, retainer) => {
+         const { customer_id } = retainer;
+         if (!result[customer_id]) result[customer_id] = [];
+         result[customer_id].push(retainer);
+         return result;
+      }, {});
+   },
+
+   async getOutstandingInvoices(db, accountID, customerIDs, lastBillDateLookup) {
+      const outstandingInvoices = {};
+
+      // Fetch all parent invoices
+      const parentInvoices = await db
+         .select('*')
+         .from('customer_invoices')
+         .where('account_id', accountID)
+         .whereIn('customer_id', customerIDs)
+         .andWhere('is_invoice_paid_in_full', false)
+         .andWhere('parent_invoice_id', null)
+         .andWhere('remaining_balance_on_invoice', '>', 0)
+         .orderBy('created_at', 'desc');
+
+      const getLatestInvoice = async parentInvoice => {
+         // Find the parent invoice by parent_invoice_id === null
+         const latestChildInvoice = await db.select('*').from('customer_invoices').where('parent_invoice_id', parentInvoice.customer_invoice_id).orderBy('created_at', 'desc').first();
+
+         return latestChildInvoice || parentInvoice;
+      };
+
+      const latestInvoices = await Promise.all(parentInvoices.map(getLatestInvoice));
+
+      latestInvoices.forEach(invoice => {
+         const lastBillDate = lastBillDateLookup[invoice.customer_id];
+         const isAfterLastBillDate = lastBillDate && new Date(invoice.created_at) > new Date(lastBillDate);
+
+         if (invoice.remaining_balance_on_invoice > 0 || (invoice.remaining_balance_on_invoice === 0 && isAfterLastBillDate)) {
+            if (!outstandingInvoices[invoice.customer_id]) {
+               outstandingInvoices[invoice.customer_id] = [];
+            }
+            // if the invoice is 0, but record created after last invoice date, return the invoice, also if remaining is greater than zero.
+            outstandingInvoices[invoice.customer_id].push(invoice);
+         }
       });
-  },
 
-  getAccountPayToInfo(db, accountID) {
-    return db
-      .select(
-        'accounts.*',
-        'account_information.account_street',
-        'account_information.account_city',
-        'account_information.account_state',
-        'account_information.account_zip',
-        'account_information.account_email',
-        'account_information.account_phone'
-      )
-      .from('accounts')
-      .leftJoin('account_information', function () {
-        this.on('accounts.account_id', '=', 'account_information.account_id')
-          .andOn('account_information.is_account_mailing_address', db.raw('?', [true]))
-          .andOn('account_information.is_this_address_active', db.raw('?', [true]));
-      })
-      .where('accounts.account_id', accountID)
-      .then(rows => rows[0]);
-  },
-
-  getRetainersForArrayOfCustomers(db, accountID, customerID) {
-    return db
-      .select()
-      .from('customer_retainers_and_prepayments')
-      .where('customer_id', customerID)
-      .where('account_id', accountID)
-      .where('current_amount', '<', 0)
-      .orderBy('created_at', 'desc');
-  },
-
-  postNewInvoice(db, invoice) {
-    return db
-      .insert(invoice)
-      .into('customer_invoices')
-      .returning('*')
-      .then(rows => rows[0]);
-  },
-
-  updatePayments(db, record, invoiceReference) {
-    return db
-      .update({ customer_invoice_id: invoiceReference })
-      .into('customer_payments')
-      .where('payment_id', record.payment_id)
-      .returning('*')
-      .then(rows => rows[0]);
-  },
-
-  postNewPayment(db, payment) {
-    return db
-      .insert(payment)
-      .into('customer_payments')
-      .returning('*')
-      .then(rows => rows[0]);
-  },
-
-  updateRetainer(db, retainer) {
-    const { current_amount, is_retainer_active } = retainer;
-    return db
-      .update({ current_amount, is_retainer_active })
-      .into('customer_retainers_and_prepayments')
-      .where('retainer_id', retainer.retainer_id)
-      .returning('*')
-      .then(rows => rows[0]);
-  },
-
-  updateWriteOff(db, record, invoiceReference) {
-    return db
-      .update({ customer_invoice_id: invoiceReference })
-      .into('customer_writeoffs')
-      .where('writeoff_id ', record.writeoff_id)
-      .returning('*')
-      .then(rows => rows[0]);
-  },
-
-  updateTransactions(db, transaction, invoiceReference) {
-    return db
-      .update({ customer_invoice_id: invoiceReference })
-      .into('customer_transactions')
-      .where('transaction_id', transaction.transaction_id)
-      .returning('*')
-      .then(rows => rows[0]);
-  }
+      return outstandingInvoices;
+   }
 };
 
 module.exports = invoiceService;
