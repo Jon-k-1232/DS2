@@ -7,8 +7,8 @@ const invoiceService = require('../invoice-service');
  * @param {*} accountID
  * @returns
  */
-const fetchInitialQueryItems = async (db, invoicesToCreate, accountID) => {
-   const customerIDs = invoicesToCreate.map(invoice => invoice.customer_id);
+const fetchInitialQueryItems = async (db, invoicesToCreateMap, accountID) => {
+   const customerIDs = Object.keys(invoicesToCreateMap);
 
    // All other data fetching depends on this returning the correct date of the last invoice per customer
    const lastInvoiceDateByCustomerID = await invoiceService.getLastInvoiceDatesByCustomerID(db, accountID, customerIDs);

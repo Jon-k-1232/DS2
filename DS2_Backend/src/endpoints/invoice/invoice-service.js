@@ -12,8 +12,8 @@ const invoiceService = {
       return db.select('*').from('customer_invoices').where('account_id', accountID).andWhere('customer_invoice_id', invoiceRowID);
    },
 
-   getLastInvoiceNumber(db, accountID) {
-      return db.select('invoice_number').from('customer_invoices').where('account_id', accountID).orderBy('invoice_date', 'desc').first();
+   async getLastInvoiceNumber(db, accountID) {
+      return db.select('invoice_number').from('customer_invoices').where('account_id', accountID).orderBy('invoice_number', 'desc').first();
    },
 
    createInvoice(db, invoice) {
@@ -122,7 +122,9 @@ const invoiceService = {
 
    async getPaymentsByCustomerID(db, accountID, customerIDs, lastBillDateLookup) {
       const data = await db('customer_payments')
-         .select('customer_payments.*')
+         .join('customer_invoices', 'customer_invoices.customer_invoice_id', '=', 'customer_payments.customer_invoice_id')
+         .select('customer_payments.*', 'customer_invoices.*')
+         // .select('customer_payments.*')
          .where({
             'customer_payments.account_id': accountID
          })
@@ -202,6 +204,12 @@ const invoiceService = {
       }, {});
    },
 
+   /**
+    * Requirements-
+    * Include parent invoices that do not have children and have a remaining balance.
+    * Include parent invoices along with all their children where at least one of the children still has a remaining balance.
+    * Include parent invoices along with all their children where a payment has been made after the last invoice date, regardless of the remaining balance.
+    */
    async getOutstandingInvoices(db, accountID, customerIDs, lastBillDateLookup) {
       const outstandingInvoices = {};
 
@@ -211,32 +219,37 @@ const invoiceService = {
          .from('customer_invoices')
          .where('account_id', accountID)
          .whereIn('customer_id', customerIDs)
-         .andWhere('is_invoice_paid_in_full', false)
          .andWhere('parent_invoice_id', null)
-         .andWhere('remaining_balance_on_invoice', '>', 0)
          .orderBy('created_at', 'desc');
 
-      const getLatestInvoice = async parentInvoice => {
-         // Find the parent invoice by parent_invoice_id === null
-         const latestChildInvoice = await db.select('*').from('customer_invoices').where('parent_invoice_id', parentInvoice.customer_invoice_id).orderBy('created_at', 'desc').first();
+      // Function to handle the children of each parent
+      const handleChildren = async parentInvoice => {
+         const children = await db.select('*').from('customer_invoices').where('parent_invoice_id', parentInvoice.customer_invoice_id).orderBy('created_at', 'desc');
+         const lastBillDate = lastBillDateLookup[parentInvoice.customer_id];
 
-         return latestChildInvoice || parentInvoice;
+         if (!outstandingInvoices[parentInvoice.customer_id]) outstandingInvoices[parentInvoice.customer_id] = [];
+
+         // Include parent invoices that do not have children and have a remaining balance
+         if (Number(parentInvoice.remaining_balance_on_invoice) > 0 && !children.length) {
+            outstandingInvoices[parentInvoice.customer_id].push(parentInvoice);
+            return;
+         }
+
+         // Include parent invoices along with all their children where at least one of the children still has a remaining balance
+         if (children.some(child => child.remaining_balance_on_invoice > 0)) {
+            outstandingInvoices[parentInvoice.customer_id].push(...children, parentInvoice);
+            return;
+         }
+
+         // Include parent invoices along with all their children where a payment has been made after the last invoice date, regardless of the remaining balance
+         const paymentAfterLastBillDate = children.some(child => child.remaining_balance_on_invoice === 0 && new Date(child.created_at) > new Date(lastBillDate));
+         if (paymentAfterLastBillDate) {
+            outstandingInvoices[parentInvoice.customer_id].push(...children, parentInvoice);
+            return;
+         }
       };
 
-      const latestInvoices = await Promise.all(parentInvoices.map(getLatestInvoice));
-
-      latestInvoices.forEach(invoice => {
-         const lastBillDate = lastBillDateLookup[invoice.customer_id];
-         const isAfterLastBillDate = lastBillDate && new Date(invoice.created_at) > new Date(lastBillDate);
-
-         if (invoice.remaining_balance_on_invoice > 0 || (invoice.remaining_balance_on_invoice === 0 && isAfterLastBillDate)) {
-            if (!outstandingInvoices[invoice.customer_id]) {
-               outstandingInvoices[invoice.customer_id] = [];
-            }
-            // if the invoice is 0, but record created after last invoice date, return the invoice, also if remaining is greater than zero.
-            outstandingInvoices[invoice.customer_id].push(invoice);
-         }
-      });
+      await Promise.all(parentInvoices.map(handleChildren));
 
       return outstandingInvoices;
    }

@@ -1,31 +1,27 @@
 const { groupAndTotalPayments } = require('./invoiceCalculations/paymentsCalculations');
 const { groupAndTotalRetainers } = require('./invoiceCalculations/retainerCalculations');
 const { groupAndTotalWriteOffs } = require('./invoiceCalculations/writeOffCalculations');
-const { incrementAnInvoiceOrQuote } = require('../sharedInvoiceFunctions');
 const { groupAndTotalTransactions } = require('./invoiceCalculations/transactionCalculations');
 const { groupAndTotalOutstandingInvoices } = require('./invoiceCalculations/outstandingInvoicesCalculations');
+const { totalInvoice } = require('./invoiceCalculations/totalInvoice');
 
 const calculateInvoices = (invoicesToCreate, invoiceQueryData) => {
-   return invoicesToCreate.map((customer, i) => {
+   return invoicesToCreate.map(customer => {
       const { customer_id, showWriteOffs } = customer;
-      const { lastInvoiceNumber, customerInformation } = invoiceQueryData;
-      const startingInvoiceNumber = lastInvoiceNumber?.invoice_number || 'INV-2023-00000';
+      const hideRetainers = false;
 
-      const customerContactInformation = customerInformation[customer_id];
-      const invoiceNumber = incrementAnInvoiceOrQuote(startingInvoiceNumber, i);
-      const payments = groupAndTotalPayments(customer_id, invoiceQueryData);
-      const retainers = groupAndTotalRetainers(customer_id, invoiceQueryData);
-      const writeOffs = groupAndTotalWriteOffs(customer_id, invoiceQueryData, showWriteOffs);
-      const transactions = groupAndTotalTransactions(customer_id, invoiceQueryData, showWriteOffs);
-      const outstandingInvoices = groupAndTotalOutstandingInvoices(customer_id, invoiceQueryData);
+      const invoiceInformation = {
+         payments: groupAndTotalPayments(customer_id, invoiceQueryData),
+         retainers: groupAndTotalRetainers(customer_id, invoiceQueryData, hideRetainers),
+         writeOffs: groupAndTotalWriteOffs(customer_id, invoiceQueryData, showWriteOffs),
+         transactions: groupAndTotalTransactions(customer_id, invoiceQueryData, showWriteOffs),
+         outstandingInvoices: groupAndTotalOutstandingInvoices(customer_id, invoiceQueryData)
+      };
+
+      const invoiceTotal = totalInvoice(invoiceInformation, showWriteOffs, hideRetainers);
 
       // const autoPayments = groupAndTotalAutoPayments(customer_id, invoiceQueryData);
-      // const invoiceTotal = groupAndTotalWholeInvoice(customer_id, invoiceQueryData);
-
-      // todo - handle invoice object creation
-      // todo - adjustments
-
-      return { invoiceNumber, retainers, customerContactInformation, payments, writeOffs, transactions, outstandingInvoices };
+      return { customer_id, ...invoiceInformation, invoiceTotal };
    });
 };
 
