@@ -1,67 +1,68 @@
 version: '3.9'
 
 services:
-  # Frontend
-  app:
-    container_name: DS2_Frontend
-    build:
-      context: ./DS2_Frontend
-      dockerfile: Dockerfile
-    env_file:
-      - ./DS2_Frontend/.env
-    volumes:
-      - './DS2_Frontend:/app'
-      - '/app/node_modules'
-    stdin_open: true
-    tty: true
-    ports:
-      - '3001:3001'
-    networks:
-      - server_customnetwork
-      - customnetwork2
-    restart: always
+   # Frontend
+   app:
+      container_name: DS2_Frontend
+      build:
+         context: ./DS2_Frontend
+         dockerfile: Dockerfile
+      env_file:
+         - ./DS2_Frontend/.env
+      volumes:
+         - './DS2_Frontend:/app'
+         - '/app/node_modules'
+      stdin_open: true
+      tty: true
+      ports:
+         - '3001:3001'
+      networks:
+         - server_customnetwork
+         - customnetwork2
+      restart: always
 
-  # Backend
-  api:
-    container_name: DS2_Backend
-    build:
-      context: ./DS2_Backend
-      dockerfile: Dockerfile
-    env_file:
-      - ./DS2_Backend/.env
-    ports:
-      - '8001:8001'
-    volumes:
-      - /app/node_modules
-      - ./DS2_Backend:/app
-    networks:
-      - server_customnetwork
-      - customnetwork2
-    restart: always
+   # Backend
+   api:
+      container_name: DS2_Backend
+      build:
+         context: ./DS2_Backend
+         dockerfile: Dockerfile
+      env_file:
+         - ./DS2_Backend/.env
+      ports:
+         - '8001:8001'
+      volumes:
+         - /app/node_modules
+         - ./DS2_Backend:/app
+         - /Users/jonkimmel/Desktop/invoices:/invoices
+      networks:
+         - server_customnetwork
+         - customnetwork2
+      restart: always
 
-  # Server
-  server:
-    container_name: Nginx_Server
-    image: nginx
-    depends_on:
-      - api
-      - app
-    build:
-      context: ./Nginx
-      dockerfile: Dockerfile
-    ports:
-      - '81:81'
-      - '444:444'
-    networks:
-      - server_customnetwork
-      - customnetwork2
-    volumes:
-      - ./Nginx/Server_ssl/192.168.12.209.crt:/etc/nginx/192.168.12.209.crt
-      - ./Nginx/Server_ssl/192.168.12.209.key:/etc/nginx/192.168.12.209.key
-    restart: always
+   # Server
+   server:
+      container_name: Nginx_Server
+      image: nginx
+      depends_on:
+         - api
+         - app
+      build:
+         context: ./Nginx
+         dockerfile: Dockerfile
+      ports:
+         - '81:81'
+         - '444:444'
+      networks:
+         - server_customnetwork
+         - customnetwork2
+      volumes:
+         - ./Nginx/Server_ssl/192.168.12.209.crt:/etc/nginx/192.168.12.209.crt
+         - ./Nginx/Server_ssl/192.168.12.209.key:/etc/nginx/192.168.12.209.key
+      restart: always
 
 networks:
-  server_customnetwork:
-    external: true
-  customnetwork2:
-    driver: bridge
+   server_customnetwork:
+      external: true
+   customnetwork2:
+      driver: bridge

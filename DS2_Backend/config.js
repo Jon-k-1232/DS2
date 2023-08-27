@@ -9,7 +9,7 @@ const config = {
    TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || 'postgresql://@localhost/ds_2',
    API_TOKEN: process.env.API_TOKEN,
    JWT_EXPIRATION: process.env.JWT_EXPIRATION,
-   DEFAULT_PDF_SAVE_LOCATION: process.env.DEFAULT_PDF_SAVE_LOCATION
+   DEFAULT_PDF_SAVE_LOCATION: process.env.NODE_ENV === 'production' ? process.env.PRODUCTION_PDF_SAVE_LOCATION : process.env.DEVELOPMENT_PDF_SAVE_LOCATION
 };
 
 module.exports = config;
