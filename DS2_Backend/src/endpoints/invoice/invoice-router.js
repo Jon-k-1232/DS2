@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const invoiceRouter = express.Router();
 const invoiceService = require('./invoice-service');
 const accountService = require('../account/account-service');
@@ -8,10 +9,11 @@ const { sanitizeFields } = require('../../utils');
 const { findCustomersNeedingInvoices } = require('./invoiceEligibility/invoiceEligibility');
 const { createGrid, filterGridByColumnName } = require('../../helperFunctions/helperFunctions');
 const { fetchInitialQueryItems } = require('./createInvoice/createInvoiceQueries');
-const { calculateInvoices } = require('./createInvoice/calculateInvoices');
-const { addInvoiceDetails } = require('./createInvoice/addInvoiceDetail');
-const { createAndSavePdfsToDisk } = require('../../pdfCreator/CreateAndSavePDFs');
-const { createZip, saveZipToDisk } = require('../../pdfCreator/zipOrchestrator');
+const { calculateInvoices } = require('./createInvoice/invoiceCalculations/calculateInvoices');
+const { addInvoiceDetails } = require('./createInvoice/addDetailToInvoice/addInvoiceDetail');
+const { createAndSavePdfsToDisk } = require('../../pdfCreator/createAndSavePDFs');
+const { createCsvData } = require('./createInvoiceCsv/createInvoiceCsv');
+const config = require('../../../config');
 
 // GET all invoices
 invoiceRouter.route('/getInvoices/:accountID/:invoiceID').get(async (req, res) => {
@@ -120,62 +122,70 @@ invoiceRouter.route('/createInvoice/:accountID/:userID').post(jsonParser, async 
    const { invoicesToCreate, invoiceCreationSettings } = sanitizedData;
    const { isFinalized, isRoughDraft, isCsvOnly, globalInvoiceNote } = invoiceCreationSettings;
 
-   // Create map of customer_id and object as value. Needed later when matching calculated invoices with invoice details
-   const invoicesToCreateMap = invoicesToCreate.reduce((map, obj) => ({ ...map, [obj.customer_id]: obj }), {});
+   try {
+      // Create map of customer_id and object as value. Needed later when matching calculated invoices with invoice details
+      const invoicesToCreateMap = invoicesToCreate.reduce((map, obj) => ({ ...map, [obj.customer_id]: obj }), {});
+      const [accountBillingInformation] = await accountService.getAccount(db, accountID);
+      const invoiceQueryData = await fetchInitialQueryItems(db, invoicesToCreateMap, accountID);
+      const calculatedInvoices = calculateInvoices(invoicesToCreate, invoiceQueryData);
+      const invoicesWithDetail = addInvoiceDetails(calculatedInvoices, invoiceQueryData, invoicesToCreateMap, accountBillingInformation, globalInvoiceNote);
 
-   const [accountBillingInformation] = await accountService.getAccount(db, accountID);
-   const invoiceQueryData = await fetchInitialQueryItems(db, invoicesToCreateMap, accountID);
-   const calculatedInvoices = calculateInvoices(invoicesToCreate, invoiceQueryData);
-   const invoicesWithDetail = addInvoiceDetails(calculatedInvoices, invoiceQueryData, invoicesToCreateMap, accountBillingInformation, globalInvoiceNote);
+      let pdfFileLocation = '';
+      let csvFileLocation = '';
 
-   // Create PDF buffer and metadata for each invoice
-   const pdfBuffer = await createAndSavePdfsToDisk(invoicesWithDetail, isFinalized);
+      if (isCsvOnly) {
+         csvFileLocation = await createCsvData(invoicesWithDetail, accountBillingInformation);
+      }
 
-   // Zips PDFs, and provides a passthrough zip
-   //    const zipFile = await createZip(invoicesWithDetail);
-   //    // Save zip to disk and returns the path for which it saved
-   //    const zipPath = await saveZipToDisk(zipFile, accountID);
+      if (isRoughDraft) {
+         pdfFileLocation = await createAndSavePdfsToDisk(invoicesWithDetail, isFinalized, accountBillingInformation);
+      }
 
-   res.send({
-      invoicesWithDetail,
-      message: 'Successfully retrieved balance.',
-      status: 200
-   });
+      if (isFinalized) {
+         pdfFileLocation = await createAndSavePdfsToDisk(invoicesWithDetail, isFinalized, accountBillingInformation);
+         // Handle data inserts
+         // await handleDataInserts(db, invoicesWithDetail, accountID, userID);
+      }
+
+      res.send({
+         invoicesWithDetail,
+         csvFileLocation,
+         pdfFileLocation,
+         message: 'Successfully retrieved balance.',
+         status: 200
+      });
+   } catch (error) {
+      res.send({
+         message: error.message,
+         status: 500
+      });
+   }
 });
 
-// invoiceRouter.route('/getZippedInvoices/:accountID/:userID').get(async (req, res) => {
-//   const { filename } = req.query;
+invoiceRouter.route('/downloadFile/:accountID/:userID').get(async (req, res) => {
+   try {
+      const zipFilePath = req.query.fileLocation;
 
-//   // Find zip file in the file system
-//   const zipFilePath = path.join(filename);
+      // Validate file path
+      if (zipFilePath === undefined || !zipFilePath || !zipFilePath.startsWith(`${config.DEFAULT_PDF_SAVE_LOCATION}`)) {
+         return res.status(400).send('Invalid file path');
+      }
 
-//   // Check if the file exists
-//   fs.access(zipFilePath, fs.constants.F_OK, err => {
-//     if (err) {
-//       console.error(err);
-//       res.status(404).json({ message: 'File not found' });
-//       return;
-//     }
+      // Check if the file exists before attempting to download
+      fs.access(zipFilePath, fs.constants.F_OK, err => {
+         if (err) return res.send({ message: 'File not found', status: 400, error: err });
 
-//     // Set the headers to trigger the file download
-//     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-//     res.setHeader('Content-Type', 'application/octet-stream');
-
-//     // Send the file to the client for download
-//     res.download(path.resolve(zipFilePath), err => {
-//       if (err) {
-//         console.error(err);
-//         res.status(500).json({ message: 'Error downloading file' });
-//       } else {
-//         // Delete the file from the file system after it has been downloaded
-//         fs.unlink(zipFilePath, err => {
-//           if (err) {
-//             console.error('Error deleting file:', err);
-//           }
-//         });
-//       }
-//     });
-//   });
-// });
+         // File exists, proceed with the download
+         return res.status(200).download(zipFilePath, path.basename(zipFilePath), err => {
+            if (err) return res.send({ message: `Couldn't download file`, status: 400, error: err });
+         });
+      });
+   } catch (error) {
+      res.send({
+         message: 'Successfully retrieved balance.',
+         status: 400
+      });
+   }
+});
 
 module.exports = invoiceRouter;

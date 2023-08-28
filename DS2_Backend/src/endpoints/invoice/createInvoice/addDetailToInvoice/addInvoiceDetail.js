@@ -1,4 +1,4 @@
-const { incrementAnInvoiceOrQuote } = require('../sharedInvoiceFunctions');
+const { incrementAnInvoiceOrQuote } = require('../../sharedInvoiceFunctions');
 const dayjs = require('dayjs');
 
 const addInvoiceDetails = (calculatedInvoices, invoiceQueryData, invoicesToCreateMap, accountBillingInformation, globalInvoiceNote) => {

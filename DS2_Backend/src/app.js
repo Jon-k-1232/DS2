@@ -29,26 +29,29 @@ const workDescriptionsRouter = require('./endpoints/workDescriptions/workDescrip
 // Middleware
 app.use(cookieParser());
 app.use(
-  morgan((tokens, req, res) => {
-    const ipAddress = req.ip;
-    const currentTime = new Date().toLocaleString();
-    const responseTime = parseFloat(tokens['response-time'](req, res)).toFixed(3);
-    const formattedResponseTime = responseTime.padStart(7, ' ').padEnd(10, '');
-    const status = tokens.status(req, res);
-    const method = tokens.method(req, res);
-    const endpoint = tokens.url(req, res);
-    return `[${currentTime}] - ${ipAddress} - ${method} - Status: ${status} - Response Time: ${formattedResponseTime}ms - ${endpoint}`;
-  })
+   morgan((tokens, req, res) => {
+      const ipAddress = req.ip;
+      const currentTime = new Date().toLocaleString();
+      const responseTime = parseFloat(tokens['response-time'](req, res)).toFixed(3);
+      const formattedResponseTime = responseTime.padStart(7, ' ').padEnd(10, '');
+      const status = tokens.status(req, res);
+      const method = tokens.method(req, res);
+      const endpoint = tokens.url(req, res);
+      return `[${currentTime}] - ${ipAddress} - ${method} - Status: ${status} - Response Time: ${formattedResponseTime}ms - ${endpoint}`;
+   })
 );
 app.use(helmet());
 app.use(express.json());
 app.use(
-  cors({
-    origin: config.FRONT_END_URL,
-    credentials: true
-  })
+   cors({
+      origin: config.FRONT_END_URL,
+      credentials: true
+   })
 );
 
+app.get('/', (req, res) => {
+   res.send('Hello, world!');
+});
 /* ///////////////////////////\\\\  USER ENDPOINTS  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 app.use('/auth', authentication);
@@ -71,14 +74,14 @@ app.use('/workDescriptions', requireAuth, workDescriptionsRouter);
 /* ///////////////////////////\\\\  ERROR HANDLER  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 app.use(function errorHandler(error, req, res, next) {
-  let response;
-  if (NODE_ENV === 'production') {
-    response = { error: { message: 'server error' } };
-  } else {
-    console.error(error);
-    response = { message: error.message, error };
-  }
-  res.status(500).json(response);
+   let response;
+   if (NODE_ENV === 'production') {
+      response = { error: { message: 'server error' } };
+   } else {
+      console.error(error);
+      response = { message: error.message, error };
+   }
+   res.status(500).json(response);
 });
 
 module.exports = app;

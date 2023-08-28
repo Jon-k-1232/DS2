@@ -11,64 +11,64 @@ import { useContext } from 'react';
 import { context } from '../../App';
 
 export default function LoginForm() {
-  const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [incorrectCredential, setIncorrectCredential] = useState(null);
-  const { setLoggedInUser } = useContext(context);
+   const navigate = useNavigate();
+   const [showPassword, setShowPassword] = useState(false);
+   const [username, setUsername] = useState('');
+   const [password, setPassword] = useState('');
+   const [incorrectCredential, setIncorrectCredential] = useState(null);
+   const { setLoggedInUser } = useContext(context);
 
-  const handleSubmit = async () => {
-    const fetchedToken = await postLoginAuth(username, password);
-    if (fetchedToken.status !== 200) setIncorrectCredential(fetchedToken.response.data);
+   const handleSubmit = async () => {
+      const fetchedToken = await postLoginAuth(username, password);
+      if (fetchedToken.status !== 200) setIncorrectCredential(fetchedToken.response.data);
 
-    const { account_id, user_id, display_name, job_title, access_level } = fetchedToken.user;
-    TokenService.saveAuthToken(fetchedToken.authToken);
-    window.sessionStorage.setItem('userID', user_id);
-    window.sessionStorage.setItem('accountID', account_id);
+      const { account_id, user_id, display_name, job_title, access_level } = fetchedToken.user;
+      TokenService.saveAuthToken(fetchedToken.authToken);
+      window.sessionStorage.setItem('userID', user_id);
+      window.sessionStorage.setItem('accountID', account_id);
 
-    setLoggedInUser({
-      accountID: account_id,
-      userID: user_id,
-      displayName: display_name,
-      role: job_title,
-      accessLevel: access_level,
-      token: fetchedToken.authToken
-    });
-    navigate('/customers/customersList');
-  };
+      setLoggedInUser({
+         accountID: account_id,
+         userID: user_id,
+         displayName: display_name,
+         role: job_title,
+         accessLevel: access_level,
+         token: fetchedToken.authToken
+      });
+      navigate('/customers/customersList');
+   };
 
-  return (
-    <Stack>
-      <Stack spacing={3}>
-        <TextField fullWidth type='text' label='Username' onChange={e => setUsername(e.target.value)} />
+   return (
+      <Stack>
+         <Stack spacing={3}>
+            <TextField fullWidth type='text' label='Username' onChange={e => setUsername(e.target.value)} />
 
-        <TextField
-          fullWidth
-          type={showPassword ? 'text' : 'password'}
-          label='Password'
-          onChange={e => setPassword(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position='end'>
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge='end'>
-                  <Icon icon={showPassword ? eyeFill : eyeOffFill} />
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
-        />
+            <TextField
+               fullWidth
+               type={showPassword ? 'text' : 'password'}
+               label='Password'
+               onChange={e => setPassword(e.target.value)}
+               onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+               InputProps={{
+                  endAdornment: (
+                     <InputAdornment position='end'>
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge='end'>
+                           <Icon icon={showPassword ? eyeFill : eyeOffFill} />
+                        </IconButton>
+                     </InputAdornment>
+                  )
+               }}
+            />
+         </Stack>
+
+         <LoadingButton onClick={() => handleSubmit()} style={{ marginTop: '25px' }} fullWidth size='large' variant='contained'>
+            Login
+         </LoadingButton>
+         {incorrectCredential && Object.keys(incorrectCredential).length && (
+            <Typography variant='caption' style={{ color: 'red', marginTop: '20px' }}>
+               {incorrectCredential.status} / {incorrectCredential.error}
+            </Typography>
+         )}
       </Stack>
-
-      <LoadingButton onClick={() => handleSubmit()} style={{ marginTop: '25px' }} fullWidth size='large' variant='contained'>
-        Login
-      </LoadingButton>
-      {incorrectCredential && Object.keys(incorrectCredential).length && (
-        <Typography variant='caption' style={{ color: 'red', marginTop: '20px' }}>
-          {incorrectCredential.status} / {incorrectCredential.error}
-        </Typography>
-      )}
-    </Stack>
-  );
+   );
 }

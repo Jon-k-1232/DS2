@@ -77,22 +77,6 @@ export const getOutstandingBalanceList = async (accountID, userID, token) => {
    }
 };
 
-// ToDO will need to update to S3 bucket once dev is complete.
-export const getZippedInvoices = async (zipFileName, accountID, userID, token) => {
-   try {
-      const queryParams = new URLSearchParams({
-         filename: zipFileName
-      }).toString();
-
-      const url = `${config.API_ENDPOINT}/invoices/getZippedInvoices/${accountID}/${userID}?${queryParams}`;
-
-      // Redirect the browser to the download URL
-      window.location.href = url;
-   } catch (error) {
-      console.error('Error redirecting to download URL:', error);
-   }
-};
-
 export const fetchSingleTransaction = async (customer_id, transaction_id, accountID, userID, token) => {
    try {
       const response = await axios.get(`${config.API_ENDPOINT}/transactions/getSingleTransaction/${customer_id}/${transaction_id}/${accountID}/${userID}`, headers(token));
@@ -178,5 +162,31 @@ export const fetchCustomerRetainerAndPrepaymentList = async (accountID, userID, 
    } catch (error) {
       console.error('Error fetching customer retainers and prepayments:', error);
       return [];
+   }
+};
+
+export const fetchFileDownload = async (fileLocation, fileName, accountID, userID, token) => {
+   try {
+      const response = await axios.get(`${config.API_ENDPOINT}/invoices/downloadFile/${accountID}/${userID}?fileLocation=${fileLocation}`, {
+         ...headers(token),
+         responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      // set filename from the server response
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      return { status: 200, message: 'Successfully downloaded file.' };
+   } catch (error) {
+      console.error('Error fetching download file:', error);
+      return { status: 400, message: 'File download failure.' };
    }
 };

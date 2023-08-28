@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Divider, Stack, Typography, TextField, Box, Button, Alert, FormControl, FormHelperText, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
 import CreateInvoiceGrid from '../InvoiceGrids/CreateInvoiceGrid';
-import { getOutstandingBalanceList } from '../../../Services/ApiCalls/FetchCalls';
+import { getOutstandingBalanceList, fetchFileDownload } from '../../../Services/ApiCalls/FetchCalls';
 import CreateInvoiceCheckBoxes from './SubComponents/CreateInvoiceCheckBoxes';
 import { postInvoiceCreation } from '../../../Services/ApiCalls/PostCalls';
 import { useContext } from 'react';
@@ -63,15 +63,24 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
 
       const postedItem = await postInvoiceCreation(selectedRowsToInvoice, accountID, userID);
       console.log(postedItem);
-      if (postedItem.status === 200) {
-         setIsLoading(false);
-         // setSelectedRowsToInvoice(initialState);
-         setTimeout(() => setPostStatus(null), 2000);
-         // setCustomerData({ ...customerData, invoicesList: postedItem.invoicesList });
-      } else {
-         setIsLoading(false);
-         setPostStatus(postedItem);
+      if (postedItem.status !== 200) return setPostStatus(postedItem);
+
+      // This conditionals can be handled better by zipping files together on backend. This is a temporary solution.
+      if (isFinalized || isRoughDraft) {
+         const downloadedPdfFile = await fetchFileDownload(postedItem.pdfFileLocation, 'invoices.zip', accountID, userID);
+         if (downloadedPdfFile.status !== 200) return setPostStatus(downloadedPdfFile);
       }
+
+      if (isCsvOnly) {
+         const downloadedCsvFile = await fetchFileDownload(postedItem.csvFileLocation, 'Invoices_Report.csv', accountID, userID);
+         if (downloadedCsvFile.status !== 200) return setPostStatus(downloadedCsvFile);
+      }
+
+      setIsLoading(false);
+      setTimeout(() => setPostStatus(null), 2000);
+
+      // setSelectedRowsToInvoice(initialState);
+      // setCustomerData({ ...customerData, invoicesList: postedItem.invoicesList });
    };
 
    const handleSelectedRowsChange = selectedRows => {

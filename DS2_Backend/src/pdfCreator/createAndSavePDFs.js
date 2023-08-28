@@ -1,5 +1,6 @@
 const dayjs = require('dayjs');
 const { createPDF } = require('../pdfCreator/templateOne/templateOneOrchestrator');
+const { createAndSaveZip } = require('../pdfCreator/zipOrchestrator');
 const config = require('../../config');
 const fs = require('fs').promises;
 
@@ -8,13 +9,24 @@ const fs = require('fs').promises;
  * @param {*} invoicesWithDetail- Array of objects- each object is an invoice
  * @returns {Object} - { pdfBuffer: [{},{}], fileLocation:'filePath' }
  */
-const createAndSavePdfsToDisk = async (invoicesWithDetail, isFinalized) => {
-   const now = dayjs().format('MM-DD-YYYY_T_HH_mm_ss');
+const createAndSavePdfsToDisk = async (invoicesWithDetail, isFinalized, accountBillingInformation) => {
+   try {
+      const now = dayjs().format('MM-DD-YYYY_T_HH_mm_ss');
+      const accountName = accountBillingInformation.account_name.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileLocation = isFinalized ? `${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Invoices/Final/${now}` : `${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Invoices/Preview/${now}`;
 
-   const invoiceBuffer = await createBuffer(invoicesWithDetail, isFinalized, now);
-   const [fileLocation] = await savePdfsToDisk(invoiceBuffer, isFinalized, now);
+      await fs.mkdir(fileLocation, { recursive: true });
+      const invoiceBuffer = await createBuffer(invoicesWithDetail, fileLocation);
 
-   return { pdfBuffer: invoiceBuffer, ...fileLocation };
+      // Zip the pdfs
+      await Promise.all(invoiceBuffer.map(async () => createAndSaveZip(invoiceBuffer, fileLocation)));
+
+      // Location of saved file
+      return `${fileLocation}/zipped_files.zip`;
+   } catch (error) {
+      console.log(`Error creating and saving pdfs to disk: ${error.message}`);
+      throw new Error('Error creating and saving pdfs to disk: ' + error.message);
+   }
 };
 
 /**
@@ -23,53 +35,18 @@ const createAndSavePdfsToDisk = async (invoicesWithDetail, isFinalized) => {
  * @param {*} isFinalized - Boolean
  * @param {*} now - Date/Time
  */
-const createBuffer = async (invoicesWithDetail, isFinalized, now) => {
-   // Create PDF buffer and metadata for each invoice
+const createBuffer = async invoicesWithDetail => {
    return Promise.all(
       invoicesWithDetail.map(async invoice => {
-         const accountName = invoice.accountBillingInformation.account_name;
-
-         if (isFinalized) {
-            // Create directory if it doesn't exist
-            await fs.mkdir(`${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Final/${now}`, { recursive: true });
-         } else {
-            await fs.mkdir(`${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Preview/${now}`, { recursive: true });
-         }
-
          // Loop through invoices and create PDFs
          const pdfBuffer = await createPDF(invoice);
 
          return {
             pdfBuffer,
             metadata: {
-               accountName,
                displayName: invoice.customerContactInformation.display_name
             }
          };
-      })
-   );
-};
-
-/**
- * Saves Pdfs to disk
- * @param {*} invoiceBuffer - Array of objects- each object is an invoice
- * @param {*} isFinalized - Boolean
- * @param {*} now - Date/Time
- */
-const savePdfsToDisk = async (invoiceBuffer, isFinalized, now) => {
-   // Save PDFs to disk
-   return Promise.all(
-      invoiceBuffer.map(async ({ pdfBuffer, metadata }) => {
-         const fileName = `${metadata.displayName}.pdf`;
-         const accountName = metadata.accountName;
-
-         if (isFinalized) {
-            await fs.writeFile(`${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Final/${now}/${fileName}`, pdfBuffer);
-            return { file_location: `${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Final/${now}` };
-         }
-
-         await fs.writeFile(`${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Preview/${now}/${fileName}`, pdfBuffer);
-         return { file_location: `${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/Preview/${now}` };
       })
    );
 };
