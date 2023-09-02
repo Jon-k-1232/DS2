@@ -1,36 +1,22 @@
-const config = require('../../../../config');
-const dayjs = require('dayjs');
-const fs = require('fs').promises;
-
 /**
  * Create Csv Data
  * @param {*} invoicesWithDetail
- * @param {*} accountBillingInformation
+ * @return {Buffer} Buffer containing the CSV data
  */
-const createCsvData = async (invoicesWithDetail, accountBillingInformation) => {
-   const accountName = accountBillingInformation.account_name.replace(/[^a-zA-Z0-9]/g, '_');
-   const now = dayjs().format('MM-DD-YYYY_T_HH_mm_ss');
-   const fileLocation = `${config.DEFAULT_PDF_SAVE_LOCATION}/${accountName}/CSV_Reports/${now}`;
-
-   // Create directory
-   await fs.mkdir(fileLocation, { recursive: true });
-
+const createCsvData = invoicesWithDetail => {
    const csvData = convertToCSV(invoicesWithDetail);
+   const buffer = Buffer.from(csvData);
 
-   // Write to a CSV file
-   try {
-      await fs.writeFile(`${fileLocation}/Invoices_Report.csv`, csvData);
-      return `${fileLocation}/Invoices_Report.csv`;
-   } catch (err) {
-      console.error('Error writing CSV file', err);
-      throw new Error('Error writing CSV file');
-   }
+   return {
+      buffer,
+      metadata: { type: 'csv', displayName: 'Monthly_CSV_Report' }
+   };
 };
 
 /**
  * Create Rows and Columns
  * @param {*} invoicesWithDetail
- * @returns
+ * @returns {string} CSV data as a string
  */
 const convertToCSV = invoicesWithDetail => {
    const headers = [
@@ -50,6 +36,7 @@ const convertToCSV = invoicesWithDetail => {
       'Adjustment Amount',
       'Adjustment Reason'
    ];
+
    const rows = invoicesWithDetail.map(customer => [
       customer.customer_id,
       customer.customerContactInformation.display_name,

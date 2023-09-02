@@ -10,71 +10,67 @@ import InformationDialog from '../../../../Components/Dialogs/InformationDialog'
 import { formatTotal } from '../../../../Services/SharedFunctions';
 
 const initialState = {
-  selectedCustomer: null,
-  selectedJob: null,
-  selectedTeamMember: null,
-  writeoffReason: '',
-  selectedDate: dayjs(),
-  unitCost: 0,
-  quantity: 1
+   selectedCustomer: null,
+   selectedJob: null,
+   selectedTeamMember: null,
+   writeoffReason: '',
+   selectedDate: dayjs(),
+   unitCost: 0,
+   quantity: 1
 };
 
 export default function WriteOff({ customerData, setCustomerData }) {
-  const { loggedInUser } = useContext(context);
-  const { accountID, userID } = loggedInUser;
+   const { loggedInUser } = useContext(context);
+   const { accountID, userID } = loggedInUser;
 
-  const [postStatus, setPostStatus] = useState(null);
-  const [selectedItems, setSelectedItems] = useState(initialState);
+   const [postStatus, setPostStatus] = useState(null);
+   const [selectedItems, setSelectedItems] = useState(initialState);
 
-  const { unitCost, quantity } = selectedItems;
+   const { unitCost, quantity } = selectedItems;
 
-  const handleSubmit = async () => {
-    const dataToPost = formObjectForWriteOffPost(selectedItems, loggedInUser, 'WriteOff');
-    const postedItem = await postNewWriteOff(dataToPost, accountID, userID);
+   const handleSubmit = async () => {
+      const dataToPost = formObjectForWriteOffPost(selectedItems, loggedInUser, 'WriteOff');
+      const postedItem = await postNewWriteOff(dataToPost, accountID, userID);
 
-    setPostStatus(postedItem);
-    if (postedItem.status === 200) {
-      setTimeout(() => setPostStatus(null), 2000);
-      setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList });
-      setSelectedItems(initialState);
-    }
-  };
+      setPostStatus(postedItem);
 
-  return (
-    <>
-      <Box sx={{ display: 'grid', gap: 3 }}>
-        <InformationDialog
-          dialogText={helpText}
-          dialogTitle='Write Off Help'
-          toolTipText={'Info'}
-          buttonLocation={{ position: 'absolute', top: '1em', right: '1em', cursor: 'pointer' }}
-        />
+      if (postedItem.status === 200) {
+         setTimeout(() => setPostStatus(null), 2000);
+         setSelectedItems(initialState);
+         setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList });
+      }
+   };
 
-        <InitialSelectionOptions
-          customerData={customerData}
-          setCustomerData={data => setCustomerData(data)}
-          selectedItems={selectedItems}
-          setSelectedItems={data => setSelectedItems(data)}
-          initialState={initialState}
-        />
+   return (
+      <>
+         <Box sx={{ display: 'grid', gap: 3 }}>
+            <InformationDialog dialogText={helpText} dialogTitle='Write Off Help' toolTipText={'Info'} buttonLocation={{ position: 'absolute', top: '1em', right: '1em', cursor: 'pointer' }} />
 
-        <WriteOffOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
+            <InitialSelectionOptions
+               customerData={customerData}
+               setCustomerData={data => setCustomerData(data)}
+               selectedItems={selectedItems}
+               setSelectedItems={data => setSelectedItems(data)}
+               initialState={initialState}
+            />
 
-        <Typography>Total: {formatTotal(quantity * unitCost)}</Typography>
+            <WriteOffOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 
-        <Box style={{ textAlign: 'center' }}>
-          <Button onClick={handleSubmit}>Submit</Button>
-          {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
-        </Box>
-      </Box>
-    </>
-  );
+            <Typography>Total: {formatTotal(quantity * unitCost)}</Typography>
+
+            <Box style={{ textAlign: 'center' }}>
+               <Button onClick={handleSubmit}>Submit</Button>
+               {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
+            </Box>
+         </Box>
+      </>
+   );
 }
 
 const helpText = [
-  'Adjustments are not currently supported. You can either write off a portion or the entire amount of a job.',
-  'If you need to adjust a transaction, please edit or delete the transaction directly from the transactions list.',
-  'When writing off, only provide the ID for an Invoice or select a Job. Do not provide both. In most cases, you will want to write off a Job.',
-  'Currently, you are required to provide the ID of the invoice you want to write off.',
-  'Definition of a Write Off: The inability to collect payment from a customer for a job that has been completed.'
+   'Adjustments are not currently supported. You can either write off a portion or the entire amount of a job.',
+   'If you need to adjust a transaction, please edit or delete the transaction directly from the transactions list.',
+   'When writing off, only provide the ID for an Invoice or select a Job. Do not provide both. In most cases, you will want to write off a Job.',
+   'Currently, you are required to provide the ID of the invoice you want to write off.',
+   'Definition of a Write Off: The inability to collect payment from a customer for a job that has been completed.'
 ];

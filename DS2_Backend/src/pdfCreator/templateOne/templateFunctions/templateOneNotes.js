@@ -3,7 +3,7 @@ const createNotesSection = (doc, invoiceDetails, preferenceSettings) => {
    const { account_statement, account_interest_statement } = accountBillingInformation;
    const { normalFont, boldFont, lineHeight, leftMargin, pageWidth, bottomMargin, pageHeight, endOfGroupingHeight } = preferenceSettings;
 
-   const groupHeight = endOfGroupingHeight + 25;
+   const groupHeight = endOfGroupingHeight;
 
    if (account_statement) {
       doc.font(normalFont)

@@ -11,8 +11,11 @@ const { createGrid, filterGridByColumnName } = require('../../helperFunctions/he
 const { fetchInitialQueryItems } = require('./createInvoice/createInvoiceQueries');
 const { calculateInvoices } = require('./createInvoice/invoiceCalculations/calculateInvoices');
 const { addInvoiceDetails } = require('./createInvoice/addDetailToInvoice/addInvoiceDetail');
-const { createAndSavePdfsToDisk } = require('../../pdfCreator/createAndSavePDFs');
+const { createPDFInvoices } = require('../../pdfCreator/createAndSavePDFs');
 const { createCsvData } = require('./createInvoiceCsv/createInvoiceCsv');
+const { createAndSaveZip } = require('../../pdfCreator/zipOrchestrator');
+const dataInsertionOrchestrator = require('./invoiceDataInsertions/dataInsertionOrchestrator');
+const { requireManagerOrAdmin } = require('../auth/jwt-auth');
 const config = require('../../../config');
 
 // GET all invoices
@@ -36,59 +39,32 @@ invoiceRouter.route('/getInvoices/:accountID/:invoiceID').get(async (req, res) =
 });
 
 // Delete invoice
-invoiceRouter.route('/deleteInvoice/:accountID/:invoiceID').delete(async (req, res) => {
-   const db = req.app.get('db');
-   const { accountID, invoiceID } = req.params;
+invoiceRouter
+   .route('/deleteInvoice/:accountID/:invoiceID')
+   .all(requireManagerOrAdmin)
+   .delete(async (req, res) => {
+      const db = req.app.get('db');
+      const { accountID, invoiceID } = req.params;
 
-   await invoiceService.deleteInvoice(db, invoiceID);
+      await invoiceService.deleteInvoice(db, invoiceID);
 
-   const invoicesData = await invoiceService.getInvoices(db, accountID);
+      const invoicesData = await invoiceService.getInvoices(db, accountID);
 
-   // Create Mui Grid
-   const grid = createGrid(invoicesData);
+      // Create Mui Grid
+      const grid = createGrid(invoicesData);
 
-   // Return Object
-   const invoices = {
-      invoicesData,
-      grid
-   };
+      // Return Object
+      const invoices = {
+         invoicesData,
+         grid
+      };
 
-   res.send({
-      invoices,
-      message: 'Successfully deleted invoice.',
-      status: 200
+      res.send({
+         invoices,
+         message: 'Successfully deleted invoice.',
+         status: 200
+      });
    });
-});
-
-// Update an invoice
-invoiceRouter.route('/updateInvoice').put(jsonParser, async (req, res) => {
-   const db = req.app.get('db');
-   // sanitize fields
-   const sanitizedInvoice = sanitizeFields(req.body.invoice);
-
-   // Create new object with sanitized fields
-   const invoiceTableFields = restoreDataTypesInvoiceTableOnUpdate(sanitizedInvoice);
-
-   // Update invoice
-   await invoiceService.updateInvoice(db, invoiceTableFields);
-
-   const invoicesData = await invoiceService.getInvoices(db, invoiceTableFields.account_id);
-
-   // Create Mui Grid
-   const grid = createGrid(invoicesData);
-
-   // Return Object
-   const invoices = {
-      invoicesData,
-      grid
-   };
-
-   res.send({
-      invoices,
-      message: 'Successfully updated invoice.',
-      status: 200
-   });
-});
 
 // Get accounts with a balance to generate invoices
 invoiceRouter.route('/createInvoice/AccountsWithBalance/:accountID/:invoiceID').get(async (req, res) => {
@@ -130,27 +106,27 @@ invoiceRouter.route('/createInvoice/:accountID/:userID').post(jsonParser, async 
       const calculatedInvoices = calculateInvoices(invoicesToCreate, invoiceQueryData);
       const invoicesWithDetail = addInvoiceDetails(calculatedInvoices, invoiceQueryData, invoicesToCreateMap, accountBillingInformation, globalInvoiceNote);
 
-      let pdfFileLocation = '';
-      let csvFileLocation = '';
+      let fileLocation = '';
 
-      if (isCsvOnly) {
-         csvFileLocation = await createCsvData(invoicesWithDetail, accountBillingInformation);
-      }
+      const csvBuffer = createCsvData(invoicesWithDetail);
+      const pdfBuffer = await createPDFInvoices(invoicesWithDetail);
+      const filesToZip = pdfBuffer.concat(csvBuffer);
 
-      if (isRoughDraft) {
-         pdfFileLocation = await createAndSavePdfsToDisk(invoicesWithDetail, isFinalized, accountBillingInformation);
-      }
-
-      if (isFinalized) {
-         pdfFileLocation = await createAndSavePdfsToDisk(invoicesWithDetail, isFinalized, accountBillingInformation);
-         // Handle data inserts
-         // await handleDataInserts(db, invoicesWithDetail, accountID, userID);
+      if (isCsvOnly && isRoughDraft) {
+         fileLocation = await createAndSaveZip(filesToZip, accountBillingInformation, 'monthly_files/csv_report_and_draft_invoices', 'zipped_files.zip');
+      } else if (isCsvOnly) {
+         fileLocation = await createAndSaveZip([csvBuffer], accountBillingInformation, 'monthly_files/csv_report', 'zipped_files.zip');
+      } else if (isRoughDraft) {
+         fileLocation = await createAndSaveZip(pdfBuffer, accountBillingInformation, 'monthly_files/draft_invoices', 'zipped_files.zip');
+      } else if (isFinalized) {
+         fileLocation = await createAndSaveZip(pdfBuffer, accountBillingInformation, 'monthly_files/final_invoices', 'zipped_files.zip');
+         // Insert data into db
+         await dataInsertionOrchestrator(db, invoicesWithDetail, accountBillingInformation, pdfBuffer, userID);
       }
 
       res.send({
          invoicesWithDetail,
-         csvFileLocation,
-         pdfFileLocation,
+         fileLocation,
          message: 'Successfully retrieved balance.',
          status: 200
       });

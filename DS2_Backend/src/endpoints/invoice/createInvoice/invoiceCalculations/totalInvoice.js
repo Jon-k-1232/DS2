@@ -1,12 +1,30 @@
-const totalInvoice = (invoiceInformation, showWriteOffs, hideRetainers) => {
-   const { payments, retainers, writeOffs, transactions, outstandingInvoices } = invoiceInformation;
+const totalInvoice = (customer_id, invoiceInformation, showWriteOffs, hideRetainers) => {
+   const { payments, retainers, writeOffs, transactions, transactionRetainerPayments, outstandingInvoices } = invoiceInformation;
 
    const invoiceTotalHidingWriteOffs = payments.paymentTotal + transactions.transactionsTotal + outstandingInvoices.outstandingInvoiceTotal;
 
    const writeOffsTotal = showWriteOffs ? writeOffs.writeOffTotal : 0;
    const retainerTotal = hideRetainers ? 0 : retainers.retainerTotal;
 
-   return invoiceTotalHidingWriteOffs + writeOffsTotal + retainerTotal;
+   const preRetainerInvoiceTotal = invoiceTotalHidingWriteOffs + writeOffsTotal;
+   const retainerAppliedToInvoice = transactionRetainerPayments.transactionRetainerPaymentTotal;
+   const remainingRetainer = retainerTotal + Math.abs(retainerAppliedToInvoice);
+   const invoiceTotal = invoiceTotalHidingWriteOffs + writeOffsTotal + retainerAppliedToInvoice;
+
+   if (isNaN(invoiceTotal)) {
+      console.log(`Invoice Total on ${customer_id} is NaN`);
+      throw new Error(`Invoice Total on ${customer_id} is NaN`);
+   }
+   if (invoiceTotal === null || invoiceTotal === undefined) {
+      console.log(`Invoice Total on ${customer_id} is null or undefined`);
+      throw new Error(`Invoice Total on ${customer_id} is null or undefined`);
+   }
+   if (typeof invoiceTotal !== 'number') {
+      console.log(`Invoice Total on ${customer_id} is not a number`);
+      throw new Error(`Invoice Total on ${customer_id} is not a number`);
+   }
+
+   return { retainerAppliedToInvoice, remainingRetainer, invoiceTotal, preRetainerInvoiceTotal };
 };
 
 module.exports = { totalInvoice };

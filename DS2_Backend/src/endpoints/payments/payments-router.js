@@ -12,37 +12,41 @@ const { unableToCompleteRequest } = require('../../serverResponses/errors');
 // Create a new payment
 paymentsRouter.route('/createPayment/:accountID/:userID').post(jsonParser, async (req, res) => {
    const db = req.app.get('db');
+   try {
+      const sanitizedNewPayment = sanitizeFields(req.body.payment);
+      const paymentTableFields = restoreDataTypesPaymentsTableOnCreate(sanitizedNewPayment);
 
-   const sanitizedNewPayment = sanitizeFields(req.body.payment);
-   const paymentTableFields = restoreDataTypesPaymentsTableOnCreate(sanitizedNewPayment);
+      const { customer_invoice_id, account_id, payment_amount } = paymentTableFields;
 
-   const { customer_invoice_id, account_id, payment_amount } = paymentTableFields;
+      if (!customer_invoice_id) {
+         throw new Error('No invoice ID provided for this payment.');
+      }
 
-   if (!customer_invoice_id) {
-      const reason = 'Payment must be attached to an invoice. If there is not an invoice, create a new Prepayment.';
-      return unableToCompleteRequest(res, reason, 400);
+      // Find all records for this invoice
+      const [matchingInvoice] = await invoiceService.getInvoiceByInvoiceRowID(db, account_id, customer_invoice_id);
+      const { remaining_balance_on_invoice } = matchingInvoice || {};
+
+      // If no matching invoice return error
+      if (!Object.keys(matchingInvoice).length) {
+         throw new Error('No matching invoice record found for this payment.');
+      }
+
+      // return error for over payment, along with the max amount that can be applied to this invoice
+      if (Math.abs(remaining_balance_on_invoice) < Math.abs(payment_amount)) {
+         throw new Error(`Payment amount exceeds remaining balance on invoice. Max amount that can be applied to this invoice is $${Math.abs(remaining_balance_on_invoice)}.`);
+      }
+
+      // Calculate remaining balance, and post
+      await handlePaymentMatchingInvoice(db, matchingInvoice, paymentTableFields);
+
+      return returnTablesWithSuccessResponse(db, res, paymentTableFields);
+   } catch (err) {
+      console.log(err);
+      res.send({
+         message: err.message || 'An error occurred while creating the Payment.',
+         status: 500
+      });
    }
-
-   // Find all records for this invoice
-   const [matchingInvoice] = await invoiceService.getInvoiceByInvoiceRowID(db, account_id, customer_invoice_id);
-   const { remaining_balance_on_invoice } = matchingInvoice || {};
-
-   // If no matching invoice return error
-   if (!Object.keys(matchingInvoice).length) {
-      const reason = 'No matching invoice record found for this payment.';
-      return unableToCompleteRequest(res, reason, 400);
-   }
-
-   // return error for over payment, along with the max amount that can be applied to this invoice
-   if (Math.abs(remaining_balance_on_invoice) < Math.abs(payment_amount)) {
-      const reason = `Payment amount exceeds the amount due on this invoice. The maximum amount that can be applied to this invoice is ${remaining_balance_on_invoice}.`;
-      return unableToCompleteRequest(res, reason, 400);
-   }
-
-   // Calculate remaining balance, and post
-   await handlePaymentMatchingInvoice(db, matchingInvoice, paymentTableFields);
-
-   return returnTablesWithSuccessResponse(db, res, paymentTableFields);
 });
 
 // Get single payment
@@ -51,89 +55,111 @@ paymentsRouter
    // .all( requireAuth )
    .get(async (req, res) => {
       const db = req.app.get('db');
-      const { paymentID, accountID } = req.params;
+      try {
+         const { paymentID, accountID } = req.params;
 
-      const activePayments = await paymentsService.getSinglePayment(db, paymentID, accountID);
+         const activePayments = await paymentsService.getSinglePayment(db, paymentID, accountID);
 
-      // Return Object
-      const activePaymentData = {
-         activePayments,
-         grid: createGrid(activePayments)
-      };
+         if (!activePayments.length) throw new Error('No matching payment record found.');
 
-      res.send({
-         activePaymentData,
-         message: 'Successfully retrieved single payment.',
-         status: 200
-      });
+         // Return Object
+         const activePaymentData = {
+            activePayments,
+            grid: createGrid(activePayments)
+         };
+
+         res.send({
+            activePaymentData,
+            message: 'Successfully retrieved single payment.',
+            status: 200
+         });
+      } catch (err) {
+         console.log(err);
+         res.send({
+            message: err.message || 'An error occurred while updating the Payment.',
+            status: 500
+         });
+      }
    });
 
 // Update a payment
 paymentsRouter.route('/updatePayment/:accountID/:userID').put(jsonParser, async (req, res) => {
    const db = req.app.get('db');
-   const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
+   try {
+      const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
 
-   // Create new object with sanitized fields
-   const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
-   const { customer_invoice_id } = paymentTableFields;
+      // Create new object with sanitized fields
+      const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
+      const { customer_invoice_id } = paymentTableFields;
 
-   // If payment is attached to an invoice, do not allow update
-   if (customer_invoice_id) {
-      const reason = 'Payment is attached to an invoice and cannot be updated.';
-      unableToCompleteRequest(res, reason, 423);
-      return;
+      // If payment is attached to an invoice, do not allow update
+      if (customer_invoice_id) {
+         throw new Error('Payment is attached to an invoice and cannot be updated.');
+      }
+
+      // Update payment
+      await paymentsService.updatePayment(db, paymentTableFields);
+
+      // Get all payments
+      const activePayments = await paymentsService.getActivePayments(db, paymentTableFields.account_id);
+
+      const activePaymentsData = {
+         activePayments,
+         grid: createGrid(activePayments)
+      };
+
+      res.send({
+         paymentsList: { activePaymentsData },
+         message: 'Successfully updated payment.',
+         status: 200
+      });
+   } catch (err) {
+      console.log(err);
+      res.send({
+         message: err.message || 'An error occurred while updating the Payment.',
+         status: 500
+      });
    }
-
-   // Update payment
-   await paymentsService.updatePayment(db, paymentTableFields);
-
-   // Get all payments
-   const activePayments = await paymentsService.getActivePayments(db, paymentTableFields.account_id);
-
-   const activePaymentsData = {
-      activePayments,
-      grid: createGrid(activePayments)
-   };
-
-   res.send({
-      paymentsList: { activePaymentsData },
-      message: 'Successfully updated payment.',
-      status: 200
-   });
 });
 
 // Delete a payment
 paymentsRouter.route('/deletePayment/:accountID/:userID').delete(jsonParser, async (req, res) => {
    const db = req.app.get('db');
-   const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
+   try {
+      const sanitizedUpdatedPayment = sanitizeFields(req.body.payment);
 
-   // Create new object with sanitized fields
-   const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
-   const { customer_invoice_id, payment_id, account_id } = paymentTableFields;
+      // Create new object with sanitized fields
+      const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
+      const { customer_invoice_id, payment_id, account_id } = paymentTableFields;
 
-   // If payment is attached to an invoice, do not allow delete
-   if (customer_invoice_id) {
-      const reason = 'Payment is attached to an invoice and cannot be deleted.';
-      unableToCompleteRequest(res, reason, 423);
-      return;
+      // If payment is attached to an invoice, do not allow delete
+      if (customer_invoice_id) {
+         throw new Error('Payment is attached to an invoice and cannot be deleted.');
+      }
+
+      // Delete payment
+      await paymentsService.deletePayment(db, payment_id);
+
+      // Get all payments
+      const paymentsData = await paymentsService.getActivePayments(db, account_id);
+
+      const activePaymentsData = {
+         paymentsData,
+         grid: createGrid(paymentsData)
+      };
+
+      res.send({
+         paymentsList: { activePaymentsData },
+         message: 'Successfully deleted payment.',
+         status: 200
+      });
+   } catch (err) {
+      console.log(err);
+      res.send({
+         message: err.message || 'An error occurred while deleting the Payment.',
+         status: 500
+      });
    }
-
-   // Delete payment
-   await paymentsService.deletePayment(db, payment_id);
-
-   // Get all payments
-   const paymentsData = await paymentsService.getActivePayments(db, account_id);
-
-   const activePaymentsData = {
-      paymentsData,
-      grid: createGrid(paymentsData)
-   };
-
-   res.send({
-      paymentsList: { activePaymentsData },
-      message: 'Successfully deleted payment.',
-      status: 200
-   });
 });
 
 module.exports = paymentsRouter;

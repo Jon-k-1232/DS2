@@ -74,7 +74,7 @@ export default function EditTransaction({ customerData, setCustomerData, transac
             selectedDate: dayjs(transaction_date),
             transactionType: transaction_type || 'Charge',
             selectedGeneralWorkDescription: workDescriptions.find(workDescription => workDescription.general_work_description_id === general_work_description_id),
-            retainer_id: activeRetainers.find(retainer => retainer.retainer_id === retainer_id)
+            selectedRetainerPayment: activeRetainers.find(retainer => retainer.retainer_id === retainer_id) || null
          });
       }
       // eslint-disable-next-line
@@ -92,18 +92,13 @@ export default function EditTransaction({ customerData, setCustomerData, transac
       const postedItem = await putEditTransaction(dataToPost, accountID, userID);
 
       setPostStatus(postedItem);
-      if (postedItem.status === 200) {
-         setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList });
-         resetState();
-      }
-   };
 
-   const resetState = () => {
-      setSelectedItems(initialState);
-      setTimeout(() => {
-         setPostStatus(null);
+      if (postedItem.status === 200) {
+         setTimeout(() => setPostStatus(null), 2000);
+         setSelectedItems(initialState);
+         setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList, accountRetainersList: postedItem.accountRetainersList });
          navigate('/transactions/customerTransactions');
-      }, 2000);
+      }
    };
 
    return (

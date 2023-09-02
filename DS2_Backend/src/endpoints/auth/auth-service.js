@@ -3,39 +3,49 @@ const jwt = require('jsonwebtoken');
 const config = require('../../../config');
 
 const authService = {
-  getUserByUserName(db, username) {
-    return db('user_login').where('user_name', username).where('is_login_active', true);
-  },
+   getUserByUserName(db, username) {
+      return db('user_login').where('user_name', username).where('is_login_active', true);
+   },
 
-  getUserInformation(db, accountID, userID) {
-    return db('users').where('account_id', accountID).where('user_id', userID).where('is_user_active', true);
-  },
+   getUserRoleByUserName(db, username) {
+      return db('user_login')
+         .join('users', 'user_login.user_id', '=', 'users.user_id')
+         .where({
+            'user_login.user_name': username,
+            'user_login.is_login_active': true
+         })
+         .select('users.access_level');
+   },
 
-  comparePasswords(password, hash) {
-    return bcrypt.compare(password, hash);
-  },
+   getUserInformation(db, accountID, userID) {
+      return db('users').where('account_id', accountID).where('user_id', userID).where('is_user_active', true);
+   },
 
-  createJwt(subject, payload) {
-    return jwt.sign(payload, config.API_TOKEN, {
-      subject,
-      expiresIn: config.JWT_EXPIRATION,
-      algorithm: 'HS256'
-    });
-  },
+   comparePasswords(password, hash) {
+      return bcrypt.compare(password, hash);
+   },
 
-  verifyJwt(token) {
-    return jwt.verify(token, config.API_TOKEN, {
-      algorithms: ['HS256']
-    });
-  },
+   createJwt(subject, payload) {
+      return jwt.sign(payload, config.API_TOKEN, {
+         subject,
+         expiresIn: config.JWT_EXPIRATION,
+         algorithm: 'HS256'
+      });
+   },
 
-  hashPassword(password) {
-    return bcrypt.hash(password, 12);
-  },
+   verifyJwt(token) {
+      return jwt.verify(token, config.API_TOKEN, {
+         algorithms: ['HS256']
+      });
+   },
 
-  insertLoginLog(db, userLog) {
-    return db('user_login_log').insert(userLog).returning('*');
-  }
+   hashPassword(password) {
+      return bcrypt.hash(password, 12);
+   },
+
+   insertLoginLog(db, userLog) {
+      return db('user_login_log').insert(userLog).returning('*');
+   }
 };
 
 module.exports = authService;

@@ -23,8 +23,6 @@ const fetchInitialQueryItems = async (db, invoicesToCreateMap, accountID) => {
          invoiceService.getWriteOffsByCustomerID(db, accountID, customerIDs, lastInvoiceDateByCustomerID),
          invoiceService.getRetainersByCustomerID(db, accountID, customerIDs, lastInvoiceDateByCustomerID),
          invoiceService.getOutstandingInvoices(db, accountID, customerIDs, lastInvoiceDateByCustomerID)
-         // Need to create
-         // invoiceService.getAdjustmentsByCustomerID(db, accountID, customerIDs, lastInvoiceDateByCustomerID)
       ]);
 
       return {

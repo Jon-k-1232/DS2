@@ -3,26 +3,30 @@ const { groupAndTotalRetainers } = require('./retainerCalculations');
 const { groupAndTotalWriteOffs } = require('./writeOffCalculations');
 const { groupAndTotalTransactions } = require('./transactionCalculations');
 const { groupAndTotalOutstandingInvoices } = require('./outstandingInvoicesCalculations');
+const { groupAndTotalTransactionRetainerPayments } = require('./transactionRetainerPaymentCalculations');
 const { totalInvoice } = require('./totalInvoice');
 
 const calculateInvoices = (invoicesToCreate, invoiceQueryData) => {
    try {
       return invoicesToCreate.map(customer => {
          const { customer_id, showWriteOffs } = customer;
+         const { lastInvoiceDateByCustomerID } = invoiceQueryData;
          const hideRetainers = false;
 
+         // Calculate the invoice information per customer
          const invoiceInformation = {
+            lastInvoiceDate: lastInvoiceDateByCustomerID[customer_id],
+            outstandingInvoices: groupAndTotalOutstandingInvoices(customer_id, invoiceQueryData),
             payments: groupAndTotalPayments(customer_id, invoiceQueryData),
             retainers: groupAndTotalRetainers(customer_id, invoiceQueryData, hideRetainers),
-            writeOffs: groupAndTotalWriteOffs(customer_id, invoiceQueryData, showWriteOffs),
             transactions: groupAndTotalTransactions(customer_id, invoiceQueryData, showWriteOffs),
-            outstandingInvoices: groupAndTotalOutstandingInvoices(customer_id, invoiceQueryData)
+            writeOffs: groupAndTotalWriteOffs(customer_id, invoiceQueryData, showWriteOffs),
+            transactionRetainerPayments: groupAndTotalTransactionRetainerPayments(customer_id, invoiceQueryData, showWriteOffs)
          };
 
-         const invoiceTotal = totalInvoice(invoiceInformation, showWriteOffs, hideRetainers);
+         const invoiceTotal = totalInvoice(customer_id, invoiceInformation, showWriteOffs, hideRetainers);
 
-         // Todo - const autoPayments = groupAndTotalAutoPayments(customer_id, invoiceQueryData);
-         return { customer_id, ...invoiceInformation, invoiceTotal };
+         return { customer_id, ...invoiceInformation, ...invoiceTotal };
       });
    } catch (error) {
       console.log(`Error Calculating Invoices: ${error.message}`);

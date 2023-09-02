@@ -76,7 +76,7 @@ INSERT INTO customer_quotes(account_id, customer_id, customer_job_id, amount_quo
 (1, 3, NULL, 1000.00, TRUE, 3, 'Custom project with multiple phases');
 
 -- Sample data for customer_invoices table
-INSERT INTO customer_invoices(parent_invoice_id, account_id, customer_id, customer_info_id, invoice_number, invoice_date, due_date, beginning_balance, total_payments, total_charges, total_write_offs, total_retainers, total_amount_due, remaining_balance_on_invoice, is_invoice_paid_in_full, fully_paid_date, created_by_user_id, start_date, end_date, notes)
+INSERT INTO customer_invoices(parent_invoice_id, account_id, customer_id, customer_info_id, invoice_number, invoice_date, due_date, beginning_balance, total_payments, total_charges, total_write_offs, total_retainers, total_amount_due, remaining_balance_on_invoice, is_invoice_paid_in_full, fully_paid_date, created_by_user_id, start_date, end_date, invoice_file_location, notes)
      VALUES (NULL, 2, 1, 1, 'INV-2023-00001', '2023-01-01', '2023-02-01', 0.00, 0.00, 500.00, 0.00, 0.00, 500.00, 500, FALSE, NULL, 1, '2023-01-01', '2023-01-01', 'First invoice for completed work'),
 (NULL, 2, 2, 2, 'INV-2023-00002', '2023-01-01', '2023-02-01', 0.00, 0.00, 750.00, 0.00, 0.00, 750.00, 750, FALSE, NULL, 2, '2023-01-01', '2023-01-01', 'Invoice for discounted rate'),
 (NULL, 2, 3, 3, 'INV-2023-00003', '2023-01-01', '2023-02-01', 0.00, 0.00, 1000.00, 0.00, 0.00, 1000.00, 1000, FALSE, NULL, 3, '2023-01-01', '2023-01-01', 'Invoice for custom project'),

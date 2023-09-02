@@ -82,11 +82,12 @@ export default function EditRetainer({ customerData, setCustomerData, retainerDa
       const postedItem = await postEditRetainer(dataToPost, accountID, userID);
 
       setPostStatus(postedItem);
+
       if (postedItem.status === 200) {
-         setCustomerData({ ...customerData, accountRetainersList: postedItem.accountRetainersList });
          setTimeout(() => setPostStatus(null), 2000);
-         navigate('/transactions/customerRetainers');
          setSelectedItems(initialState);
+         setCustomerData({ ...customerData, accountRetainersList: postedItem.accountRetainersList });
+         navigate('/transactions/customerRetainers');
       }
    };
 

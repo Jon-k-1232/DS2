@@ -35,10 +35,11 @@ export default function Retainer({ customerData, setCustomerData }) {
       const postedItem = await postNewRetainer(dataToPost, accountID, userID);
 
       setPostStatus(postedItem);
+
       if (postedItem.status === 200) {
-         setCustomerData({ ...customerData, accountRetainersList: postedItem.accountRetainersList });
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
+         setCustomerData({ ...customerData, accountRetainersList: postedItem.accountRetainersList });
       }
    };
 

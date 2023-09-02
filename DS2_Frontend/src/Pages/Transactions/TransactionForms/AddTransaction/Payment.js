@@ -58,10 +58,11 @@ export default function Payment({ customerData, setCustomerData }) {
       const postedItem = await postNewPayment(dataToPost, accountID, userID);
 
       setPostStatus(postedItem);
+
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
-         setCustomerData({ ...customerData, paymentsList: postedItem.paymentsList });
          setSelectedItems(initialState);
+         setCustomerData({ ...customerData, paymentsList: postedItem.paymentsList });
       }
    };
 

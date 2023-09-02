@@ -8,54 +8,54 @@ import { useContext } from 'react';
 import { context } from '../../../../App';
 
 const initialState = {
-  customerStreet: '',
-  customerCity: '',
-  customerState: '',
-  customerZip: '',
-  customerPhone: '',
-  customerEmail: '',
-  isThisAddressActive: true,
-  isCustomerAddressActive: true,
-  isCustomerPhysicalAddress: true,
-  isCustomerBillingAddress: true,
-  isCustomerMailingAddress: true
+   customerStreet: '',
+   customerCity: '',
+   customerState: '',
+   customerZip: '',
+   customerPhone: '',
+   customerEmail: '',
+   isThisAddressActive: true,
+   isCustomerAddressActive: true,
+   isCustomerPhysicalAddress: true,
+   isCustomerBillingAddress: true,
+   isCustomerMailingAddress: true
 };
 
 export default function UpdateAccountAddress() {
-  const { loggedInUser } = useContext(context);
-  const { accountID, userID } = useContext(context).loggedInUser;
+   const { loggedInUser } = useContext(context);
+   const { accountID, userID } = useContext(context).loggedInUser;
 
-  const [postStatus, setPostStatus] = useState(null);
-  const [selectedItems, setSelectedItems] = useState(initialState);
+   const [postStatus, setPostStatus] = useState(null);
+   const [selectedItems, setSelectedItems] = useState(initialState);
 
-  const handleSubmit = async () => {
-    // ToDO - Not hooked up
-    const dataToPost = formObjectForAccountAddressUpdate(selectedItems, loggedInUser);
-    const postedItem = await putUpdateAccountAddress(dataToPost, accountID, userID);
+   const handleSubmit = async () => {
+      // Todo - Not hooked up
+      const dataToPost = formObjectForAccountAddressUpdate(selectedItems, loggedInUser);
+      const postedItem = await putUpdateAccountAddress(dataToPost, accountID, userID);
 
-    setPostStatus(postedItem);
-    if (postedItem.status === 200) resetState(postedItem);
-  };
+      setPostStatus(postedItem);
+      if (postedItem.status === 200) resetState(postedItem);
+   };
 
-  const resetState = () => {
-    setSelectedItems(initialState);
-    setTimeout(() => setPostStatus(null), 4000);
-  };
+   const resetState = () => {
+      setSelectedItems(initialState);
+      setTimeout(() => setPostStatus(null), 4000);
+   };
 
-  return (
-    <>
-      <Stack spacing={3}>
-        <Stack>
-          <AddressForm selectedItems={selectedItems} setSelectedItems={setSelectedItems} />
-        </Stack>
-        <Stack>
-          <AddressTypeSelections selectedItems={selectedItems} setSelectedItems={setSelectedItems} />
-        </Stack>
-        <Box style={{ textAlign: 'center' }}>
-          <Button onClick={handleSubmit}>Submit</Button>
-          {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
-        </Box>
-      </Stack>
-    </>
-  );
+   return (
+      <>
+         <Stack spacing={3}>
+            <Stack>
+               <AddressForm selectedItems={selectedItems} setSelectedItems={setSelectedItems} />
+            </Stack>
+            <Stack>
+               <AddressTypeSelections selectedItems={selectedItems} setSelectedItems={setSelectedItems} />
+            </Stack>
+            <Box style={{ textAlign: 'center' }}>
+               <Button onClick={handleSubmit}>Submit</Button>
+               {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
+            </Box>
+         </Stack>
+      </>
+   );
 }

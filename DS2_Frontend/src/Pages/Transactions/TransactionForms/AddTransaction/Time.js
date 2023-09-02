@@ -38,13 +38,12 @@ export default function Time({ customerData, setCustomerData }) {
       const postedItem = await postTransaction(dataToPost, accountID, userID);
 
       setPostStatus(postedItem);
-      if (postedItem.status === 200) resetState(postedItem);
-   };
 
-   const resetState = postedItem => {
-      setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList });
-      setSelectedItems(initialState);
-      setTimeout(() => setPostStatus(null), 2000);
+      if (postedItem.status === 200) {
+         setTimeout(() => setPostStatus(null), 2000);
+         setSelectedItems(initialState);
+         setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList, accountRetainersList: postedItem.accountRetainersList });
+      }
    };
 
    return (

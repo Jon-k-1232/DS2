@@ -73,39 +73,54 @@ retainerRouter.route('/deleteRetainer/:retainerID/:accountID/:userID').delete(js
 // get single retainer
 retainerRouter.route('/getSingleRetainer/:retainerID/:accountID/:userID').get(async (req, res) => {
    const db = req.app.get('db');
-   const { retainerID, accountID } = req.params;
 
-   const activeRetainer = await retainerService.getSingleRetainer(db, accountID, retainerID);
+   try {
+      const { retainerID, accountID } = req.params;
+      const activeRetainer = await retainerService.getSingleRetainer(db, accountID, retainerID);
 
-   const activeRetainerData = {
-      activeRetainer,
-      grid: createGrid(activeRetainer)
-   };
+      if (!activeRetainer.length) throw new Error('Error no retainer found: ' + error.message);
 
-   res.send({
-      activeRetainerData,
-      message: 'Successfully retrieved single retainer.',
-      status: 200
-   });
+      const activeRetainerData = {
+         activeRetainer,
+         grid: createGrid(activeRetainer)
+      };
+
+      res.send({
+         activeRetainerData,
+         message: 'Successfully retrieved single retainer.',
+         status: 200
+      });
+   } catch (err) {
+      res.send({
+         message: 'Failure to retrieve single retainer.',
+         status: 500
+      });
+   }
 });
 
 // Get active retainers for a customer
 retainerRouter.route('/getActiveRetainers/:customerID/:accountID/:userID').get(async (req, res) => {
    const db = req.app.get('db');
    const { accountID, customerID } = req.params;
+   try {
+      const activeRetainers = await retainerService.getMostRecentRecordOfCustomerRetainers(db, accountID, customerID);
 
-   const activeRetainers = await retainerService.getCustomerRetainersByID(db, accountID, customerID);
+      const activeRetainerData = {
+         activeRetainers,
+         grid: createGrid(activeRetainers)
+      };
 
-   const activeRetainerData = {
-      activeRetainers,
-      grid: createGrid(activeRetainers)
-   };
-
-   res.send({
-      activeRetainerData,
-      message: 'Successfully retrieved active retainers.',
-      status: 200
-   });
+      res.send({
+         activeRetainerData,
+         message: 'Successfully retrieved active retainers.',
+         status: 200
+      });
+   } catch (err) {
+      res.send({
+         message: 'Failure to retrieve active retainers.',
+         status: 500
+      });
+   }
 });
 
 module.exports = retainerRouter;

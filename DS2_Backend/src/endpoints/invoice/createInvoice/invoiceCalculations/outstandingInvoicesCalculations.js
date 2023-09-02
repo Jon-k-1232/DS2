@@ -7,6 +7,19 @@ const groupAndTotalOutstandingInvoices = (customer_id, invoiceQueryData) => {
    const outstandingInvoiceRecords = filterInvoices(customerOutstandingInvoices, customersLastInvoiceDate);
    const outstandingInvoiceTotal = outstandingInvoiceRecords.reduce((prev, invoice) => (prev += Number(invoice.remaining_balance_on_invoice)), 0);
 
+   if (isNaN(outstandingInvoiceTotal)) {
+      console.log(`Outstanding Invoice Total on customerID:${customer_id} is NaN`);
+      throw new Error(`Outstanding Invoice Total on customerID:${customer_id} is NaN`);
+   }
+   if (outstandingInvoiceTotal === null || outstandingInvoiceTotal === undefined) {
+      console.log(`Outstanding Invoice Total on customerID:${customer_id} is null or undefined`);
+      throw new Error(`Outstanding Invoice Total on customerID:${customer_id} is null or undefined`);
+   }
+   if (typeof outstandingInvoiceTotal !== 'number') {
+      console.log(`Outstanding Invoice Total on customerID:${customer_id} is not a number`);
+      throw new Error(`Outstanding Invoice Total on customerID:${customer_id} is not a number`);
+   }
+
    return { outstandingInvoiceTotal, outstandingInvoiceRecords };
 };
 

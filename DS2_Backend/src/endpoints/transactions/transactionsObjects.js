@@ -39,4 +39,26 @@ const restoreDataTypesTransactionsTableOnUpdate = transaction => ({
    note: String(transaction.note) || ''
 });
 
-module.exports = { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate };
+const restoreDataTypesOnTransactions = transaction => ({
+   transaction_id: Number(transaction.transaction_id),
+   account_id: Number(transaction.account_id),
+   customer_id: Number(transaction.customer_id),
+   customer_job_id: Number(transaction.customer_job_id),
+   retainer_id: Number(transaction.retainer_id) || null,
+   customer_invoice_id: Number(transaction.customer_invoice_id) || null,
+   logged_for_user_id: Number(transaction.logged_for_user_id),
+   general_work_description_id: Number(transaction.general_work_description_id),
+   detailed_work_description: String(transaction.detailed_work_description) || '',
+   transaction_date: new Date(transaction.transaction_date),
+   transaction_type: String(transaction.transaction_type),
+   quantity: Number(transaction.quantity),
+   unit_cost: Number(transaction.unit_cost),
+   total_transaction: Math.abs(Number(transaction.total_transaction)),
+   is_transaction_billable: Boolean(transaction.is_transaction_billable),
+   is_excess_to_subscription: Boolean(transaction.is_excess_to_subscription) || false,
+   created_at: new Date(transaction.created_at),
+   created_by_user_id: Number(transaction.created_by_user_id),
+   note: String(transaction.note) || null
+});
+
+module.exports = { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, restoreDataTypesOnTransactions };
