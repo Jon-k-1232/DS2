@@ -73,8 +73,8 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
          setIsLoading(false);
          setTimeout(() => setPostStatus(null), 2000);
 
-         // setSelectedRowsToInvoice(initialState);
-         // setCustomerData({ ...customerData, invoicesList: postedItem.invoicesList });
+         setSelectedRowsToInvoice(initialState);
+         setCustomerData({ ...customerData, invoicesList: postedItem.invoicesList });
       }
    };
 

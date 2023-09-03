@@ -5,28 +5,30 @@ import AccountSettings from '../../../Pages/Account/AccountSettings/AccountSetti
 import UsersSubRoutes from './UsersSubRoutes';
 import Page from '../../../Components/Page';
 import { Stack } from '@mui/material';
+import AdminProtectedAccessRoute from '../../AdminProtectedAccess';
 
 export default function AccountRoutes({ setPageTitle, customerData, setCustomerData }) {
-  useEffect(() => {
-    setPageTitle('Account');
-    // eslint-disable-next-line
-  }, []);
+   useEffect(() => {
+      setPageTitle('Account');
+      // eslint-disable-next-line
+   }, []);
 
-  return (
-    <Page style={{ paddingTop: 0 }}>
-      <Stack style={{ padding: '20px' }}>
-        <Routes>
-          <Route
-            path='accountUsers'
-            element={<AccountUsersGrid customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
-          />
-          <Route
-            path='/accountUsers/*'
-            element={<UsersSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />}
-          />
-          <Route path='accountSettings' element={<AccountSettings />} />
-        </Routes>
-      </Stack>
-    </Page>
-  );
+   return (
+      <Page style={{ paddingTop: 0 }}>
+         <Stack style={{ padding: '20px' }}>
+            <Routes>
+               <Route path='accountUsers' element={<AccountUsersGrid customerData={customerData} setCustomerData={data => setCustomerData(data)} />} />
+               <Route path='/accountUsers/*' element={<UsersSubRoutes customerData={customerData} setCustomerData={data => setCustomerData(data)} />} />
+               <Route
+                  path='accountSettings'
+                  element={
+                     <AdminProtectedAccessRoute>
+                        <AccountSettings />
+                     </AdminProtectedAccessRoute>
+                  }
+               />
+            </Routes>
+         </Stack>
+      </Page>
+   );
 }
