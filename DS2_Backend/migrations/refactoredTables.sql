@@ -7,7 +7,7 @@ CREATE TABLE accounts(
      account_interest_statement varchar(255),
      account_invoice_interest_rate decimal(10, 2),
      account_invoice_template_option varchar(100),
-     account_company_logo varchar(255),
+     account_company_logo bytea,
      created_at timestamp DEFAULT NOW()
 );
 

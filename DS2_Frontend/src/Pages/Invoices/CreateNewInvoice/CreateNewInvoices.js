@@ -55,8 +55,6 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
       submitInvoice();
    };
 
-   console.log(selectedRowsToInvoice);
-
    const submitInvoice = async () => {
       setIsLoading(true);
       setSubmitError(null);

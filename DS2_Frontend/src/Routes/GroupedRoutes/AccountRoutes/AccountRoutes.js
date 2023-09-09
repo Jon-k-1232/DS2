@@ -23,7 +23,7 @@ export default function AccountRoutes({ setPageTitle, customerData, setCustomerD
                   path='accountSettings'
                   element={
                      <AdminProtectedAccessRoute>
-                        <AccountSettings />
+                        <AccountSettings customerData={customerData} setCustomerData={data => setCustomerData(data)} />
                      </AdminProtectedAccessRoute>
                   }
                />

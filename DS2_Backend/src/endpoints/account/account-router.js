@@ -6,6 +6,7 @@ const accountService = require('./account-service');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
 const { requireAdmin } = require('../auth/jwt-auth');
 const { restoreDataTypesAccountOnCreate, restoreDataTypesAccountInformationOnCreate, restoreDataTypesAccountOnUpdate, restoreDataTypesAccountInformationOnUpdate } = require('./accountObjects');
+const fs = require('fs').promises;
 
 // Create post to input new account
 accountRouter.route('/createAccount').post(jsonParser, async (req, res) => {
@@ -72,21 +73,18 @@ accountRouter
    });
 
 accountRouter
-   .route('/getAccount/:accountID')
+   .route('/AccountInformation/:accountID/:userID')
    .all(requireAdmin)
    .get(async (req, res) => {
       const db = req.app.get('db');
       const { accountID } = req.params;
-      const accountData = await accountService.getAccount(db, accountID);
+      const [data] = await accountService.getAccount(db, accountID);
 
-      // Return Object
-      const account = {
-         accountData,
-         grid: createGrid(accountData)
-      };
+      const account_logo_buffer = await fs.readFile(data.account_company_logo);
+      const accountData = { ...data, account_logo_buffer };
 
       res.send({
-         account,
+         account: { accountData },
          message: 'Successfully retrieved customer.',
          status: 200
       });

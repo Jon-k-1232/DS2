@@ -190,3 +190,14 @@ export const fetchFileDownload = async (fileLocation, fileName, accountID, userI
       return { status: 400, message: 'File download failure.' };
    }
 };
+
+export const fetchAccountInformation = async (accountID, userID, token) => {
+   try {
+      const response = await axios.get(`${config.API_ENDPOINT}/account/AccountInformation/${accountID}/${userID}`, headers(token));
+      const accountInformation = response.data;
+      return accountInformation;
+   } catch (error) {
+      console.error('Error fetching account information:', error);
+      return [];
+   }
+};
