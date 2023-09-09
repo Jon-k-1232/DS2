@@ -47,7 +47,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
          }}
       >
          <Box sx={{ px: 2.5, py: 3 }}>
-            <Box component={RouterLink} to='/customers/customersList' sx={{ display: 'inline-flex' }}>
+            <Box component={RouterLink} to='/customers/customersList' sx={{ display: 'inline-flex', textDecoration: 'none' }}>
                <Logo />
             </Box>
          </Box>

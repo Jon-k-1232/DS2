@@ -52,7 +52,7 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
       autoCompleteLabel: 'Select Job',
       autoCompleteOptionsList: customerJobs,
       onChangeKey: 'selectedJob',
-      optionLabelProperty: 'job_description',
+      optionLabelProperty: 'display_name',
       valueTestProperty: 'customer_job_id',
       addedOptionLabel: 'Add New Job',
       selectedOption: selectedJob,

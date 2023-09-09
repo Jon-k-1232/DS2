@@ -1,6 +1,8 @@
 const express = require('express');
 const jobRouter = express.Router();
 const jobService = require('./job-service');
+const transactionsService = require('../transactions/transactions-service');
+const writeOffsService = require('../writeOffs/writeOffs-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { restoreDataTypesJobTableOnCreate, restoreDataTypesJobTableOnUpdate } = require('./jobObjects');
@@ -29,51 +31,48 @@ jobRouter.route('/createJob/:accountID/:userID').post(jsonParser, async (req, re
 });
 
 // Get job for a company
-jobRouter
-   .route('/getSingleJob/:customerJobID/:accountID/:userID')
-   // .all( requireAuth )
-   .get(async (req, res) => {
-      const db = req.app.get('db');
-      const { customerJobID } = req.params;
+jobRouter.route('/getSingleJob/:customerJobID/:accountID/:userID').get(async (req, res) => {
+   const db = req.app.get('db');
+   const { customerJobID } = req.params;
 
-      const activeJobs = await jobService.getSingleJob(db, customerJobID);
+   const activeJobs = await jobService.getSingleJob(db, customerJobID);
 
-      const activeJobData = {
-         activeJobs,
-         grid: createGrid(activeJobs)
-      };
+   const activeJobData = {
+      activeJobs,
+      grid: createGrid(activeJobs)
+   };
 
-      res.send({
-         activeJobData,
-         message: 'Successfully retrieved single job.',
-         status: 200
-      });
+   res.send({
+      activeJobData,
+      message: 'Successfully retrieved single job.',
+      status: 200
    });
+});
 
 // Get all active jobs for a customer
-jobRouter
-   .route('/getActiveCustomerJobs/:accountID/:userID/:customerID')
-   // .all( requireAuth )
-   .get(async (req, res) => {
-      const db = req.app.get('db');
-      const { accountID, customerID } = req.params;
+jobRouter.route('/getActiveCustomerJobs/:accountID/:userID/:customerID').get(async (req, res) => {
+   const db = req.app.get('db');
+   const { accountID, customerID } = req.params;
 
-      const customerJobs = await jobService.getActiveCustomerJobs(db, accountID, customerID);
+   const customerJobs = await jobService.getActiveCustomerJobs(db, accountID, customerID);
 
-      const activeCustomerJobs = findMostRecentJobRecords(customerJobs);
+   const activeCustomerJobs = findMostRecentJobRecords(customerJobs);
 
-      // Return Object
-      const activeCustomerJobData = {
-         activeCustomerJobs,
-         grid: createGrid(activeCustomerJobs)
-      };
+   // Add display_name field for autocomplete
+   activeCustomerJobs.forEach(job => (job.display_name = `${job.job_description} - ${job.customer_job_category}`));
 
-      res.send({
-         activeCustomerJobData,
-         message: 'Successfully retrieved active customer jobs.',
-         status: 200
-      });
+   // Return Object
+   const activeCustomerJobData = {
+      activeCustomerJobs,
+      grid: createGrid(activeCustomerJobs)
+   };
+
+   res.send({
+      activeCustomerJobData,
+      message: 'Successfully retrieved active customer jobs.',
+      status: 200
    });
+});
 
 // Update a job
 jobRouter.route('/updateJob/:accountID/:userID').put(jsonParser, async (req, res) => {
@@ -102,6 +101,12 @@ jobRouter.route('/deleteJob/:jobID/:accountID/:userID').delete(jsonParser, async
    const { accountID, jobID } = req.params;
 
    try {
+      const linkedTransactions = await transactionsService.getTransactionsByJobID(db, accountID, jobID);
+      if (linkedTransactions.length) throw new Error('Transactions are linked to job: ' + error.message);
+
+      const linkedWriteOffs = await writeOffsService.getWriteOffsByJobID(db, accountID, jobID);
+      if (linkedWriteOffs.length) throw new Error('Write offs are linked to job: ' + error.message);
+
       // Delete job
       await jobService.deleteJob(db, jobID);
       await sendUpdatedTableWith200Response(db, res, accountID);

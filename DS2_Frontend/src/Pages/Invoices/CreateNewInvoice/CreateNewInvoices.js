@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Divider, Stack, Typography, TextField, Box, Button, Alert, FormControl, FormHelperText, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import LinearProgress from '@mui/material/LinearProgress';
 import CreateInvoiceGrid from '../InvoiceGrids/CreateInvoiceGrid';
 import { getOutstandingBalanceList, fetchFileDownload } from '../../../Services/ApiCalls/FetchCalls';
 import CreateInvoiceCheckBoxes from './SubComponents/CreateInvoiceCheckBoxes';
 import { postInvoiceCreation } from '../../../Services/ApiCalls/PostCalls';
-import { useContext } from 'react';
 import { context } from '../../../App';
 
 const initialState = {
@@ -55,6 +54,8 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
 
       submitInvoice();
    };
+
+   console.log(selectedRowsToInvoice);
 
    const submitInvoice = async () => {
       setIsLoading(true);

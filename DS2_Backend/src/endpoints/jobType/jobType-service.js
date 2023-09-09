@@ -1,27 +1,31 @@
 const jobTypeService = {
-  createJobType(db, newJobType) {
-    return db
-      .insert(newJobType)
-      .into('customer_job_types')
-      .returning('*')
-      .then(rows => rows[0]);
-  },
+   createJobType(db, newJobType) {
+      return db
+         .insert(newJobType)
+         .into('customer_job_types')
+         .returning('*')
+         .then(rows => rows[0]);
+   },
 
-  getSingleJobType(db, jobTypeID, account) {
-    return db.select().from('customer_job_types').where('job_type_id', jobTypeID).andWhere('account_id', account);
-  },
+   getJobTypesByJobCategoryID(db, accountID, jobCategoryID) {
+      return db.select().from('customer_job_types').where('account_id', accountID).andWhere('customer_job_category_id', jobCategoryID);
+   },
 
-  getActiveJobTypes(db, accountID) {
-    return db.select().from('customer_job_types').where('account_id', accountID);
-  },
+   getSingleJobType(db, jobTypeID, account) {
+      return db.select().from('customer_job_types').where('job_type_id', jobTypeID).andWhere('account_id', account);
+   },
 
-  updateJobType(db, updatedJobType) {
-    return db.update(updatedJobType).into('customer_job_types').where('job_type_id', '=', updatedJobType.job_type_id);
-  },
+   getActiveJobTypes(db, accountID) {
+      return db.select().from('customer_job_types').where('account_id', accountID);
+   },
 
-  deleteJobType(db, jobTypeID) {
-    return db.del().from('customer_job_types').where('job_type_id', '=', jobTypeID);
-  }
+   updateJobType(db, updatedJobType) {
+      return db.update(updatedJobType).into('customer_job_types').where('job_type_id', '=', updatedJobType.job_type_id);
+   },
+
+   deleteJobType(db, jobTypeID) {
+      return db.del().from('customer_job_types').where('job_type_id', '=', jobTypeID);
+   }
 };
 
 module.exports = jobTypeService;

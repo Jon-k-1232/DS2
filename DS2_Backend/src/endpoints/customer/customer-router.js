@@ -7,7 +7,7 @@ const transactionsService = require('../transactions/transactions-service');
 const jobService = require('../job/job-service');
 const recurringCustomerService = require('../recurringCustomer/recurringCustomer-service');
 const retainerService = require('../retainer/retainer-service');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
+const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const { sanitizeFields } = require('../../utils');
 const { requireManagerOrAdmin } = require('../auth/jwt-auth');
 const { restoreDataTypesRecurringCustomerTableOnCreate, restoreDataTypesRecurringCustomerTableOnUpdate } = require('../recurringCustomer/recurringCustomerObjects');
@@ -77,39 +77,54 @@ customerRouter.route('/createCustomer/:accountID/:userID').post(jsonParser, asyn
 });
 
 // Get customer by ID, and all associated data for customer profile
-customerRouter
-   .route('/activeCustomers/customerByID/:accountID/:userID/:customerID')
-   // .all(requireManagerOrAdmin)
-   .get(async (req, res) => {
-      const db = req.app.get('db');
-      const { accountID, customerID } = req.params;
+customerRouter.route('/activeCustomers/customerByID/:accountID/:userID/:customerID').get(async (req, res) => {
+   const db = req.app.get('db');
+   const { accountID, customerID } = req.params;
 
-      const services = [
-         { service: customerService.getCustomerByID, name: 'customerData' },
-         { service: retainerService.getCustomerRetainersByID, name: 'customerRetainerData' },
-         { service: invoiceService.getCustomerInvoiceByID, name: 'customerInvoiceData' },
-         { service: transactionsService.getCustomerTransactionsByID, name: 'customerTransactionData' },
-         { service: jobService.getActiveCustomerJobs, name: 'customerJobData' }
-      ];
+   const customerContactData = await customerService.getCustomerByID(db, accountID, customerID);
+   const customerRetainers = await retainerService.getCustomerRetainersByID(db, accountID, customerID);
+   const customerInvoices = await invoiceService.getCustomerInvoiceByID(db, accountID, customerID);
+   const customerTransactions = await transactionsService.getCustomerTransactionsByID(db, accountID, customerID);
+   const customerJobs = await jobService.getActiveCustomerJobs(db, accountID, customerID);
 
-      const results = await Promise.all(
-         services.map(({ service, name }) =>
-            service(db, accountID, customerID).then(data => ({
-               [name]: {
-                  grid: createGrid(data),
-                  [name]: data
-               }
-            }))
-         )
-      );
+   const customerData = {
+      customerData: customerContactData,
+      grid: createGrid(customerContactData)
+   };
 
-      const responseData = Object.assign({}, ...results, {
-         message: 'Success',
-         status: 200
-      });
+   const customerRetainerData = {
+      customerRetainers,
+      grid: createGrid(customerRetainers),
+      treeGrid: generateTreeGridData(customerRetainers, 'retainer_id', 'parent_retainer_id')
+   };
 
-      res.send(responseData);
+   const customerInvoiceData = {
+      customerInvoices,
+      grid: createGrid(customerInvoices),
+      treeGrid: generateTreeGridData(customerInvoices, 'customer_invoice_id', 'parent_invoice_id')
+   };
+
+   const customerTransactionData = {
+      customerTransactions,
+      grid: createGrid(customerTransactions)
+   };
+
+   const customerJobData = {
+      customerJobs,
+      grid: createGrid(customerJobs),
+      treeGrid: generateTreeGridData(customerJobs, 'customer_job_id', 'parent_job_id')
+   };
+
+   res.send({
+      customerData,
+      customerRetainerData,
+      customerInvoiceData,
+      customerTransactionData,
+      customerJobData,
+      message: 'Successfully Retrieved Data.',
+      status: 200
    });
+});
 
 // Update Customer
 customerRouter.route('/updateCustomer/:accountID/:userID').put(jsonParser, async (req, res) => {
@@ -178,7 +193,7 @@ customerRouter
       const { customerID, accountID } = req.params;
 
       // delete customer
-      //  await customerService.deleteCustomer(db, customerID);
+      await customerService.deleteCustomer(db, customerID);
 
       // call active customers
       const activeCustomers = await customerService.getActiveCustomers(db, accountID);
@@ -192,6 +207,31 @@ customerRouter
 
       res.send({
          customer,
+         message: 'Successfully deleted customer.',
+         status: 200
+      });
+   });
+
+customerRouter
+   .route('/disableCustomer/:customerID/:accountID/:userID')
+   .all(requireManagerOrAdmin)
+   .put(jsonParser, async (req, res) => {
+      const db = req.app.get('db');
+      const { customerID, accountID } = req.params;
+
+      // disable customer
+      await customerService.disableCustomer(db, accountID, customerID);
+
+      // call active customers
+      const activeCustomers = await customerService.getActiveCustomers(db, accountID);
+
+      const activeCustomerData = {
+         activeCustomers,
+         grid: createGrid(activeCustomers)
+      };
+
+      res.send({
+         customersList: { activeCustomerData },
          message: 'Successfully deleted customer.',
          status: 200
       });

@@ -8,8 +8,20 @@ const transactionsService = {
       return db.select().from('customer_transactions').where('account_id', accountID).andWhere('customer_id', customerID).orderBy('transaction_date', 'desc');
    },
 
+   getTransactionsForInvoice(db, accountID, invoiceID) {
+      return db.select().from('customer_transactions').where('account_id', accountID).andWhere('customer_invoice_id', invoiceID);
+   },
+
    getSingleTransaction(db, accountID, customerID, transactionID) {
       return db.select().from('customer_transactions').where('account_id', accountID).andWhere('customer_id', customerID).andWhere('transaction_id', transactionID);
+   },
+
+   getTransactionsByRetainerID(db, retainerID) {
+      return db.select().from('customer_transactions').where('retainer_id', retainerID);
+   },
+
+   getTransactionsByJobID(db, accountID, jobID) {
+      return db.select().from('customer_transactions').where('account_id', accountID).andWhere('customer_job_id', jobID);
    },
 
    updateTransaction(db, updatedTransaction) {

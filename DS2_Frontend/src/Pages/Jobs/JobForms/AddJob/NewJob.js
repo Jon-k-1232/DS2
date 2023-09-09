@@ -7,47 +7,47 @@ import { context } from '../../../../App';
 import NewJobSelections from './FormSubComponents/NewJobSelections';
 
 const initialState = {
-  selectedCustomer: null,
-  selectedJobDescription: null,
-  isQuote: false,
-  quoteAmount: '',
-  agreedJobAmount: '',
-  notes: ''
+   selectedCustomer: null,
+   selectedJobDescription: null,
+   isQuote: false,
+   quoteAmount: '',
+   agreedJobAmount: '',
+   notes: ''
 };
 
 export default function NewJob({ customerData, setCustomerData }) {
-  const { loggedInUser } = useContext(context);
-  const { accountID, userID } = useContext(context).loggedInUser;
+   const { loggedInUser } = useContext(context);
+   const { accountID, userID } = useContext(context).loggedInUser;
 
-  const [postStatus, setPostStatus] = useState(null);
-  const [selectedItems, setSelectedItems] = useState(initialState);
+   const [postStatus, setPostStatus] = useState(null);
+   const [selectedItems, setSelectedItems] = useState(initialState);
 
-  const handleSubmit = async () => {
-    const dataToPost = formObjectForJobPost(selectedItems, loggedInUser);
-    const postedItem = await postNewCustomerJob(dataToPost, accountID, userID);
+   const handleSubmit = async () => {
+      const dataToPost = formObjectForJobPost(selectedItems, loggedInUser);
+      const postedItem = await postNewCustomerJob(dataToPost, accountID, userID);
 
-    setPostStatus(postedItem);
-    if (postedItem.status === 200) resetState(postedItem);
-  };
+      setPostStatus(postedItem);
+      if (postedItem.status === 200) resetState(postedItem);
+   };
 
-  const resetState = postedItem => {
-    setCustomerData({ ...customerData, accountJobsList: postedItem.accountJobsList });
-    setTimeout(() => setPostStatus(null), 4000);
-    setSelectedItems(initialState);
-  };
+   const resetState = postedItem => {
+      setTimeout(() => setPostStatus(null), 2000);
+      setSelectedItems(initialState);
+      setCustomerData({ ...customerData, accountJobsList: postedItem.accountJobsList });
+   };
 
-  return (
-    <>
-      <Stack spacing={3}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
-          <NewJobSelections customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} pageName='newJob'/>
-        </Stack>
+   return (
+      <>
+         <Stack spacing={3}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
+               <NewJobSelections customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} pageName='newJob' />
+            </Stack>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-          <Button onClick={handleSubmit}>Submit</Button>
-          {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
-        </Box>
-      </Stack>
-    </>
-  );
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+               <Button onClick={handleSubmit}>Submit</Button>
+               {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
+            </Box>
+         </Stack>
+      </>
+   );
 }

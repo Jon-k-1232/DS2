@@ -5,6 +5,7 @@ const retainerRouter = express.Router();
 const retainerService = require('./retainer-service');
 const { restoreDataTypesRetainersTableOnCreate, restoreDataTypesRetainersTableOnUpdate } = require('./retainerObjects');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
+const transactionsService = require('../transactions/transactions-service');
 
 // Create a new retainer
 retainerRouter.route('/createRetainer/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -58,6 +59,11 @@ retainerRouter.route('/deleteRetainer/:retainerID/:accountID/:userID').delete(js
    const { retainerID, accountID } = req.params;
 
    try {
+      // Check transactions table for retainerID. If transactions exist it mean the reatiner is linked to a transaction and cannot be deleted
+      const linkedTransactions = await transactionsService.getTransactionsByRetainerID(db, retainerID);
+
+      if (linkedTransactions.length) throw new Error('Transactions are linked to retainer: ' + error.message);
+
       // Delete retainer
       await retainerService.deleteRetainer(db, retainerID, accountID);
       await sendUpdatedTableWith200Response(db, res, accountID);

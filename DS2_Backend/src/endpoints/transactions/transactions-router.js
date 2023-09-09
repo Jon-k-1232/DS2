@@ -7,7 +7,6 @@ const retainerService = require('../retainer/retainer-service');
 const jobService = require('../job/job-service');
 const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate } = require('./transactionsObjects');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
-const { unableToCompleteRequest } = require('../../serverResponses/errors');
 
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {

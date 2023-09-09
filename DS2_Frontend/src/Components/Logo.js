@@ -1,14 +1,16 @@
 import PropTypes from 'prop-types';
-import { Box } from '@mui/material';
-// import crow from "../Static_Icons/crow.png";
+import { Box, Typography } from '@mui/material';
 
 Logo.propTypes = {
-  sx: PropTypes.object
+   sx: PropTypes.object
 };
 
 export default function Logo({ sx }) {
-  return (
-    // <Box component="img" src={crow} sx={{ width: 40, height: 40, ...sx }} />
-    <Box sx={{ width: 40, height: 40, ...sx }} />
-  );
+   return (
+      <Box>
+         <Typography style={{ fontFamily: 'Kanit, sans-serif', color: '#00AB55', fontSize: '2.7em', ...sx }} variant='h2'>
+            DS | 2
+         </Typography>
+      </Box>
+   );
 }

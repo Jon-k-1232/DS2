@@ -92,25 +92,4 @@ accountRouter
       });
    });
 
-// Delete account
-accountRouter
-   .route('/deleteAccount/:accountID')
-   .all(requireAdmin)
-   .delete(async (req, res) => {
-      const db = req.app.get('db');
-      const { accountID } = req.params;
-      const accountData = await accountService.deleteAccount(db, accountID);
-
-      const account = {
-         accountData,
-         grid: createGrid([accountData])
-      };
-
-      res.send({
-         account,
-         message: 'Successfully deleted customer.',
-         status: 200
-      });
-   });
-
 module.exports = accountRouter;

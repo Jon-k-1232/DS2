@@ -7,6 +7,14 @@ const writeOffsService = {
       return db.select().from('customer_writeoffs').where('writeoff_id', writeOffID).andWhere('account_id', accountID);
    },
 
+   getWriteoffsForInvoice(db, accountID, invoiceID) {
+      return db.select().from('customer_writeoffs').where('account_id', accountID).andWhere('customer_invoice_id', invoiceID);
+   },
+
+   getWriteOffsByJobID(db, accountID, jobID) {
+      return db.select().from('customer_writeoffs').where('account_id', accountID).andWhere('customer_job_id', jobID);
+   },
+
    updateWriteOff(db, updatedWriteOff) {
       return db.update(updatedWriteOff).into('customer_writeoffs').where('writeoff_id', '=', updatedWriteOff.writeoff_id);
    },

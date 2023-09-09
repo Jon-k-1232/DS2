@@ -8,6 +8,10 @@ const paymentsService = {
       return db.select().from('customer_payments').andWhere('payment_id', Number(paymentID));
    },
 
+   getPaymentsForInvoice(db, accountID, invoiceID) {
+      return db.select().from('customer_payments').where('account_id', accountID).andWhere('customer_invoice_id', invoiceID);
+   },
+
    updatePayment(db, updatedPayment) {
       return db
          .update(updatedPayment)

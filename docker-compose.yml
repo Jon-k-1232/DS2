@@ -34,7 +34,7 @@ services:
       volumes:
          - /app/node_modules
          - ./DS2_Backend:/app
-         - /Users/jonkimmel/Desktop/invoices:/invoices
+         - /Users/jonkimmel/Desktop/DS2_Files:/DS2_Files
       networks:
          - server_customnetwork
          - customnetwork2

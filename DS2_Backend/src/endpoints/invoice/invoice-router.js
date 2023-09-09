@@ -4,6 +4,9 @@ const fs = require('fs');
 const invoiceRouter = express.Router();
 const invoiceService = require('./invoice-service');
 const accountService = require('../account/account-service');
+const transactionsService = require('../transactions/transactions-service');
+const paymentsService = require('../payments/payments-service');
+const writeOffsService = require('../writeOffs/writeOffs-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { findCustomersNeedingInvoices } = require('./invoiceEligibility/invoiceEligibility');
@@ -46,24 +49,36 @@ invoiceRouter
       const db = req.app.get('db');
       const { accountID, invoiceID } = req.params;
 
-      await invoiceService.deleteInvoice(db, invoiceID);
+      try {
+         // check from transactions, writeoffs, and retainers, payments, and writeoffs
+         const foundTransactions = await transactionsService.getTransactionsForInvoice(db, accountID, invoiceID);
+         const foundPayments = await paymentsService.getPaymentsForInvoice(db, accountID, invoiceID);
+         const foundWriteoffs = await writeOffsService.getWriteoffsForInvoice(db, accountID, invoiceID);
 
-      const invoicesData = await invoiceService.getInvoices(db, accountID);
+         if (foundTransactions.length || foundPayments.length || foundWriteoffs.length) {
+            throw new Error('Cannot delete invoice with transactions, retainers, payments, or writeoffs.');
+         }
 
-      // Create Mui Grid
-      const grid = createGrid(invoicesData);
+         await invoiceService.deleteInvoice(db, invoiceID);
+         const activeInvoices = await invoiceService.getInvoices(db, accountID);
 
-      // Return Object
-      const invoices = {
-         invoicesData,
-         grid
-      };
+         // Return Object
+         const activeInvoiceData = {
+            activeInvoices,
+            grid: createGrid(activeInvoices)
+         };
 
-      res.send({
-         invoices,
-         message: 'Successfully deleted invoice.',
-         status: 200
-      });
+         res.send({
+            invoicesList: { activeInvoiceData },
+            message: 'Successfully deleted invoice.',
+            status: 200
+         });
+      } catch (error) {
+         res.send({
+            message: error.message || 'An error occurred while deleting the invoice.',
+            status: 500
+         });
+      }
    });
 
 // Get accounts with a balance to generate invoices
