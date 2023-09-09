@@ -7,7 +7,6 @@ const invoiceService = require('../invoice/invoice-service');
 const retainersService = require('../retainer/retainer-service');
 const { restoreDataTypesPaymentsTableOnCreate, restoreDataTypesPaymentsTableOnUpdate } = require('./paymentsObjects');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
-const { unableToCompleteRequest } = require('../../serverResponses/errors');
 
 // Create a new payment
 paymentsRouter.route('/createPayment/:accountID/:userID').post(jsonParser, async (req, res) => {

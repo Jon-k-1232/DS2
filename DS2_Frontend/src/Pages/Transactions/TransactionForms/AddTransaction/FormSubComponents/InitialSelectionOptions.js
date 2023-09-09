@@ -18,7 +18,7 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
 
    const activeCustomers = combinedData.customersList?.activeCustomerData?.activeCustomers || [];
    const activeUsers = combinedData.teamMembersList?.activeUserData?.activeUsers || [];
-   const customerInvoiceData = combinedData?.customerInvoiceData?.customerInvoiceData || [];
+   const customerInvoiceData = combinedData?.customerInvoiceData?.customerInvoices || [];
    const customerTransactionData = combinedData?.customerTransactionData?.customerTransactionData || [];
    const customerJobData = combinedData?.customerJobData?.customerJobData || [];
 

@@ -10,6 +10,7 @@ import EditCustomerProfile from '../../../Pages/Customer/CustomerProfile/EditCus
 import CustomerRetainers from '../../../Pages/Customer/CustomerProfile/CustomerRetainers';
 import { useContext } from 'react';
 import { context } from '../../../App';
+import { useRowData } from '../../../Routes/useRowData';
 
 export default function CustomerProfileSubRoutes({ customerData, setCustomerData }) {
    const navigate = useNavigate();
@@ -22,16 +23,22 @@ export default function CustomerProfileSubRoutes({ customerData, setCustomerData
    const [callProfileData, setCallProfileData] = useState(new Date());
    const [customerInfoID, setCustomerInfoID] = useState(null);
 
+   // Custom hook to get rowData from context
+   // eslint-disable-next-line
+   const { rowData: contextRowData, setRowData } = useRowData();
+
    useEffect(() => {
-      if (rowData || customerInfoID) {
+      if (rowData || contextRowData || customerInfoID) {
          const apiCall = async () => {
-            const customerID = rowData?.customer_id || customerInfoID;
+            const customerID = rowData?.customer_id || contextRowData?.customer_id || customerInfoID;
 
             const fetchCustomerInformation = await fetchCustomerProfileInformation(accountID, userID, customerID, token);
             setProfileData({ ...fetchCustomerInformation });
             setCustomerInfoID(customerID);
          };
          apiCall();
+      } else {
+         navigate('/customers/customersList');
       }
       // eslint-disable-next-line
    }, [callProfileData]);

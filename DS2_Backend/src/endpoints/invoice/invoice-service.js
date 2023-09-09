@@ -62,12 +62,12 @@ const invoiceService = {
       return data.reduce((result, { customer_id, last_invoice_date }) => ({ ...result, [customer_id]: last_invoice_date }), {});
    },
 
-   getCustomerInvoicesByCustomerID(db, customerIDs, accountID) {
+   getCustomerInvoicesByCustomerID(db, customerID, accountID) {
       return db
          .select('*')
          .from('customer_invoices')
          .where('account_id', accountID)
-         .whereIn('customer_id', customerIDs)
+         .where('customer_id', customerID)
          .andWhere('is_invoice_paid_in_full', false)
          .andWhere('remaining_balance_on_invoice', '>', 0)
          .orderBy('created_at', 'desc');
