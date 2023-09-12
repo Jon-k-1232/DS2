@@ -3,6 +3,7 @@ import DataGridTable from '../../../Components/DataGrids/DataGrid';
 import NewCustomer from '../CustomerForms/AddCustomer/NewCustomer';
 import AddIcon from '@mui/icons-material/Add';
 import palette from '../../../Theme/palette';
+import { filterGridByColumnName } from '../../../Services/SharedFunctions';
 
 export default function Customers({ customerData, setCustomerData }) {
    if (!customerData || !customerData.customersList || !customerData.customersList.activeCustomerData) {
@@ -23,12 +24,28 @@ export default function Customers({ customerData, setCustomerData }) {
       }
    ];
 
+   const arrayOfColumnNames = [
+      'customer_id',
+      'business_name',
+      'customer_name',
+      'display_name',
+      'customer_street',
+      'customer_city',
+      'customer_state',
+      'customer_zip',
+      'customer_phone',
+      'is_billable',
+      'is_recurring',
+      'is_customer_active'
+   ];
+   const filteredGrid = filterGridByColumnName(activeCustomerData.grid, arrayOfColumnNames);
+
    return (
       <>
          <Stack spacing={3}>
             <DataGridTable
                title='Customers'
-               tableData={activeCustomerData.grid}
+               tableData={filteredGrid}
                checkboxSelection={false}
                arrayOfButtons={gridButtons}
                enableSingleRowClick

@@ -6,7 +6,7 @@ const writeOffsService = require('../writeOffs/writeOffs-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { restoreDataTypesJobTableOnCreate, restoreDataTypesJobTableOnUpdate } = require('./jobObjects');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
+const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const dayjs = require('dayjs');
 
 // Create a new job
@@ -18,13 +18,18 @@ jobRouter.route('/createJob/:accountID/:userID').post(jsonParser, async (req, re
       const sanitizedNewJob = sanitizeFields(req.body.job);
       // Create new object with sanitized fields
       const jobTableFields = restoreDataTypesJobTableOnCreate(sanitizedNewJob);
+
+      // Check for duplicate job
+      const duplicateJob = await jobService.findDuplicateJob(db, jobTableFields);
+      if (duplicateJob.length) throw new Error('Duplicate job');
+
       // Post new job
       await jobService.createJob(db, jobTableFields);
       await sendUpdatedTableWith200Response(db, res, accountID);
    } catch (err) {
       console.log(err);
       res.send({
-         message: err.message || 'An error occurred while creating the Job.',
+         message: err.message || 'Error creating job.',
          status: 500
       });
    }
@@ -39,7 +44,8 @@ jobRouter.route('/getSingleJob/:customerJobID/:accountID/:userID').get(async (re
 
    const activeJobData = {
       activeJobs,
-      grid: createGrid(activeJobs)
+      grid: createGrid(activeJobs),
+      treeGrid: generateTreeGridData(activeJobs, 'customer_job_id', 'parent_job_id')
    };
 
    res.send({
@@ -64,7 +70,8 @@ jobRouter.route('/getActiveCustomerJobs/:accountID/:userID/:customerID').get(asy
    // Return Object
    const activeCustomerJobData = {
       activeCustomerJobs,
-      grid: createGrid(activeCustomerJobs)
+      grid: createGrid(activeCustomerJobs),
+      treeGrid: generateTreeGridData(activeCustomerJobs, 'customer_job_id', 'parent_job_id')
    };
 
    res.send({
@@ -146,7 +153,8 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
 
    const activeJobData = {
       activeJobs,
-      grid: createGrid(activeJobs)
+      grid: createGrid(activeJobs),
+      treeGrid: generateTreeGridData(activeJobs, 'customer_job_id', 'parent_job_id')
    };
 
    res.send({

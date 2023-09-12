@@ -7,6 +7,10 @@ const jobService = {
          .then(rows => rows[0]);
    },
 
+   findDuplicateJob(db, jobTableFields) {
+      return db.select().from('customer_jobs').where('job_type_id', jobTableFields.job_type_id).andWhere('customer_id', jobTableFields.customer_id).andWhere('account_id', jobTableFields.account_id);
+   },
+
    getSingleJob(db, customerJobID) {
       return db.select().from('customer_jobs').where('customer_job_id', customerJobID);
    },
@@ -17,11 +21,20 @@ const jobService = {
 
    getActiveJobs(db, accountID) {
       return db
-         .select()
+         .select(
+            'customer_jobs.*',
+            'customer_job_types.*',
+            'customer_job_categories.customer_job_category',
+            db.raw('customers.display_name as customer_name'),
+            db.raw('users.display_name as created_by_user')
+         )
          .from('customer_jobs')
          .join('customer_job_types', 'customer_jobs.job_type_id', 'customer_job_types.job_type_id')
+         .join('customer_job_categories', 'customer_job_types.customer_job_category_id', 'customer_job_categories.customer_job_category_id')
+         .join('customers', 'customer_jobs.customer_id', 'customers.customer_id')
+         .join('users', 'customer_jobs.created_by_user_id', 'users.user_id')
          .where('customer_jobs.account_id', accountID)
-         .andWhere('customer_job_types.account_id', accountID);
+         .orderBy('customer_jobs.created_at', 'asc');
    },
 
    // !! Must be in asc order, oldest to newest.

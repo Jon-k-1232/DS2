@@ -88,7 +88,8 @@ retainerRouter.route('/getSingleRetainer/:retainerID/:accountID/:userID').get(as
 
       const activeRetainerData = {
          activeRetainer,
-         grid: createGrid(activeRetainer)
+         grid: createGrid(activeRetainer),
+         treeGrid: generateTreeGridData(activeRetainer, 'retainer_id', 'parent_retainer_id')
       };
 
       res.send({
@@ -113,7 +114,8 @@ retainerRouter.route('/getActiveRetainers/:customerID/:accountID/:userID').get(a
 
       const activeRetainerData = {
          activeRetainers,
-         grid: createGrid(activeRetainers)
+         grid: createGrid(activeRetainers),
+         treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
       };
 
       res.send({
@@ -137,7 +139,8 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
 
    const activeRetainerData = {
       activeRetainers,
-      grid: createGrid(activeRetainers)
+      grid: createGrid(activeRetainers),
+      treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
    };
 
    res.send({

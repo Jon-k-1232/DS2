@@ -16,7 +16,12 @@ const jobTypeService = {
    },
 
    getActiveJobTypes(db, accountID) {
-      return db.select().from('customer_job_types').where('account_id', accountID);
+      return db
+         .select('customer_job_types.*', 'customer_job_categories.customer_job_category')
+         .from('customer_job_types')
+         .leftJoin('customer_job_categories', 'customer_job_types.customer_job_category_id', 'customer_job_categories.customer_job_category_id')
+         .where('customer_job_types.account_id', accountID)
+         .orderBy('job_description', 'asc');
    },
 
    updateJobType(db, updatedJobType) {

@@ -237,7 +237,6 @@ const handleRetainerUpdate = async (db, transactionDifferences, transactionTable
 
    // Disallow retainer change for now
    if (originalTransaction.retainer_id !== transactionTableFields.retainer_id) {
-      console.log('A retainer change was detected while editing a transaction.');
       throw new Error('Please contact support. Retainer/ Prepayment change not allowed at this time.');
    }
 

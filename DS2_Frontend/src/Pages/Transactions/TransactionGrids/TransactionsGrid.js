@@ -5,6 +5,7 @@ import Time from '../TransactionForms/AddTransaction/Time';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import palette from '../../../Theme/palette';
+import { filterGridByColumnName } from '../../../Services/SharedFunctions';
 
 export default function TransactionsGrid({ customerData, setCustomerData }) {
    if (!customerData || !customerData.transactionsList || !customerData.transactionsList.activeTransactionsData) {
@@ -31,12 +32,31 @@ export default function TransactionsGrid({ customerData, setCustomerData }) {
       }
    ];
 
+   const arrayOfColumnNames = [
+      'transaction_id',
+      'customer_name',
+      'transaction_type',
+      'quantity',
+      'unit_cost',
+      'total_transaction',
+      'customer_invoice_id',
+      'retainer_id',
+      'is_transaction_billable',
+      'is_excess_to_subscription',
+      'created_at',
+      'logged_for_user_name',
+      'job_description',
+      'general_work_description',
+      'detailed_work_description'
+   ];
+   const filteredGrid = filterGridByColumnName(activeTransactionsData.grid, arrayOfColumnNames);
+
    return (
       <>
          <Stack spacing={3}>
             <DataGridTable
                title='Charges and Time'
-               tableData={activeTransactionsData.grid}
+               tableData={filteredGrid}
                checkboxSelection={false}
                enableSingleRowClick
                rowSelectionOnly

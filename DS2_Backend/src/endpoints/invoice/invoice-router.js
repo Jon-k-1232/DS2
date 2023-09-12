@@ -10,7 +10,7 @@ const writeOffsService = require('../writeOffs/writeOffs-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { findCustomersNeedingInvoices } = require('./invoiceEligibility/invoiceEligibility');
-const { createGrid, filterGridByColumnName } = require('../../helperFunctions/helperFunctions');
+const { createGrid, filterGridByColumnName, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const { fetchInitialQueryItems } = require('./createInvoice/createInvoiceQueries');
 const { calculateInvoices } = require('./createInvoice/invoiceCalculations/calculateInvoices');
 const { addInvoiceDetails } = require('./createInvoice/addDetailToInvoice/addInvoiceDetail');
@@ -31,7 +31,8 @@ invoiceRouter.route('/getInvoices/:accountID/:invoiceID').get(async (req, res) =
    // Return Object
    const activeInvoiceData = {
       activeInvoices,
-      grid: createGrid(activeInvoices)
+      grid: createGrid(activeInvoices),
+      treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
    };
 
    res.send({
@@ -65,7 +66,8 @@ invoiceRouter
          // Return Object
          const activeInvoiceData = {
             activeInvoices,
-            grid: createGrid(activeInvoices)
+            grid: createGrid(activeInvoices),
+            treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
          };
 
          res.send({
@@ -139,9 +141,20 @@ invoiceRouter.route('/createInvoice/:accountID/:userID').post(jsonParser, async 
          await dataInsertionOrchestrator(db, invoicesWithDetail, accountBillingInformation, pdfBuffer, userID);
       }
 
+      // get invoices table data
+      const activeInvoices = await invoiceService.getInvoices(db, accountID);
+
+      // Return Object
+      const activeInvoiceData = {
+         activeInvoices,
+         grid: createGrid(activeInvoices),
+         treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
+      };
+
       res.send({
          invoicesWithDetail,
          fileLocation,
+         invoicesList: { activeInvoiceData },
          message: 'Successfully retrieved balance.',
          status: 200
       });

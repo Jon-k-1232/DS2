@@ -5,6 +5,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { IconButton, Box } from '@mui/material';
 import CustomToolbar from './CustomToolbar';
+import { filterGridByColumnName } from '../../Services/SharedFunctions';
 
 const ExpandableGrid = ({
    tableData,
@@ -20,13 +21,24 @@ const ExpandableGrid = ({
    dialogSize,
    hideGridTools,
    idField,
-   parentColumnName
+   parentColumnName,
+   displayColumnNames
 }) => {
    const navigate = useNavigate();
    const [expandedRows, setExpandedRows] = useState(new Set());
 
    const { activeInvoices, treeGrid } = tableData || {};
-   const { rows, columns } = treeGrid || {};
+
+   // rather than write over the json object, create a new one with the filtered data
+   const treeGridData = { rows: treeGrid.rows, columns: treeGrid.columns } || {};
+   let { rows, columns } = treeGridData || {};
+
+   // If displayColumnNames is passed, filter the grid to only show those columns
+   if (displayColumnNames && displayColumnNames.length) {
+      const filteredGrid = filterGridByColumnName(treeGrid, displayColumnNames);
+      rows = filteredGrid.rows;
+      columns = filteredGrid.columns;
+   }
 
    const gridProps = {
       density: 'compact',

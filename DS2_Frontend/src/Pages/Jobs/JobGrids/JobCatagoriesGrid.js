@@ -3,6 +3,7 @@ import DataGridTable from '../../../Components/DataGrids/DataGrid';
 import NewJobCategory from '../JobForms/AddJob/NewJobCategory';
 import AddIcon from '@mui/icons-material/Add';
 import palette from '../../../Theme/palette';
+import { filterGridByColumnName } from '../../../Services/SharedFunctions';
 
 export default function JobCatagoriesGrid({ customerData, setCustomerData }) {
    const { jobCategoriesList: { activeJobCategoriesData = {} } = {} } = customerData || {};
@@ -21,12 +22,15 @@ export default function JobCatagoriesGrid({ customerData, setCustomerData }) {
       }
    ];
 
+   const arrayOfColumnNames = ['customer_job_category_id', 'customer_job_category', 'is_job_category_active'];
+   const filteredGrid = filterGridByColumnName(activeJobCategoriesData.grid, arrayOfColumnNames);
+
    return (
       <>
          <Stack spacing={3}>
             <DataGridTable
                title='Job Categories'
-               tableData={activeJobCategoriesData.grid}
+               tableData={filteredGrid}
                checkboxSelection={false}
                enableSingleRowClick
                rowSelectionOnly

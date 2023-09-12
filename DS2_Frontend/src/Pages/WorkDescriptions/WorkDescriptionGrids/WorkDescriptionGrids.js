@@ -3,6 +3,7 @@ import DataGridTable from '../../../Components/DataGrids/DataGrid';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import palette from '../../../Theme/palette';
 import AddWorkDescription from '../WorkDescriptionForms/AddWorkDescription/AddWorkDescription';
+import { filterGridByColumnName } from '../../../Services/SharedFunctions';
 
 export default function WorkDescriptionsGrid({ customerData, setCustomerData }) {
    if (!customerData || !customerData.workDescriptionsList || !customerData.workDescriptionsList.activeWorkDescriptionsData) {
@@ -23,12 +24,15 @@ export default function WorkDescriptionsGrid({ customerData, setCustomerData }) 
       }
    ];
 
+   const arrayOfColumnNames = ['general_work_description_id', 'general_work_description', 'estimated_time', 'is_general_work_description_active'];
+   const filteredGrid = filterGridByColumnName(activeWorkDescriptionsData.grid, arrayOfColumnNames);
+
    return (
       <>
          <Stack spacing={3}>
             <DataGridTable
                title='General Work Descriptions'
-               tableData={activeWorkDescriptionsData.grid}
+               tableData={filteredGrid}
                checkboxSelection={false}
                enableSingleRowClick
                rowSelectionOnly
