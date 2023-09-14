@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
 import CustomToolbar from './CustomToolbar';
+import getDynamicColumnWidths from './DynamicColumnSizing';
 
 const DataGridTable = ({
    tableData,
@@ -54,19 +55,3 @@ const DataGridTable = ({
 };
 
 export default DataGridTable;
-
-const getDynamicColumnWidths = (rows, columns) => {
-   const ctx = document.createElement('canvas').getContext('2d');
-   ctx.font = '14px Roboto';
-
-   const basePadding = 16;
-
-   return columns.map(column => {
-      const headerWidth = ctx.measureText(column.headerName).width;
-      const maxWidth = rows.reduce((maxWidth, row) => {
-         const textWidth = ctx.measureText(row[column.field]).width;
-         return Math.max(maxWidth, textWidth);
-      }, headerWidth);
-      return { ...column, width: maxWidth + 35 + basePadding };
-   });
-};

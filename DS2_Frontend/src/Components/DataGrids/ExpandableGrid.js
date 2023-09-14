@@ -6,6 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { IconButton, Box } from '@mui/material';
 import CustomToolbar from './CustomToolbar';
 import { filterGridByColumnName } from '../../Services/SharedFunctions';
+import getDynamicColumnWidths from './DynamicColumnSizing';
 
 const ExpandableGrid = ({
    tableData,
@@ -125,25 +126,3 @@ const ExpandableGrid = ({
 };
 
 export default ExpandableGrid;
-
-/**
- * Sets a dynamic width based on the largest text width in the column
- * @param {*} rows
- * @param {*} columns
- * @returns
- */
-const getDynamicColumnWidths = (rows, columns) => {
-   const ctx = document.createElement('canvas').getContext('2d');
-   ctx.font = '14px Roboto';
-
-   const basePadding = 16;
-
-   return columns.map(column => {
-      const headerWidth = ctx.measureText(column.headerName).width;
-      const maxWidth = rows.reduce((maxWidth, row) => {
-         const textWidth = ctx.measureText(row[column.field]).width;
-         return Math.max(maxWidth, textWidth);
-      }, headerWidth);
-      return { ...column, width: maxWidth + 35 + basePadding };
-   });
-};

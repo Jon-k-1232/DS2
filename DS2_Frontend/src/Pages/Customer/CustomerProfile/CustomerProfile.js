@@ -1,11 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
 import { context } from '../../../App';
-import { Divider, Stack, Typography } from '@mui/material';
+import { Divider, Stack, Typography, Alert } from '@mui/material';
 import { postInvoiceCreation } from '../../../Services/ApiCalls/PostCalls';
 import dayjs from 'dayjs';
 
 export default function CustomerProfile({ profileData }) {
    const [customerBalance, setCustomerBalance] = useState({});
+   const [postStatus, setPostStatus] = useState(null);
 
    const {
       loggedInUser: { accountID, userID, token }
@@ -43,8 +44,10 @@ export default function CustomerProfile({ profileData }) {
             invoicesToCreate: [{ ...customerData, invoiceNote: '', showWriteOffs: false }],
             invoiceCreationSettings: { globalInvoiceNote: '', isCsvOnly: false, isFinalized: false, isRoughDraft: false }
          };
+
          const customerTotals = await postInvoiceCreation(configuration, accountID, userID, token);
-         setCustomerBalance(customerTotals.invoicesWithDetail[0]);
+         if (customerTotals.status !== 200) setPostStatus(customerTotals);
+         setCustomerBalance(customerTotals?.invoicesWithDetail[0]);
       };
 
       if (Object.keys(customerData).length) fetchBalances();
@@ -187,6 +190,7 @@ export default function CustomerProfile({ profileData }) {
                </tbody>
             </table>
          </Stack>
+         {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
          <Divider style={styles.divider} />
       </Stack>
    );

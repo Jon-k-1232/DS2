@@ -38,9 +38,9 @@ export default function EditPayment({ customerData, setCustomerData, paymentData
    const {
       customersList: { activeCustomerData: { activeCustomers } = [] } = [],
       teamMembersList: { activeUserData: { activeUsers } = [] } = [],
-      customerRetainerData: { customerRetainerData } = [],
-      customerJobData: { customerJobData } = [],
-      customerInvoiceData: { customerInvoiceData } = []
+      customerRetainerData: { customerRetainers } = [],
+      customerJobData: { customerJobs } = [],
+      customerInvoiceData: { customerInvoices } = []
    } = { ...customerData, ...customerProfileData };
 
    const { unitCost, quantity, invoiceNumber } = selectedItems;
@@ -63,7 +63,7 @@ export default function EditPayment({ customerData, setCustomerData, paymentData
 
    useEffect(() => {
       if (paymentData && Object.keys(paymentData).length) {
-         const invoiceObject = customerInvoiceData.find(invoice => invoice.customer_invoice_id === customer_invoice_id);
+         const invoiceObject = customerInvoices && customerInvoices.find(invoice => invoice.customer_invoice_id === customer_invoice_id);
          const invoiceNumber = invoiceObject?.invoice_number;
 
          setSelectedItems({
@@ -71,8 +71,8 @@ export default function EditPayment({ customerData, setCustomerData, paymentData
             accountID: account_id,
             selectedCustomer: activeCustomers.find(customer => customer.customer_id === customer_id),
             selectedInvoice: invoiceObject,
-            selectedRetainer: customerRetainerData.find(retainer => retainer.retainer_id === retainer_id),
-            selectedJob: customerJobData.find(job => job.customer_job_id === customer_job_id),
+            selectedRetainer: customerRetainers.find(retainer => retainer.retainer_id === retainer_id),
+            selectedJob: customerJobs.find(job => job.customer_job_id === customer_job_id),
             selectedTeamMember: activeUsers.find(user => user.user_id === created_by_user_id),
             invoiceNumber: invoiceNumber,
             foundInvoiceID: invoiceNumber,

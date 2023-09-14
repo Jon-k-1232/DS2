@@ -26,6 +26,7 @@ export default function RetainersGrid({ customerData, setCustomerData }) {
    const displayColumnNames = [
       'retainer_id',
       'parent_retainer_id',
+      'customer_id',
       'customer_name',
       'display_name',
       'type_of_hold',

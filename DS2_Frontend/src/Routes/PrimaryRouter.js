@@ -25,7 +25,6 @@ export default function Router() {
    const { loggedInUser, setLoggedInUser } = useContext(context);
    const { accountID, userID, displayName, token } = loggedInUser;
 
-   // const [timeLeft, setTimeLeft] = useState(0);
    const [pageTitle, setPageTitle] = useState('');
    const [customerData, setCustomerData] = useState({});
 

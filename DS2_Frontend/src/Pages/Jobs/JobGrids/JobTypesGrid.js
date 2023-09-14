@@ -22,7 +22,7 @@ export default function JobTypesGrid({ customerData, setCustomerData }) {
       }
    ];
 
-   const arrayOfColumnNames = ['job_type_id', 'job_description', 'customer_job_category', 'is_job_type_active', 'estimated_straight_time', 'book_rate'];
+   const arrayOfColumnNames = ['job_type_id', 'job_description', 'customer_job_category', 'customer_job_category_id', 'is_job_type_active', 'estimated_straight_time', 'book_rate'];
    const filteredGrid = filterGridByColumnName(activeJobTypesData.grid, arrayOfColumnNames);
 
    return (

@@ -26,6 +26,7 @@ export default function PaymentsGrid({ customerData, setCustomerData }) {
 
    const arrayOfColumnNames = [
       'payment_id',
+      'customer_id',
       'customer_name',
       'payment_date',
       'payment_amount',

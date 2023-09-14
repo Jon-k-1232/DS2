@@ -24,7 +24,18 @@ export default function WriteOffsGrid({ customerData, setCustomerData }) {
       }
    ];
 
-   const arrayOfColumnNames = ['writeoff_id', 'customer_name', 'job_description', 'writeoff_amount', 'transaction_type', 'created_at', 'created_by_user_name', 'writeoff_reason', 'note'];
+   const arrayOfColumnNames = [
+      'writeoff_id',
+      'customer_id',
+      'customer_name',
+      'job_description',
+      'writeoff_amount',
+      'transaction_type',
+      'created_at',
+      'created_by_user_name',
+      'writeoff_reason',
+      'note'
+   ];
    const filteredGrid = filterGridByColumnName(activeWriteOffsData.grid, arrayOfColumnNames);
 
    return (

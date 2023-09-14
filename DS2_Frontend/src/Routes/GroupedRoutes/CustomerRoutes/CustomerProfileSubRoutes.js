@@ -8,6 +8,7 @@ import CustomerProfileTransactions from '../../../Pages/Customer/CustomerProfile
 import CustomerProfileJobs from '../../../Pages/Customer/CustomerProfile/CustomerProfileJobs';
 import EditCustomerProfile from '../../../Pages/Customer/CustomerProfile/EditCustomerProfile';
 import CustomerRetainers from '../../../Pages/Customer/CustomerProfile/CustomerRetainers';
+import CustomerProfilePayments from '../../../Pages/Customer/CustomerProfile/CustomerProfilePayments';
 import { useContext } from 'react';
 import { context } from '../../../App';
 import { useRowData } from '../../../Routes/useRowData';
@@ -53,6 +54,7 @@ export default function CustomerProfileSubRoutes({ customerData, setCustomerData
             <Route path='customerInvoices' element={<CustomerProfileInvoices profileData={profileData} />} />
             <Route path='customerTransactions' element={<CustomerProfileTransactions profileData={profileData} />} />
             <Route path='customerJobs' element={<CustomerProfileJobs profileData={profileData} setCustomerData={setCustomerData} />} />
+            <Route path='customerPayments' element={<CustomerProfilePayments profileData={profileData} />} />
             <Route path='retainersAndPrePayments' element={<CustomerRetainers profileData={profileData} />} />
             <Route
                path='editCustomerProfile'
@@ -89,6 +91,12 @@ const fetchMenuOptions = navigate => [
       value: 'customerJobs',
       route: '/customers/customersList/customerProfile/customerJobs',
       onClick: () => navigate('/customers/customersList/customerProfile/customerJobs')
+   },
+   {
+      display: 'Payments',
+      value: 'customerPayments',
+      route: '/customers/customersList/customerProfile/customerPayments',
+      onClick: () => navigate('/customers/customersList/customerProfile/customerPayments')
    },
    {
       display: 'Retainers and PrePayments',

@@ -117,27 +117,24 @@ transactionsRouter.route('/deleteTransaction/:accountID/:userID').delete(async (
 });
 
 // Get a specific transaction
-transactionsRouter
-   .route('/getSingleTransaction/:customerID/:transactionID/:accountID/:userID')
-   // .all( requireAuth )
-   .get(async (req, res) => {
-      const db = req.app.get('db');
-      const { customerID, transactionID, accountID } = req.params;
+transactionsRouter.route('/getSingleTransaction/:customerID/:transactionID/:accountID/:userID').get(async (req, res) => {
+   const db = req.app.get('db');
+   const { customerID, transactionID, accountID } = req.params;
 
-      // Get specific transaction
-      const transactionData = await transactionsService.getSingleTransaction(db, accountID, customerID, transactionID);
+   // Get specific transaction
+   const transactionData = await transactionsService.getSingleTransaction(db, accountID, customerID, transactionID);
 
-      const activeTransactionsData = {
-         transactionData,
-         grid: createGrid(transactionData)
-      };
+   const activeTransactionsData = {
+      transactionData,
+      grid: createGrid(transactionData)
+   };
 
-      res.send({
-         activeTransactionsData,
-         message: 'Successfully retrieved specific transaction.',
-         status: 200
-      });
+   res.send({
+      activeTransactionsData,
+      message: 'Successfully retrieved specific transaction.',
+      status: 200
    });
+});
 
 module.exports = transactionsRouter;
 

@@ -34,6 +34,7 @@ export default function TransactionsGrid({ customerData, setCustomerData }) {
 
    const arrayOfColumnNames = [
       'transaction_id',
+      'customer_id',
       'customer_name',
       'transaction_type',
       'quantity',

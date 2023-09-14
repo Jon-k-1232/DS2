@@ -7,6 +7,7 @@ const transactionsService = require('../transactions/transactions-service');
 const jobService = require('../job/job-service');
 const recurringCustomerService = require('../recurringCustomer/recurringCustomer-service');
 const retainerService = require('../retainer/retainer-service');
+const paymentsService = require('../payments/payments-service');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const { sanitizeFields } = require('../../utils');
 const { requireManagerOrAdmin } = require('../auth/jwt-auth');
@@ -83,6 +84,7 @@ customerRouter.route('/activeCustomers/customerByID/:accountID/:userID/:customer
 
    const customerContactData = await customerService.getCustomerByID(db, accountID, customerID);
    const customerRetainers = await retainerService.getCustomerRetainersByID(db, accountID, customerID);
+   const customerPayments = await paymentsService.getActivePaymentsForCustomer(db, accountID, customerID);
    const customerInvoices = await invoiceService.getCustomerInvoiceByID(db, accountID, customerID);
    const customerTransactions = await transactionsService.getCustomerTransactionsByID(db, accountID, customerID);
    const customerJobs = await jobService.getActiveCustomerJobs(db, accountID, customerID);
@@ -96,6 +98,11 @@ customerRouter.route('/activeCustomers/customerByID/:accountID/:userID/:customer
       customerRetainers,
       grid: createGrid(customerRetainers),
       treeGrid: generateTreeGridData(customerRetainers, 'retainer_id', 'parent_retainer_id')
+   };
+
+   const customerPaymentData = {
+      customerPayments,
+      grid: createGrid(customerPayments)
    };
 
    const customerInvoiceData = {
@@ -118,6 +125,7 @@ customerRouter.route('/activeCustomers/customerByID/:accountID/:userID/:customer
    res.send({
       customerData,
       customerRetainerData,
+      customerPaymentData,
       customerInvoiceData,
       customerTransactionData,
       customerJobData,

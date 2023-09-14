@@ -49,8 +49,7 @@ export default function DeleteTimeOrCharge({ customerData, setCustomerData, tran
    const {
       customersList: { activeCustomerData: { activeCustomers } = [] } = [],
       teamMembersList: { activeUserData: { activeUsers } = [] } = [],
-      accountJobsList: { activeJobData: { activeJobs } = [] } = [],
-      accountRetainersList: { activeRetainerData: { activeRetainers } = [] } = []
+      accountJobsList: { activeJobData: { activeJobs } = [] } = []
    } = { ...customerData };
 
    const {

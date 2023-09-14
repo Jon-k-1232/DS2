@@ -7,6 +7,7 @@ import ChargeOptions from './FormSubComponents/ChargeOptions';
 import { formObjectForTransactionPost } from '../../../../Services/SharedPostObjects/SharedPostObjects';
 import dayjs from 'dayjs';
 import { context } from '../../../../App';
+import { formatTotal } from '../../../../Services/SharedFunctions';
 
 const initialState = {
    selectedCustomer: null,
@@ -42,13 +43,6 @@ export default function Charge({ customerData, setCustomerData }) {
          setSelectedItems(initialState);
          setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList, accountRetainersList: postedItem.accountRetainersList, accountJobsList: postedItem.accountJobsList });
       }
-   };
-
-   const formatTotal = value => {
-      return value
-         .toFixed(2)
-         .toString()
-         .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
    };
 
    return (
