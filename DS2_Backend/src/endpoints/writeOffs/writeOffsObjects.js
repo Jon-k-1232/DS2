@@ -6,7 +6,7 @@ const restoreDataTypesWriteOffsTableOnCreate = data => ({
    writeoff_date: data.selectedDate,
    writeoff_amount: -Math.abs(data.unitCost),
    transaction_type: 'Writeoff',
-   writeoff_reason: data.writeOffReason || null,
+   writeoff_reason: data.writeoffReason || null,
    created_by_user_id: Number(data.loggedByUserID),
    note: data.note || null
 });

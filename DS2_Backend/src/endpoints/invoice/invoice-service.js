@@ -1,7 +1,13 @@
 const invoiceService = {
    // Must stay desc, used in finding if an invoice has to be created
    getInvoices(db, accountID) {
-      return db.select('*').from('customer_invoices').where('account_id', accountID).orderBy('invoice_date', 'desc');
+      return db
+         .select('customer_invoices.*', db.raw('customers.display_name as customer_name'), db.raw('users.display_name as created_by_user_name'))
+         .from('customer_invoices')
+         .join('customers', 'customer_invoices.customer_id', 'customers.customer_id')
+         .join('users', 'customer_invoices.created_by_user_id', 'users.user_id')
+         .where('customer_invoices.account_id', accountID)
+         .orderBy('customer_invoices.invoice_date', 'desc');
    },
 
    getCustomerInvoiceByID(db, accountID, customerID) {

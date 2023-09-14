@@ -3,6 +3,7 @@ import DataGridTable from '../../../Components/DataGrids/DataGrid';
 import Payment from '../TransactionForms/AddTransaction/Payment';
 import PaymentIcon from '@mui/icons-material/Payment';
 import palette from '../../../Theme/palette';
+import { filterGridByColumnName } from '../../../Services/SharedFunctions';
 
 export default function PaymentsGrid({ customerData, setCustomerData }) {
    if (!customerData || !customerData.paymentsList || !customerData.paymentsList.activePaymentsData) {
@@ -23,12 +24,29 @@ export default function PaymentsGrid({ customerData, setCustomerData }) {
       }
    ];
 
+   const arrayOfColumnNames = [
+      'payment_id',
+      'customer_name',
+      'payment_date',
+      'payment_amount',
+      'form_of_payment',
+      'payment_reference_number',
+      'customer_invoice_id',
+      'customer_job_id',
+      'retainer_id',
+      'is_transaction_billable',
+      'created_at',
+      'created_by_user_name',
+      'note'
+   ];
+   const filteredGrid = filterGridByColumnName(activePaymentsData.grid, arrayOfColumnNames);
+
    return (
       <>
          <Stack spacing={3}>
             <DataGridTable
                title='Payments'
-               tableData={activePaymentsData.grid}
+               tableData={filteredGrid}
                checkboxSelection={false}
                enableSingleRowClick
                rowSelectionOnly

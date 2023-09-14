@@ -6,7 +6,7 @@ const transactionsService = require('./transactions-service');
 const retainerService = require('../retainer/retainer-service');
 const jobService = require('../job/job-service');
 const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate } = require('./transactionsObjects');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
+const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -281,20 +281,29 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all transactions
    const activeTransactions = await transactionsService.getActiveTransactions(db, accountID);
    const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
-
-   const activeRetainerData = {
-      activeRetainers,
-      grid: createGrid(activeRetainers)
-   };
+   const activeJobs = await jobService.getActiveJobs(db, accountID);
 
    const activeTransactionsData = {
       activeTransactions,
       grid: createGrid(activeTransactions)
    };
 
+   const activeRetainerData = {
+      activeRetainers,
+      grid: createGrid(activeRetainers),
+      treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
+   };
+
+   const activeJobData = {
+      activeJobs,
+      grid: createGrid(activeJobs),
+      treeGrid: generateTreeGridData(activeJobs, 'customer_job_id', 'parent_job_id')
+   };
+
    res.send({
       transactionsList: { activeTransactionsData },
       accountRetainersList: { activeRetainerData },
+      accountJobsList: { activeJobData },
       message: 'Successful.',
       status: 200
    });

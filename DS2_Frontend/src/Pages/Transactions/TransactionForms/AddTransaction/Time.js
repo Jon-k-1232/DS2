@@ -42,7 +42,7 @@ export default function Time({ customerData, setCustomerData }) {
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
-         setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList, accountRetainersList: postedItem.accountRetainersList });
+         setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList, accountRetainersList: postedItem.accountRetainersList, accountJobsList: postedItem.accountJobsList });
       }
    };
 

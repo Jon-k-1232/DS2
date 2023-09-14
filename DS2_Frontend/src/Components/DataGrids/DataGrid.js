@@ -67,6 +67,6 @@ const getDynamicColumnWidths = (rows, columns) => {
          const textWidth = ctx.measureText(row[column.field]).width;
          return Math.max(maxWidth, textWidth);
       }, headerWidth);
-      return { ...column, width: maxWidth + 30 + basePadding };
+      return { ...column, width: maxWidth + 35 + basePadding };
    });
 };

@@ -4,7 +4,7 @@ const { sanitizeFields } = require('../../utils');
 const retainerRouter = express.Router();
 const retainerService = require('./retainer-service');
 const { restoreDataTypesRetainersTableOnCreate, restoreDataTypesRetainersTableOnUpdate } = require('./retainerObjects');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
+const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const transactionsService = require('../transactions/transactions-service');
 
 // Create a new retainer

@@ -1,7 +1,13 @@
 const retainersService = {
    // Must stay desc, used in finding if an invoice has to be created
    getActiveRetainers(db, accountID) {
-      return db.select().from('customer_retainers_and_prepayments').where('account_id', accountID).orderBy('created_at', 'desc');
+      return db
+         .select('customer_retainers_and_prepayments.*', db.raw('customers.display_name as customer_name'), db.raw('users.display_name as created_by_user_name'))
+         .from('customer_retainers_and_prepayments')
+         .join('customers', 'customer_retainers_and_prepayments.customer_id', 'customers.customer_id')
+         .join('users', 'customer_retainers_and_prepayments.created_by_user_id', 'users.user_id')
+         .where('customer_retainers_and_prepayments.account_id', accountID)
+         .orderBy('customer_retainers_and_prepayments.created_at', 'desc');
    },
 
    getCustomerRetainersByID(db, accountID, customerID) {

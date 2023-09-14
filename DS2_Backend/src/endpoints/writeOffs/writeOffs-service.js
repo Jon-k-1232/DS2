@@ -1,6 +1,19 @@
 const writeOffsService = {
    getActiveWriteOffs(db, accountID) {
-      return db.select().from('customer_writeoffs').where('account_id', accountID);
+      return db
+         .select(
+            'customer_writeoffs.*',
+            db.raw('customers.display_name as customer_name'),
+            'customer_jobs.job_type_id',
+            'customer_job_types.job_description',
+            db.raw('users.display_name as created_by_user_name')
+         )
+         .from('customer_writeoffs')
+         .join('customers', 'customer_writeoffs.customer_id', 'customers.customer_id')
+         .join('customer_jobs', 'customer_writeoffs.customer_job_id', 'customer_jobs.customer_job_id')
+         .join('customer_job_types', 'customer_jobs.job_type_id', 'customer_job_types.job_type_id')
+         .join('users', 'customer_writeoffs.created_by_user_id', 'users.user_id') // Join with users on created_by_user_id
+         .where('customer_writeoffs.account_id', accountID);
    },
 
    getSingleWriteOff(db, writeOffID, accountID) {

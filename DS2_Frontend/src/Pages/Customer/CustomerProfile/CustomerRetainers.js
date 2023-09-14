@@ -9,6 +9,22 @@ export default function CustomerRetainers({ profileData }) {
       return <div>Loading...</div>;
    }
 
+   const displayColumnNames = [
+      'retainer_id',
+      'parent_retainer_id',
+      'customer_name',
+      'display_name',
+      'type_of_hold',
+      'starting_amount',
+      'current_amount',
+      'form_of_payment',
+      'payment_reference_number',
+      'is_retainer_active',
+      'created_at',
+      'created_by_user_name',
+      'notes'
+   ];
+
    return (
       <>
          <Stack spacing={3}>
@@ -19,6 +35,7 @@ export default function CustomerRetainers({ profileData }) {
                checkboxSelection
                enableSingleRowClick
                rowSelectionOnly
+               displayColumnNames={displayColumnNames}
                routeToPass={'/transactions/customerRetainers/deleteRetainer'}
             />
          </Stack>
