@@ -8,7 +8,7 @@ import NotFound from '../Pages/Page404/Page404';
 import DashboardRoutes from './GroupedRoutes/DashboardRoutes';
 import CustomerRoutes from './GroupedRoutes/CustomerRoutes/CustomerRoutes';
 import TransactionsRoutes from './GroupedRoutes/TransactionRoutes/TransactionsRoutes';
-import InvoiceRoutes from './GroupedRoutes/InvoiceRoutes';
+import InvoiceRoutes from './GroupedRoutes/InvoiceRoutes/InvoiceRoutes';
 import AccountRoutes from './GroupedRoutes/AccountRoutes/AccountRoutes';
 import JobRoutes from './GroupedRoutes/JobRoutes/JobRoutes';
 import { context } from '../App';

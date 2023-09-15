@@ -26,7 +26,7 @@ export default function CustomerProfileSubRoutes({ customerData, setCustomerData
 
    // Custom hook to get rowData from context
    // eslint-disable-next-line
-   const { rowData: contextRowData, setRowData } = useRowData();
+   const { rowData: contextRowData } = useRowData();
 
    useEffect(() => {
       if (rowData || contextRowData || customerInfoID) {

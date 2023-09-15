@@ -39,8 +39,10 @@ export default function InvoicesGrid({ customerData }) {
                parentColumnName='parent_invoice_id'
                tableData={activeInvoiceData}
                checkboxSelection
+               enableSingleRowClick
                rowSelectionOnly
                displayColumnNames={displayColumnNames}
+               routeToPass={'/invoices/invoices/invoiceDetail/invoiceTransactions'}
             />
          </Stack>
       </>
