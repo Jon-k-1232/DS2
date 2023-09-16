@@ -7,6 +7,7 @@ const accountService = require('../account/account-service');
 const transactionsService = require('../transactions/transactions-service');
 const paymentsService = require('../payments/payments-service');
 const writeOffsService = require('../writeOffs/writeOffs-service');
+const retainersService = require('../retainer/retainer-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { findCustomersNeedingInvoices } = require('./invoiceEligibility/invoiceEligibility');
@@ -172,22 +173,27 @@ invoiceRouter.route('/downloadFile/:accountID/:userID').get(async (req, res) => 
 
       // Validate file path
       if (zipFilePath === undefined || !zipFilePath || !zipFilePath.startsWith(`${config.DEFAULT_PDF_SAVE_LOCATION}`)) {
-         return res.status(400).send('Invalid file path');
+         throw new Error('Invalid or no file path.');
       }
 
       // Check if the file exists before attempting to download
-      fs.access(zipFilePath, fs.constants.F_OK, err => {
-         if (err) return res.send({ message: 'File not found', status: 400, error: err });
-
-         // File exists, proceed with the download
-         return res.status(200).download(zipFilePath, path.basename(zipFilePath), err => {
-            if (err) return res.send({ message: `Couldn't download file`, status: 400, error: err });
+      const fileExists = await new Promise(resolve => {
+         fs.access(zipFilePath, fs.constants.F_OK, err => {
+            resolve(!err);
          });
       });
+
+      if (!fileExists) throw new Error('File does not exist.');
+
+      // File exists, proceed with the download
+      return res.status(200).download(zipFilePath, path.basename(zipFilePath), err => {
+         if (err) {
+            return res.status(400).send({ message: `Couldn't download file`, error: err });
+         }
+      });
    } catch (error) {
-      res.send({
-         message: 'Successfully retrieved balance.',
-         status: 400
+      res.status(400).send({
+         message: error.message
       });
    }
 });
@@ -198,9 +204,50 @@ invoiceRouter.route('/getInvoiceDetails/:invoiceID/:accountID/:userID').get(asyn
    const { accountID, invoiceID } = req.params;
 
    const [invoiceDetails] = await invoiceService.getInvoiceByInvoiceRowID(db, accountID, invoiceID);
+   const { start_date, end_date } = invoiceDetails;
+
+   // get all data between the start and end date to show what was accounted for.
+   const invoiceTransactions = await transactionsService.getTransactionsBetweenDates(db, accountID, start_date, end_date);
+   const invoicePayments = await paymentsService.getPaymentsBetweenDates(db, accountID, start_date, end_date);
+   const invoiceWriteoffs = await writeOffsService.getWriteoffsBetweenDates(db, accountID, start_date, end_date);
+   const invoiceRetainers = await retainersService.getRetainersBetweenDates(db, accountID, start_date, end_date);
+   const invoiceOutstandingInvoices = await invoiceService.getOutstandingInvoicesBetweenDates(db, accountID, start_date, end_date);
+
+   // create grid objects
+   const invoiceTransactionsData = {
+      invoiceTransactions,
+      grid: createGrid(invoiceTransactions)
+   };
+
+   const invoicePaymentsData = {
+      invoicePayments,
+      grid: createGrid(invoicePayments)
+   };
+
+   const invoiceWriteoffsData = {
+      invoiceWriteoffs,
+      grid: createGrid(invoiceWriteoffs)
+   };
+
+   const invoiceRetainersData = {
+      invoiceRetainers,
+      grid: createGrid(invoiceRetainers),
+      treeGrid: generateTreeGridData(invoiceRetainers, 'retainer_id', 'parent_retainer_id')
+   };
+
+   const invoiceOutstandingInvoicesData = {
+      invoiceOutstandingInvoices,
+      grid: createGrid(invoiceOutstandingInvoices),
+      treeGrid: generateTreeGridData(invoiceOutstandingInvoices, 'customer_invoice_id', 'parent_invoice_id')
+   };
 
    res.send({
       invoiceDetails,
+      invoiceTransactionsData,
+      invoicePaymentsData,
+      invoiceWriteoffsData,
+      invoiceRetainersData,
+      invoiceOutstandingInvoicesData,
       message: 'Successfully retrieved invoice details.',
       status: 200
    });

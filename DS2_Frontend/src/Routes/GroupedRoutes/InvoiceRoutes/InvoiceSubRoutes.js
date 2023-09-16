@@ -49,7 +49,7 @@ export default function InvoiceRoutes({ customerData, setCustomerData }) {
       <>
          <Stack>
             <PageNavigationHeader menuOptions={menuOptions} onClickNavigation={() => {}} currentLocation={location} />
-            <InvoiceDetails invoiceData={invoiceData} postStatus={postStatus} />
+            <InvoiceDetails invoiceData={invoiceData} postStatus={postStatus} setPostStatus={data => setPostStatus(data)} />
 
             <Routes>
                <Route path='invoiceTransactions' element={<InvoiceTransactions invoiceData={invoiceData} />} />
@@ -77,13 +77,13 @@ const fetchMenuOptions = navigate => [
       onClick: () => navigate('/invoices/invoices/invoiceDetail/invoicePayments')
    },
    {
-      display: 'WriteOffs',
+      display: 'Write Offs',
       value: 'invoiceWriteOffs',
       route: '/invoices/invoices/invoiceDetail/invoiceWriteOffs',
       onClick: () => navigate('/invoices/invoices/invoiceDetail/invoiceWriteOffs')
    },
    {
-      display: 'OutstandingInvoices',
+      display: 'Outstanding Invoices',
       value: 'invoiceOutstandingInvoices',
       route: '/invoices/invoices/invoiceDetail/invoiceOutstandingInvoices',
       onClick: () => navigate('/invoices/invoices/invoiceDetail/invoiceOutstandingInvoices')

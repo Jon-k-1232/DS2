@@ -20,6 +20,10 @@ const transactionsService = {
          .orderBy('customer_transactions.created_at', 'desc');
    },
 
+   getTransactionsBetweenDates(db, accountID, start_date, end_date) {
+      return db.select().from('customer_transactions').where('account_id', accountID).andWhere('transaction_date', '>=', start_date).andWhere('transaction_date', '<=', end_date);
+   },
+
    getCustomerTransactionsByID(db, accountID, customerID) {
       return db.select().from('customer_transactions').where('account_id', accountID).andWhere('customer_id', customerID).orderBy('transaction_date', 'desc');
    },

@@ -10,12 +10,41 @@ const invoiceService = {
          .orderBy('customer_invoices.invoice_date', 'desc');
    },
 
+   getOutstandingInvoicesBetweenDates(db, accountID, start_date, end_date) {
+      return db
+         .select('customer_invoices.*', db.raw('customers.display_name as customer_name'), db.raw('users.display_name as created_by_user_name'))
+         .from('customer_invoices')
+         .join('customers', 'customer_invoices.customer_id', 'customers.customer_id')
+         .join('users', 'customer_invoices.created_by_user_id', 'users.user_id')
+         .where('customer_invoices.account_id', accountID)
+         .andWhere('customer_invoices.is_invoice_paid_in_full', false)
+         .andWhere('customer_invoices.remaining_balance_on_invoice', '>', 0)
+         .andWhere('customer_invoices.invoice_date', '>=', start_date)
+         .andWhere('customer_invoices.invoice_date', '<', end_date)
+         .orderBy('customer_invoices.invoice_date', 'desc');
+   },
+
    getCustomerInvoiceByID(db, accountID, customerID) {
       return db.select('*').from('customer_invoices').where('account_id', accountID).andWhere('customer_id', customerID).orderBy('invoice_date', 'asc');
    },
 
    getInvoiceByInvoiceRowID(db, accountID, invoiceRowID) {
-      return db.select('*').from('customer_invoices').where('account_id', accountID).andWhere('customer_invoice_id', invoiceRowID);
+      return db
+         .select(
+            'customer_invoices.*',
+            db.raw('customers.display_name as customer_name'),
+            'customer_information.customer_street',
+            'customer_information.customer_city',
+            'customer_information.customer_state',
+            'customer_information.customer_zip',
+            'customer_information.customer_email',
+            'customer_information.customer_phone'
+         )
+         .from('customer_invoices')
+         .join('customers', 'customer_invoices.customer_id', 'customers.customer_id')
+         .join('customer_information', 'customer_invoices.customer_info_id', 'customer_information.customer_info_id')
+         .where('customer_invoices.account_id', accountID)
+         .andWhere('customer_invoices.customer_invoice_id', invoiceRowID);
    },
 
    async getLastInvoiceNumber(db, accountID) {

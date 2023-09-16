@@ -16,6 +16,10 @@ const writeOffsService = {
          .where('customer_writeoffs.account_id', accountID);
    },
 
+   getWriteoffsBetweenDates(db, accountID, start_date, end_date) {
+      return db.select().from('customer_writeoffs').where('account_id', accountID).andWhere('writeoff_date', '>=', start_date).andWhere('writeoff_date', '<=', end_date);
+   },
+
    getSingleWriteOff(db, writeOffID, accountID) {
       return db.select().from('customer_writeoffs').where('writeoff_id', writeOffID).andWhere('account_id', accountID);
    },

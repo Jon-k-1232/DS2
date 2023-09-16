@@ -10,6 +10,10 @@ const retainersService = {
          .orderBy('customer_retainers_and_prepayments.created_at', 'desc');
    },
 
+   getRetainersBetweenDates(db, accountID, start_date, end_date) {
+      return db.select().from('customer_retainers_and_prepayments').where('account_id', accountID).andWhere('created_at', '>=', start_date).andWhere('created_at', '<=', end_date);
+   },
+
    getCustomerRetainersByID(db, accountID, customerID) {
       return db.select().from('customer_retainers_and_prepayments').where('account_id', accountID).andWhere('customer_id', customerID);
    },

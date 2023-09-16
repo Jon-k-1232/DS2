@@ -21,6 +21,10 @@ const paymentsService = {
          .orderBy('customer_payments.created_at', 'desc');
    },
 
+   getPaymentsBetweenDates(db, accountID, start_date, end_date) {
+      return db.select().from('customer_payments').where('account_id', accountID).andWhere('payment_date', '>=', start_date).andWhere('payment_date', '<=', end_date);
+   },
+
    getSinglePayment(db, paymentID, accountID) {
       return db.select().from('customer_payments').andWhere('payment_id', Number(paymentID));
    },
