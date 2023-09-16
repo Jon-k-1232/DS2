@@ -25,7 +25,7 @@ export default function NewJob({ customerData, setCustomerData }) {
    const handleSubmit = async () => {
       const dataToPost = formObjectForJobPost(selectedItems, loggedInUser);
       const postedItem = await postNewCustomerJob(dataToPost, accountID, userID);
-
+ 
       setPostStatus(postedItem);
       if (postedItem.status === 200) resetState(postedItem);
    };

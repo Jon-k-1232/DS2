@@ -192,4 +192,18 @@ invoiceRouter.route('/downloadFile/:accountID/:userID').get(async (req, res) => 
    }
 });
 
+// fetch invoice details
+invoiceRouter.route('/getInvoiceDetails/:invoiceID/:accountID/:userID').get(async (req, res) => {
+   const db = req.app.get('db');
+   const { accountID, invoiceID } = req.params;
+
+   const [invoiceDetails] = await invoiceService.getInvoiceByInvoiceRowID(db, accountID, invoiceID);
+
+   res.send({
+      invoiceDetails,
+      message: 'Successfully retrieved invoice details.',
+      status: 200
+   });
+});
+
 module.exports = invoiceRouter;

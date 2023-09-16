@@ -23,16 +23,22 @@ const dayjs = require('dayjs');
 // Create New Customer
 customerRouter.route('/createCustomer/:accountID/:userID').post(jsonParser, async (req, res) => {
    const db = req.app.get('db');
+   const { accountID } = req.params;
    const sanitizedNewCustomer = sanitizeFields(req.body.customer);
 
    try {
       // Create new object with sanitized fields
       const customerTableFields = restoreDataTypesCustomersOnCreate(sanitizedNewCustomer);
 
+      // Check for duplicate customer
+      const customers = await customerService.getActiveCustomers(db, accountID);
+      const duplicateCustomerDisplay = customers.find(customer => customer.display_name === customerTableFields.display_name);
+      if (duplicateCustomerDisplay) throw new Error('Customer already exists with that name.');
+
       // Post new customer
       const customerData = await customerService.createCustomer(db, customerTableFields);
 
-      if (Object.keys(customerData).length) throw new Error('Error creating customer');
+      if (!Object.keys(customerData).length) throw new Error('Error Inserting Customer Into Customer Table.');
 
       // Need the customer number to post to customer_information table, then merge customer to sanitizedData, then insert
       const { customer_id, account_id } = customerData;
@@ -40,12 +46,14 @@ customerRouter.route('/createCustomer/:accountID/:userID').post(jsonParser, asyn
       const customerInfoTableFields = restoreDataTypesCustomersInformationOnCreate(updatedWithCustomerID);
 
       // Post new customer information
-      await customerService.createCustomerInformation(db, customerInfoTableFields);
+      const customerInfo = await customerService.createCustomerInformation(db, customerInfoTableFields);
+      if (!Object.keys(customerInfo).length) throw new Error('Error Inserting Customer Into Customer Information Table.');
 
       // Check for recurring customer
       if (customerTableFields.is_recurring) {
          const recurringCustomerTableFields = restoreDataTypesRecurringCustomerTableOnCreate(sanitizedNewCustomer, customer_id);
-         await recurringCustomerService.createRecurringCustomer(db, recurringCustomerTableFields);
+         const recurringCustomer = await recurringCustomerService.createRecurringCustomer(db, recurringCustomerTableFields);
+         if (!Object.keys(recurringCustomer).length) throw new Error('Error Inserting Customer Into Recurring Customer Table.');
       }
 
       // call active customers

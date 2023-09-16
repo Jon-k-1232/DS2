@@ -201,3 +201,14 @@ export const fetchAccountInformation = async (accountID, userID, token) => {
       return [];
    }
 };
+
+export const fetchCustomerInvoiceInformation = async (accountID, userID, customerInvoiceID, token) => {
+   try {
+      const response = await axios.get(`${config.API_ENDPOINT}/invoices/getInvoiceDetails/${customerInvoiceID}/${accountID}/${userID}`, headers(token));
+      const invoiceInformation = response.data;
+      return invoiceInformation;
+   } catch (error) {
+      console.error('Error fetching invoice information:', error);
+      return [];
+   }
+};
