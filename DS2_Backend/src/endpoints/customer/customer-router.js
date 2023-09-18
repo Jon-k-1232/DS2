@@ -90,7 +90,7 @@ customerRouter.route('/activeCustomers/customerByID/:accountID/:userID/:customer
    const db = req.app.get('db');
    const { accountID, customerID } = req.params;
 
-   const customerContactData = await customerService.getCustomerByID(db, accountID, customerID);
+   const [customerContactData] = await customerService.getCustomerByID(db, accountID, customerID);
    const customerRetainers = await retainerService.getCustomerRetainersByID(db, accountID, customerID);
    const customerPayments = await paymentsService.getActivePaymentsForCustomer(db, accountID, customerID);
    const customerInvoices = await invoiceService.getCustomerInvoiceByID(db, accountID, customerID);
@@ -202,55 +202,50 @@ customerRouter.route('/updateCustomer/:accountID/:userID').put(jsonParser, async
 
 // Delete Customer
 customerRouter
-   .route('/deleteCustomer/:customerID/:accountID')
+   .route('/deleteCustomer/:customerID/:accountID/:userID')
    .all(requireManagerOrAdmin)
    .delete(jsonParser, async (req, res) => {
       const db = req.app.get('db');
       const { customerID, accountID } = req.params;
 
-      // delete customer
-      await customerService.deleteCustomer(db, customerID);
+      try {
+         // check for Jobs, Retainers, Invoices, Payments, Transactions, Recurring Customers. if any exist, throw error
+         const customerJobs = await jobService.getActiveCustomerJobs(db, accountID, customerID);
+         const customerRetainers = await retainerService.getCustomerRetainersByID(db, accountID, customerID);
+         const customerInvoices = await invoiceService.getCustomerInvoiceByID(db, accountID, customerID);
+         const customerPayments = await paymentsService.getActivePaymentsForCustomer(db, accountID, customerID);
+         const customerTransactions = await transactionsService.getCustomerTransactionsByID(db, accountID, customerID);
+         const customerRecurring = await recurringCustomerService.getActiveRecurringCustomers(db, accountID);
 
-      // call active customers
-      const activeCustomers = await customerService.getActiveCustomers(db, accountID);
+         if (customerJobs.length || customerRetainers.length || customerInvoices.length || customerPayments.length || customerTransactions.length || customerRecurring.length) {
+            throw new Error('Cannot delete customer with associated jobs, retainers, invoices, payments, transactions, or recurring customers. Please disable customer instead.');
+         }
 
-      const grid = createGrid(activeCustomers);
+         // delete customer
+         await customerService.deleteCustomer(db, customerID);
 
-      const customer = {
-         activeCustomers,
-         grid
-      };
+         console.log('delete');
 
-      res.send({
-         customer,
-         message: 'Successfully deleted customer.',
-         status: 200
-      });
-   });
+         // call active customers
+         const activeCustomers = await customerService.getActiveCustomers(db, accountID);
 
-customerRouter
-   .route('/disableCustomer/:customerID/:accountID/:userID')
-   .all(requireManagerOrAdmin)
-   .put(jsonParser, async (req, res) => {
-      const db = req.app.get('db');
-      const { customerID, accountID } = req.params;
+         const activeCustomerData = {
+            activeCustomers,
+            grid: createGrid(activeCustomers)
+         };
 
-      // disable customer
-      await customerService.disableCustomer(db, accountID, customerID);
-
-      // call active customers
-      const activeCustomers = await customerService.getActiveCustomers(db, accountID);
-
-      const activeCustomerData = {
-         activeCustomers,
-         grid: createGrid(activeCustomers)
-      };
-
-      res.send({
-         customersList: { activeCustomerData },
-         message: 'Successfully deleted customer.',
-         status: 200
-      });
+         res.send({
+            customersList: { activeCustomerData },
+            message: 'Successfully deleted customer.',
+            status: 200
+         });
+      } catch (err) {
+         console.log(err);
+         res.send({
+            message: err.message || 'An error occurred while deleting the Customer.',
+            status: 500
+         });
+      }
    });
 
 module.exports = customerRouter;

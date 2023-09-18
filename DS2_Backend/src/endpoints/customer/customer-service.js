@@ -30,7 +30,8 @@ const customerService = {
          .andWhere('customers.is_customer_active', '=', true)
          .join('customer_information', 'customers.customer_id', '=', 'customer_information.customer_id')
          .andWhere('customer_information.is_this_address_active', '=', true)
-         .andWhere('customer_information.account_id', '=', accountID);
+         .andWhere('customer_information.account_id', '=', accountID)
+         .orderBy('customers.customer_name', 'asc');
    },
 
    getCustomerByID(db, accountID, customerID) {

@@ -12,7 +12,7 @@ export default function CustomerProfile({ profileData }) {
       loggedInUser: { accountID, userID, token }
    } = useContext(context);
 
-   const customerData = profileData?.customerData?.customerData[0] ?? {};
+   const customerData = profileData?.customerData?.customerData ?? {};
 
    const {
       business_name,

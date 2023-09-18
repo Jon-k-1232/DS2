@@ -90,6 +90,14 @@ jobRouter.route('/updateJob/:accountID/:userID').put(jsonParser, async (req, res
       const sanitizedUpdatedJob = sanitizeFields(req.body.job);
       // Create new object with sanitized fields
       const jobTableFields = restoreDataTypesJobTableOnUpdate(sanitizedUpdatedJob);
+
+      const [jobRowBeforeEdits] = await jobService.getSingleJob(db, jobTableFields.customer_job_id);
+
+      if (jobTableFields.is_job_complete !== jobRowBeforeEdits.is_job_complete) {
+         // Toggle job completion
+         await jobService.toggleJobCompletion(db, jobTableFields);
+      }
+
       // Update job
       await jobService.updateJob(db, jobTableFields);
       await sendUpdatedTableWith200Response(db, res, accountID);

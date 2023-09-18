@@ -7,7 +7,10 @@ const requireAuth = async (req, res, next) => {
    let bearerToken;
 
    if (!authToken.toLowerCase().startsWith('bearer ')) {
-      return res.status(401).json({ error: 'Missing bearer token' });
+      return res.send({
+         message: 'Missing bearer token',
+         status: 401
+      });
    } else {
       bearerToken = authToken.slice(7, authToken.length);
    }
@@ -20,16 +23,25 @@ const requireAuth = async (req, res, next) => {
 
       // Check if user exists and is active
       if (!user || !user.is_login_active) {
-         return res.status(401).json({ error: 'Unauthorized request' });
+         return res.send({
+            message: 'Unauthorized request',
+            status: 401
+         });
       }
 
       next();
    } catch (error) {
       console.error(`Authentication error: ${error}`);
       if (error instanceof jwt.TokenExpiredError) {
-         res.status(401).json({ error: 'Expired token' });
+         return res.send({
+            message: 'Expired token',
+            status: 401
+         });
       } else {
-         res.status(401).json({ error: 'Unauthorized request' });
+         return res.send({
+            message: 'Unauthorized request',
+            status: 401
+         });
       }
    }
 };
@@ -45,7 +57,10 @@ const requireAdmin = async (req, res, next) => {
    if (user && lowerCaseUserAuth === 'admin') {
       next();
    } else {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.send({
+         message: 'Unauthorized',
+         status: 403
+      });
    }
 };
 
@@ -60,7 +75,10 @@ const requireManager = async (req, res, next) => {
    if (user && lowerCaseUserAuth === 'manager') {
       next();
    } else {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.send({
+         message: 'Unauthorized',
+         status: 403
+      });
    }
 };
 
@@ -74,7 +92,10 @@ const requireManagerOrAdmin = async (req, res, next) => {
    if (user && (lowerCaseUserAuth === 'manager' || lowerCaseUserAuth === 'admin')) {
       next();
    } else {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.send({
+         message: 'Unauthorized',
+         status: 403
+      });
    }
 };
 

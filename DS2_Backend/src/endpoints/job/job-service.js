@@ -53,6 +53,13 @@ const jobService = {
       return db.update(updatedJob).into('customer_jobs').where('customer_job_id', '=', updatedJob.customer_job_id);
    },
 
+   // Toggle job family completion status
+   toggleJobCompletion(db, jobTableFields) {
+      const { is_job_complete, customer_job_id, parent_job_id } = jobTableFields;
+      const familyId = parent_job_id || customer_job_id;
+      return db('customer_jobs').where('customer_job_id', familyId).orWhere('parent_job_id', familyId).update({ is_job_complete });
+   },
+
    deleteJob(db, jobID) {
       return db.transaction(async trx => {
          await trx('customer_transactions').where('customer_job_id', jobID).del();

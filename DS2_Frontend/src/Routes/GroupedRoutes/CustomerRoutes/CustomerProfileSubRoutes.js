@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, useNavigate, Routes, Route } from 'react-router-dom';
 import PageNavigationHeader from '../../../Components/PageNavigationHeader/PageNavigationHeader';
 import { fetchCustomerProfileInformation } from '../../../Services/ApiCalls/FetchCalls';
@@ -9,7 +9,6 @@ import CustomerProfileJobs from '../../../Pages/Customer/CustomerProfile/Custome
 import EditCustomerProfile from '../../../Pages/Customer/CustomerProfile/EditCustomerProfile';
 import CustomerRetainers from '../../../Pages/Customer/CustomerProfile/CustomerRetainers';
 import CustomerProfilePayments from '../../../Pages/Customer/CustomerProfile/CustomerProfilePayments';
-import { useContext } from 'react';
 import { context } from '../../../App';
 import { useRowData } from '../../../Routes/useRowData';
 
