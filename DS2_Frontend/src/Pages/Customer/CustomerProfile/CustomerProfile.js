@@ -129,7 +129,7 @@ export default function CustomerProfile({ profileData }) {
                   </tr>
                   <tr>
                      <th style={styles.thStyle}>Current Outstanding Invoices Total:</th>
-                     <td style={styles.tdStyle}>{Object.keys(customerBalance).length ? outstandingInvoices?.outstandingInvoiceTotal : 0.0}</td>
+                     <td style={styles.tdStyleWithColor}>{Object.keys(customerBalance).length ? outstandingInvoices?.outstandingInvoiceTotal : 0.0}</td>
                   </tr>
                </tbody>
             </table>
@@ -141,7 +141,7 @@ export default function CustomerProfile({ profileData }) {
                   </tr>
                   <tr>
                      <th style={styles.thStyle}>Retainer/ PrePayment Applied To Cycle:</th>
-                     <td style={styles.tdStyle}>{retainerAppliedToInvoice}</td>
+                     <td style={styles.tdStyleWithColor}>{retainerAppliedToInvoice}</td>
                   </tr>
                   <tr>
                      <th style={styles.thStyle}>Running Retainer/ Pre Payment:</th>
@@ -149,15 +149,15 @@ export default function CustomerProfile({ profileData }) {
                   </tr>
                   <tr>
                      <th style={styles.thStyle}>Payments Since Last Bill:</th>
-                     <td style={styles.tdStyle}>{payments?.paymentTotal}</td>
+                     <td style={styles.tdStyleWithColor}>{payments?.paymentTotal}</td>
                   </tr>
                   <tr>
                      <th style={styles.thStyle}>Total Charges This Cycle:</th>
-                     <td style={styles.tdStyle}>{transactions?.transactionsTotal}</td>
+                     <td style={styles.tdStyleWithColor}>{transactions?.transactionsTotal}</td>
                   </tr>
                   <tr>
                      <th style={styles.thStyle}>Current Running Balance:</th>
-                     <td style={styles.tdStyle}>{invoiceTotal}</td>
+                     <td style={styles.tdStyleWithColor}>{invoiceTotal}</td>
                   </tr>
                </tbody>
             </table>
@@ -217,6 +217,13 @@ const styles = {
       textAlign: 'left',
       width: '320',
       paddingRight: '20px'
+   },
+   tdStyleWithColor: {
+      textAlign: 'left',
+      width: '320',
+      paddingRight: '20px',
+      color: '#12c99b',
+      fontWeight: '800'
    },
    tableWrapper: {
       fontSize: '0.875rem',

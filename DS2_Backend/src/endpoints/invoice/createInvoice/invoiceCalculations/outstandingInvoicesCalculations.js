@@ -36,12 +36,13 @@ module.exports = { groupAndTotalOutstandingInvoices };
  */
 const filterInvoices = (customerOutstandingInvoices, customersLastInvoiceDate) => {
    const invoices = customerOutstandingInvoices.reduce((prev, invoice) => {
-      // If invoice key does not exist, create key and initialize empty array
-      if (!prev[invoice.invoice_number]) prev[invoice.invoice_number] = [];
+      // If invoice key does not exist, create key and initialize empty
+      if (!prev[invoice.invoice_number]) prev[invoice.invoice_number] = invoice;
 
       const { created_at, remaining_balance_on_invoice } = invoice;
-      const invoiceDateMatchesLastInvoiceDate = dayjs(created_at).isSame(customersLastInvoiceDate);
-      const invoiceDateIsBeforeLastInvoiceDate = dayjs(created_at).isBefore(customersLastInvoiceDate);
+
+      const invoiceDateMatchesLastInvoiceDate = dayjs(created_at).isSame(dayjs(customersLastInvoiceDate));
+      const invoiceDateIsBeforeLastInvoiceDate = dayjs(created_at).isBefore(dayjs(customersLastInvoiceDate));
       const invoiceDateIsGreaterThanStoredInvoiceDate = dayjs(created_at).isAfter(prev[invoice.invoice_number].created_at);
 
       // If the current invoice date/time matches the last invoice date/time, add the invoice to the array
@@ -56,6 +57,7 @@ const filterInvoices = (customerOutstandingInvoices, customersLastInvoiceDate) =
       } else if (invoiceDateIsGreaterThanStoredInvoiceDate && invoiceDateIsBeforeLastInvoiceDate) {
          prev[invoice.invoice_number] = invoice;
       }
+
       return prev;
    }, {});
 
