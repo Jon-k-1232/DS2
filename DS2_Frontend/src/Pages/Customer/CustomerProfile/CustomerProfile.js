@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { context } from '../../../App';
-import { Divider, Stack, Typography, Alert } from '@mui/material';
+import { Divider, Stack, Typography, Alert, Box } from '@mui/material';
 import { postInvoiceCreation } from '../../../Services/ApiCalls/PostCalls';
+import FloatingTooltip from '../../../Components/FloatingTooltip';
 import dayjs from 'dayjs';
 
 export default function CustomerProfile({ profileData }) {
@@ -53,6 +54,55 @@ export default function CustomerProfile({ profileData }) {
       if (Object.keys(customerData).length) fetchBalances();
       // eslint-disable-next-line
    }, [customerData]);
+
+   // Tool tip definitions
+   const transactionsDefinition = <Typography variant='caption'>All charges, transactions are reflected.</Typography>;
+   const outstandingInvoice = <Typography variant='caption'>The total amount of all outstanding invoices unpaid to date.</Typography>;
+   const startingRetainer = <Typography variant='caption'>This is the amount of the retainer at the start of the cycle.</Typography>;
+   const currentRetainer = <Typography variant='caption'>The current total of all retainers. If a transaction in this cycle used a retainer, the amount is reflected.</Typography>;
+   const paymentsSinceLastBill = (
+      <Box>
+         <Typography variant='caption'>The total amount that has been collected via payment, and through retainers used on transactions this cycle.</Typography>
+         <table style={styles.tableWrapper}>
+            <tbody>
+               <tr>
+                  <th style={styles.thStyle}>Payments Total:</th>
+                  <td style={styles.tdStyle}>{payments?.paymentTotal}</td>
+               </tr>
+               <tr>
+                  <th style={styles.thStyle}>Retainer Payment Total:</th>
+                  <td style={styles.tdStyle}>{retainerAppliedToInvoice}</td>
+               </tr>
+            </tbody>
+         </table>
+      </Box>
+   );
+   const totalAmountDueTotal = (
+      <table style={styles.tableWrapper}>
+         <tbody>
+            <tr>
+               <th style={styles.thStyle}>Outstanding invoices:</th>
+               <td style={styles.tdStyleNumbers}>{outstandingInvoices?.outstandingInvoiceTotal}</td>
+            </tr>
+            <tr>
+               <th style={styles.thStyle}>Transactions this cycle:</th>
+               <td style={styles.tdStyleNumbers}>{transactions?.transactionsTotal}</td>
+            </tr>
+            <tr>
+               <th style={styles.thStyle}>Payments this cycle:</th>
+               <td style={styles.tdStyleNumbers}>{payments?.paymentTotal}</td>
+            </tr>
+            <tr>
+               <th style={styles.thStyle}>Retainers applied this cycle:</th>
+               <td style={styles.tdStyleNumbers}>{retainerAppliedToInvoice}</td>
+            </tr>
+            <tr>
+               <th style={styles.thStyle}>Current Balance:</th>
+               <td style={styles.tdStyleNumbers}>{invoiceTotal}</td>
+            </tr>
+         </tbody>
+      </table>
+   );
 
    return (
       <Stack style={styles.component}>
@@ -127,38 +177,50 @@ export default function CustomerProfile({ profileData }) {
                      <th style={styles.thStyle}>Multiple Outstanding Invoices:</th>
                      <td style={styles.tdStyle}>{Object.keys(customerBalance).length && outstandingInvoices?.outstandingInvoiceRecords.length > 1 ? 'Yes' : 'No'}</td>
                   </tr>
-                  <tr>
-                     <th style={styles.thStyle}>Current Outstanding Invoices Total:</th>
-                     <td style={styles.tdStyleWithColor}>{Object.keys(customerBalance).length ? outstandingInvoices?.outstandingInvoiceTotal : 0.0}</td>
-                  </tr>
+                  <FloatingTooltip tooltipContent={outstandingInvoice}>
+                     <tr>
+                        <th style={styles.thStyle}>Current Outstanding Invoices Total:</th>
+                        <td style={styles.tdStyle}>{outstandingInvoices?.outstandingInvoiceTotal}</td>
+                     </tr>
+                  </FloatingTooltip>
                </tbody>
             </table>
             <table style={styles.tableWrapper}>
                <tbody>
-                  <tr>
-                     <th style={styles.thStyle}>Starting Retainers/ Pre Payments:</th>
-                     <td style={styles.tdStyle}>{retainers?.retainerTotal}</td>
-                  </tr>
-                  <tr>
-                     <th style={styles.thStyle}>Retainer/ PrePayment Applied To Cycle:</th>
-                     <td style={styles.tdStyleWithColor}>{retainerAppliedToInvoice}</td>
-                  </tr>
-                  <tr>
-                     <th style={styles.thStyle}>Running Retainer/ Pre Payment:</th>
-                     <td style={styles.tdStyle}>{remainingRetainer}</td>
-                  </tr>
-                  <tr>
-                     <th style={styles.thStyle}>Payments Since Last Bill:</th>
-                     <td style={styles.tdStyleWithColor}>{payments?.paymentTotal}</td>
-                  </tr>
-                  <tr>
-                     <th style={styles.thStyle}>Total Charges This Cycle:</th>
-                     <td style={styles.tdStyleWithColor}>{transactions?.transactionsTotal}</td>
-                  </tr>
-                  <tr>
-                     <th style={styles.thStyle}>Current Running Balance:</th>
-                     <td style={styles.tdStyleWithColor}>{invoiceTotal}</td>
-                  </tr>
+                  <FloatingTooltip tooltipContent={startingRetainer}>
+                     <tr>
+                        <th style={styles.thStyle}>Starting Retainers/ Pre Payments:</th>
+                        <td style={styles.tdStyleNumbers}>{retainers?.retainerTotal}</td>
+                     </tr>
+                  </FloatingTooltip>
+
+                  <FloatingTooltip tooltipContent={currentRetainer}>
+                     <tr>
+                        <th style={styles.thStyle}>Current Retainer/ Pre Payment:</th>
+                        <td style={styles.tdStyleNumbers}>{remainingRetainer}</td>
+                     </tr>
+                  </FloatingTooltip>
+
+                  <FloatingTooltip tooltipContent={paymentsSinceLastBill}>
+                     <tr>
+                        <th style={styles.thStyle}>Payments Since Last Bill:</th>
+                        <td style={styles.tdStyleNumbers}>{payments?.paymentTotal + retainerAppliedToInvoice}</td>
+                     </tr>
+                  </FloatingTooltip>
+
+                  <FloatingTooltip tooltipContent={transactionsDefinition}>
+                     <tr>
+                        <th style={styles.thStyle}>Total Charges This Cycle:</th>
+                        <td style={styles.tdStyleNumbers}>{transactions?.transactionsTotal}</td>
+                     </tr>
+                  </FloatingTooltip>
+
+                  <FloatingTooltip tooltipContent={totalAmountDueTotal}>
+                     <tr>
+                        <th style={styles.thStyle}>Current Balance:</th>
+                        <td style={styles.tdStyleNumbers}>{invoiceTotal}</td>
+                     </tr>
+                  </FloatingTooltip>
                </tbody>
             </table>
             <table style={styles.tableWrapper}>
@@ -210,24 +272,20 @@ const styles = {
       alignSelf: 'flexStart'
    },
    thStyle: {
-      textAlign: 'left',
-      width: '180px'
+      textAlign: 'left'
    },
    tdStyle: {
       textAlign: 'left',
-      width: '320',
-      paddingRight: '20px'
+      paddingLeft: '5px'
    },
-   tdStyleWithColor: {
-      textAlign: 'left',
-      width: '320',
-      paddingRight: '20px',
-      color: '#12c99b',
-      fontWeight: '800'
+   tdStyleNumbers: {
+      textAlign: 'right',
+      paddingLeft: '5px'
    },
    tableWrapper: {
       fontSize: '0.875rem',
-      height: 'min-Content'
+      height: 'min-Content',
+      paddingRight: '10px'
    },
    divider: {
       marginTop: '20px'
