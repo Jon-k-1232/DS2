@@ -2,6 +2,17 @@ global:
    scrape_interval: 15s
 
 scrape_configs:
+   # Scrape Prometheus itself
    - job_name: 'prometheus'
      static_configs:
         - targets: ['prometheus:9090']
+
+   # Scrape Backend API
+   - job_name: 'api'
+     static_configs:
+        - targets: ['api:8001']
+
+   # Scrape Frontend
+   - job_name: 'app'
+     static_configs:
+        - targets: ['app:3001']

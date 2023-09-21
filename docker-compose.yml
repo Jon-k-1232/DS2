@@ -76,10 +76,11 @@ services:
       ports:
          - '9090:9090'
       volumes:
-         - /Users/jonkimmel/Desktop/Code/DS2/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+         - /Users/jonkimmel/Desktop/Code/DS2/prometheus.yml:/etc/prometheus/prometheus.yml
       networks:
          - server_customnetwork
          - customnetwork2
+      restart: always
 
    # Grafana
    grafana:
@@ -94,6 +95,7 @@ services:
       networks:
          - server_customnetwork
          - customnetwork2
+      restart: always
 
 networks:
    server_customnetwork:
