@@ -76,7 +76,7 @@ services:
       ports:
          - '9090:9090'
       volumes:
-         - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+         - /Users/jonkimmel/Desktop/Code/DS2/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       networks:
          - server_customnetwork
          - customnetwork2
