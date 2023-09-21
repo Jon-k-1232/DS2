@@ -4,6 +4,8 @@ services:
    # Frontend
    app:
       container_name: DS2_Frontend
+      environment:
+         - TZ=America/Phoenix
       build:
          context: ./DS2_Frontend
          dockerfile: Dockerfile
@@ -24,6 +26,8 @@ services:
    # Backend
    api:
       container_name: DS2_Backend
+      environment:
+         - TZ=America/Phoenix
       build:
          context: ./DS2_Backend
          dockerfile: Dockerfile
@@ -43,6 +47,8 @@ services:
    # Server
    server:
       container_name: Nginx_Server
+      environment:
+         - TZ=America/Phoenix
       image: nginx
       depends_on:
          - api
