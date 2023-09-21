@@ -39,11 +39,11 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
          fetchJobs();
       }
       // eslint-disable-next-line
-   }, [selectedCustomer]);
+   }, [selectedCustomer, jobDialogOpen]);
 
    const handleAutocompleteChange = (key, value) => {
-      // The reset is needed on payments in case user selects customer, then invoice, then changes mind and selects a different customer
-      if (key === 'selectedCustomer' && initialState) setSelectedItems(initialState);
+      // The reset is needed on payments in case user selects customer, then invoice, then changes mind and selects a different customer. selectedDate included so the date doesnt change on each update of field.
+      if (key === 'selectedCustomer' && initialState) setSelectedItems({ selectedDate, initialState });
       if (key === 'selectedInvoice') setSelectedItems({ ...selectedItems, selectedJob: null });
       setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));
    };

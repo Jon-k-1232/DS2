@@ -56,7 +56,7 @@ export default function CustomerProfile({ profileData }) {
    }, [customerData]);
 
    // Tool tip definitions
-   const transactionsDefinition = <Typography variant='caption'>All charges, transactions are reflected.</Typography>;
+   const transactionsDefinition = <Typography variant='caption'>All charges, and time transactions are reflected.</Typography>;
    const outstandingInvoice = <Typography variant='caption'>The total amount of all outstanding invoices unpaid to date.</Typography>;
    const startingRetainer = <Typography variant='caption'>This is the amount of the retainer at the start of the cycle.</Typography>;
    const currentRetainer = <Typography variant='caption'>The current total of all retainers. If a transaction in this cycle used a retainer, the amount is reflected.</Typography>;
