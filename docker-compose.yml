@@ -67,8 +67,39 @@ services:
          - ./Nginx/Server_ssl/192.168.12.209.key:/etc/nginx/192.168.12.209.key
       restart: always
 
+   # Prometheus
+   prometheus:
+      image: prom/prometheus:latest
+      container_name: prometheus
+      environment:
+         - TZ=America/Phoenix
+      ports:
+         - '9090:9090'
+      volumes:
+         - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      networks:
+         - server_customnetwork
+         - customnetwork2
+
+   # Grafana
+   grafana:
+      image: grafana/grafana:latest
+      container_name: grafana
+      environment:
+         - TZ=America/Phoenix
+      ports:
+         - '5500:3000'
+      volumes:
+         - grafana_data:/var/lib/grafana
+      networks:
+         - server_customnetwork
+         - customnetwork2
+
 networks:
    server_customnetwork:
       external: true
    customnetwork2:
       driver: bridge
+
+volumes:
+   grafana_data:
