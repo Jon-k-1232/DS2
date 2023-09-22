@@ -77,6 +77,24 @@ services:
          - '9090:9090'
       volumes:
          - /Users/jonkimmel/Desktop/Code/DS2/prometheus.yml:/etc/prometheus/prometheus.yml
+         - prometheus_data:/prometheus # Named volume for Prometheus
+      networks:
+         - server_customnetwork
+         - customnetwork2
+      restart: always
+
+   node-exporter:
+      image: prom/node-exporter:latest
+      volumes:
+         - /proc:/host/proc:ro
+         - /sys:/host/sys:ro
+         - /:/rootfs:ro
+      command:
+         - '--path.procfs=/host/proc'
+         - '--path.sysfs=/host/sys'
+         - '--path.rootfs=/rootfs'
+      ports:
+         - '9100:9100'
       networks:
          - server_customnetwork
          - customnetwork2
@@ -105,3 +123,4 @@ networks:
 
 volumes:
    grafana_data:
+   prometheus_data: # Added this named volume for Prometheus
