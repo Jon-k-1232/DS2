@@ -37,6 +37,7 @@
       "morgan": "^1.10.0",
       "pdfkit": "^0.13.0",
       "pg": "^8.7.3",
+      "prom-client": "^14.2.0",
       "xss": "^1.0.10"
    },
    "devDependencies": {
