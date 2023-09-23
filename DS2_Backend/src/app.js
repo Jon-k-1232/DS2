@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('../config');
-const ip = require('ip');
 const app = express();
 const customerRouter = require('./endpoints/customer/customer-router');
 const transactions = require('./endpoints/transactions/transactions-router');
@@ -17,7 +16,6 @@ const paymentsRouter = require('./endpoints/payments/payments-router');
 const jobTypeRouter = require('./endpoints/jobType/jobType-router');
 const quotesRouter = require('./endpoints/quotes/quotes-router');
 const recurringCustomerRouter = require('./endpoints/recurringCustomer/recurringCustomer-router');
-const config = require('../config');
 const accountRouter = require('./endpoints/account/account-router');
 const retainerRouter = require('./endpoints/retainer/retainer-router');
 const writeOffsRouter = require('./endpoints/writeOffs/writeOffs-router');
@@ -45,8 +43,7 @@ app.use(helmet());
 app.use(express.json());
 app.use(
    cors({
-      origin: config.FRONT_END_URL,
-      credentials: true
+      origin: '*'
    })
 );
 
