@@ -23,7 +23,6 @@ const initialDataRouter = require('./endpoints/initialData/initialData-router');
 const cookieParser = require('cookie-parser');
 const { requireAuth } = require('./endpoints/auth/jwt-auth');
 const workDescriptionsRouter = require('./endpoints/workDescriptions/workDescriptions-router');
-const healthRouter = require('./endpoints/health/health-router');
 
 // Middleware
 app.use(cookieParser());
@@ -50,7 +49,6 @@ app.use(
 /* ///////////////////////////\\\\  USER ENDPOINTS  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 app.use('/auth', authentication);
-app.use('/health', healthRouter);
 app.use('/customer', requireAuth, customerRouter);
 app.use('/jobs', requireAuth, company);
 app.use('/transactions', requireAuth, transactions);
