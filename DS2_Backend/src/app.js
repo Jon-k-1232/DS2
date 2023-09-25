@@ -20,9 +20,10 @@ const accountRouter = require('./endpoints/account/account-router');
 const retainerRouter = require('./endpoints/retainer/retainer-router');
 const writeOffsRouter = require('./endpoints/writeOffs/writeOffs-router');
 const initialDataRouter = require('./endpoints/initialData/initialData-router');
+const workDescriptionsRouter = require('./endpoints/workDescriptions/workDescriptions-router');
+const { healthRouter, localLanPing } = require('./endpoints/health/health-router');
 const cookieParser = require('cookie-parser');
 const { requireAuth } = require('./endpoints/auth/jwt-auth');
-const workDescriptionsRouter = require('./endpoints/workDescriptions/workDescriptions-router');
 
 // Middleware
 app.use(cookieParser());
@@ -46,6 +47,9 @@ app.use(
    })
 );
 
+// Checks connectivity inside LAN every minute.
+setInterval(localLanPing, 60000);
+
 /* ///////////////////////////\\\\  USER ENDPOINTS  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
 app.use('/auth', authentication);
@@ -64,6 +68,7 @@ app.use('/retainers', requireAuth, retainerRouter);
 app.use('/writeOffs', requireAuth, writeOffsRouter);
 app.use('/initialData', requireAuth, initialDataRouter);
 app.use('/workDescriptions', requireAuth, workDescriptionsRouter);
+app.use('/health', healthRouter);
 
 /* ///////////////////////////\\\\  ERROR HANDLER  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
