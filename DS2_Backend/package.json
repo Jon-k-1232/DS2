@@ -5,8 +5,8 @@
    "main": "index.js",
    "scripts": {
       "test": "mocha --require test/setup.js",
-      "dev": "nodemon src/server.js",
-      "start": "node src/server.js"
+      "dev": "NODE_ENV=development nodemon src/server.js",
+      "start": "NODE_ENV=production node src/server.js"
    },
    "keywords": [],
    "author": "Jon Kimmel",
