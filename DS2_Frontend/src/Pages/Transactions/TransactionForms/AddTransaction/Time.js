@@ -20,7 +20,7 @@ const initialState = {
    isInAdditionToMonthlyCharge: false,
    unitCost: 0,
    quantity: 1,
-   transactionType: 'Charge',
+   transactionType: 'Time',
    selectedRetainerPayment: null
 };
 
@@ -34,7 +34,7 @@ export default function Time({ customerData, setCustomerData }) {
    const { unitCost, quantity } = selectedItems;
 
    const handleSubmit = async () => {
-      const dataToPost = formObjectForTransactionPost(selectedItems, loggedInUser, 'Time');
+      const dataToPost = formObjectForTransactionPost(selectedItems, loggedInUser);
       const postedItem = await postTransaction(dataToPost, accountID, userID);
 
       setPostStatus(postedItem);

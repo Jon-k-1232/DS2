@@ -11,6 +11,17 @@ const headers = memoryToken => {
    };
 };
 
+export const fetchServerHealth = async () => {
+   try {
+      const response = await axios.get(`${config.API_ENDPOINT}/health/status`);
+      const serverHealth = response.data;
+      return serverHealth;
+   } catch (error) {
+      console.error('Error fetching server health:', error);
+      return [];
+   }
+};
+
 export const getCustomerJobsList = async (accountID, userID, customerID, token) => {
    try {
       const response = await axios.get(`${config.API_ENDPOINT}/jobs/getActiveCustomerJobs/${accountID}/${userID}/${customerID}`, headers(token));

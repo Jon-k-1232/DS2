@@ -31,6 +31,7 @@ export default function WriteOffsGrid({ customerData, setCustomerData }) {
       'job_description',
       'writeoff_amount',
       'transaction_type',
+      'writeoff_date',
       'created_at',
       'created_by_user_name',
       'writeoff_reason',

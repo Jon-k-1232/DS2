@@ -9,6 +9,8 @@ services:
       build:
          context: ./DS2_Frontend
          dockerfile: Dockerfile
+      ports:
+         - '3001:3001'
       env_file:
          - ./DS2_Frontend/.env
       volumes:

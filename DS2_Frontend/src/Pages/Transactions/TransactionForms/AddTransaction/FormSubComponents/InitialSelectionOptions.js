@@ -11,7 +11,7 @@ import { context } from '../../../../../App';
 import './Transactions.css';
 import SplitOptionLabel from '../../../../../Components/SplitOptionLabel';
 
-export default function InitialSelectionOptions({ customerData, selectedItems, setSelectedItems, customerProfileData, initialState, page }) {
+export default function InitialSelectionOptions({ customerData, selectedItems, setSelectedItems, customerProfileData, setCustomerData, initialState, page }) {
    // Destructure state variables from the props
    const combinedData = { ...customerData, ...selectedItems, ...customerProfileData };
    const { selectedDate, selectedCustomer, selectedJob, selectedTeamMember, selectedInvoice } = combinedData;
@@ -43,7 +43,7 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
 
    const handleAutocompleteChange = (key, value) => {
       // The reset is needed on payments in case user selects customer, then invoice, then changes mind and selects a different customer. selectedDate included so the date doesnt change on each update of field.
-      if (key === 'selectedCustomer' && initialState) setSelectedItems({ selectedDate, initialState });
+      if (key === 'selectedCustomer' && initialState) setSelectedItems({ ...selectedItems, selectedDate, initialState });
       if (key === 'selectedInvoice') setSelectedItems({ ...selectedItems, selectedJob: null });
       setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));
    };
@@ -129,7 +129,7 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
 
             {page !== 'Retainer' && page !== 'WriteOff' && page !== 'Payment' && (
                <AutoCompleteWithDialog dialogTitle='New Job' dialogOpen={jobDialogOpen} setDialogOpen={setJobDialogOpen} autoCompleteProps={jobAutoCompleteProps}>
-                  <NewJob customerData={customerData} />
+                  <NewJob customerData={customerData} setCustomerData={data => setCustomerData(data)} />
                </AutoCompleteWithDialog>
             )}
 

@@ -16,6 +16,7 @@ transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParse
 
       // Create new object with sanitized fields
       const transactionTableFields = restoreDataTypesTransactionsTableOnCreate(sanitizedNewTransaction);
+
       const { total_transaction, retainer_id, customer_job_id, account_id } = transactionTableFields;
 
       // Update job total

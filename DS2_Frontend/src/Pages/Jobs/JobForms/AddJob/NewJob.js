@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Stack, Button, Alert, Box } from '@mui/material';
+import { Button, Alert, Box } from '@mui/material';
 import { formObjectForJobPost } from '../../../../Services/SharedPostObjects/SharedPostObjects';
 import { postNewCustomerJob } from '../../../../Services/ApiCalls/PostCalls';
 import { useContext } from 'react';
@@ -25,7 +25,7 @@ export default function NewJob({ customerData, setCustomerData }) {
    const handleSubmit = async () => {
       const dataToPost = formObjectForJobPost(selectedItems, loggedInUser);
       const postedItem = await postNewCustomerJob(dataToPost, accountID, userID);
- 
+
       setPostStatus(postedItem);
       if (postedItem.status === 200) resetState(postedItem);
    };
@@ -38,16 +38,16 @@ export default function NewJob({ customerData, setCustomerData }) {
 
    return (
       <>
-         <Stack spacing={3}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2, md: 8 }}>
+         <Box>
+            <Box>
                <NewJobSelections customerData={customerData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} pageName='newJob' />
-            </Stack>
+            </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
                <Button onClick={handleSubmit}>Submit</Button>
                {postStatus && <Alert severity={postStatus.status === 200 ? 'success' : 'error'}>{postStatus.message}</Alert>}
             </Box>
-         </Stack>
+         </Box>
       </>
    );
 }

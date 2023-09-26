@@ -224,8 +224,6 @@ customerRouter
          // delete customer
          await customerService.deleteCustomer(db, customerID);
 
-         console.log('delete');
-
          // call active customers
          const activeCustomers = await customerService.getActiveCustomers(db, accountID);
 

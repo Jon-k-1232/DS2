@@ -44,6 +44,7 @@ export default function TransactionsGrid({ customerData, setCustomerData }) {
       'retainer_id',
       'is_transaction_billable',
       'is_excess_to_subscription',
+      'transaction_date',
       'created_at',
       'logged_for_user_name',
       'job_description',

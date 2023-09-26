@@ -8,6 +8,7 @@ import Scrollbar from '../../Components/Scrollbar';
 import NavSection from '../../Components/NavSection';
 import { MHidden } from '../../Components/@material-extend';
 import sidebarRoutes from '../../Routes/SidebarRoutes';
+import ServerStatus from './ServerStatus';
 
 const DRAWER_WIDTH = 290;
 
@@ -69,6 +70,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
                }}
             >
                {renderContent}
+               <ServerStatus />
             </Drawer>
          </MHidden>
 
@@ -84,6 +86,7 @@ export default function DashboardSidebar({ isOpenSidebar, onCloseSidebar }) {
                }}
             >
                {renderContent}
+               <ServerStatus />
             </Drawer>
          </MHidden>
       </RootStyle>

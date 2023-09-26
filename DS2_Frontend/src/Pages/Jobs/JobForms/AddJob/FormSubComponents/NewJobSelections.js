@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Stack, Autocomplete, TextField, FormControlLabel, Checkbox } from '@mui/material';
+import { Box, Autocomplete, TextField, FormControlLabel, Checkbox } from '@mui/material';
 
 export default function NewJobSelections({ customerData, selectedItems, setSelectedItems, notes }) {
    const [filteredJobTypes, setFilteredJobTypes] = useState([]);
@@ -21,7 +21,7 @@ export default function NewJobSelections({ customerData, selectedItems, setSelec
 
    return (
       <>
-         <Stack direction={{ xs: 'column', sm: 'column' }} spacing={{ xs: 1, sm: 2 }}>
+         <Box>
             <Autocomplete
                size='small'
                sx={{ width: 350 }}
@@ -73,15 +73,15 @@ export default function NewJobSelections({ customerData, selectedItems, setSelec
 
             <TextField sx={{ width: '350px' }} variant='standard' label='Job Notes' value={notes} onChange={e => setSelectedItems(otherItems => ({ ...otherItems, notes: e.target.value }))} />
 
-            <Stack direction={{ xs: 'row', sm: 'row' }} spacing={{ xs: 1, sm: 2 }}>
+            <Box>
                <FormControlLabel control={<Checkbox checked={isQuote} onChange={e => setSelectedItems(otherItems => ({ ...otherItems, isQuote: e.target.checked }))} />} label='Is this a quote?' />
 
                <FormControlLabel
                   control={<Checkbox checked={isJobComplete} onChange={e => setSelectedItems(otherItems => ({ ...otherItems, isJobComplete: e.target.checked }))} />}
                   label='Is Job Complete?'
                />
-            </Stack>
-         </Stack>
+            </Box>
+         </Box>
       </>
    );
 }

@@ -42,7 +42,9 @@ export const formObjectForTransactionPost = (selectedItems, loggedInUser) =>
       loggedForUserID: selectedItems.selectedTeamMember.user_id,
       transactionDate: dayjs(selectedItems.selectedDate).format(),
       totalTransaction: (selectedItems.quantity * selectedItems.unitCost).toFixed(2),
-      selectedRetainerID: selectedItems?.selectedRetainerPayment?.retainer_id || null
+      selectedRetainerID: selectedItems?.selectedRetainerPayment?.retainer_id || null,
+      transactionType: selectedItems?.initialState.transactionType,
+      quantity: selectedItems?.initialState.quantity
    });
 
 export const formObjectForPaymentPost = (selectedItems, loggedInUser) =>
