@@ -10,7 +10,7 @@ services:
          context: ./DS2_Frontend
          dockerfile: Dockerfile
       ports:
-         - '3001:3001'
+         - '3000:3000'
       env_file:
          - ./DS2_Frontend/.env
       volumes:

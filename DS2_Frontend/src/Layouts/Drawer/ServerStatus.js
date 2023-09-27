@@ -12,6 +12,9 @@ const ServerStatus = () => {
          setServerHealth(serverHealthFromServer);
       };
       callServerHealth();
+      // recall every 2 minutes
+      const intervalId = setInterval(callServerHealth, 120000);
+      return () => clearInterval(intervalId);
    }, []);
 
    return (
