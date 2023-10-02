@@ -1,6 +1,6 @@
 # Dockerfile_App2_Frontend
 # Pull official base image
-FROM node:14-alpine
+FROM node:latest
 
 # Set the time zone
 ENV TZ=America/Phoenix

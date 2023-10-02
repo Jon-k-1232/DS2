@@ -1,5 +1,5 @@
 # Pull official base image
-FROM node:14-alpine
+FROM node:latest
 
 # Set the time zone
 ENV TZ=America/Phoenix
@@ -12,7 +12,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install app dependencies
-RUN npm install
+RUN npm install --force
 
 # Copy app source code
 COPY . .
