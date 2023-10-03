@@ -47,12 +47,12 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
       if (key === 'selectedInvoice') setSelectedItems({ ...selectedItems, selectedJob: null });
       setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));
    };
-
    const jobAutoCompleteProps = {
       autoCompleteLabel: 'Select Job',
       autoCompleteOptionsList: customerJobs,
       onChangeKey: 'selectedJob',
-      optionLabelProperty: 'display_name',
+      // 'job_description' is needed for edit transaction, replaced 'display_name'
+      optionLabelProperty: 'job_description',
       valueTestProperty: 'customer_job_id',
       addedOptionLabel: 'Add New Job',
       selectedOption: selectedJob,

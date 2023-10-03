@@ -1,4 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { context } from '../../../../App';
 import { TextField, Typography, Autocomplete, Box, Alert, Button } from '@mui/material';
 import InitialSelectionOptions from '../AddTransaction/FormSubComponents/InitialSelectionOptions';
 import ChargeOptions from '../AddTransaction/FormSubComponents/ChargeOptions';
@@ -6,8 +8,8 @@ import TimeOptions from '../AddTransaction/FormSubComponents/TimeOptions';
 import RetainerSelection from '../AddTransaction/FormSubComponents/RetainerSelection';
 import { putEditTransaction } from '../../../../Services/ApiCalls/PutCalls';
 import { formObjectForTransactionPost } from '../../../../Services/SharedPostObjects/SharedPostObjects';
-import { context } from '../../../../App';
-import { useNavigate } from 'react-router-dom';
+import { formatTotal } from '../../../../Services/SharedFunctions';
+
 import dayjs from 'dayjs';
 
 const initialState = {
@@ -22,7 +24,7 @@ const initialState = {
    isInAdditionToMonthlyCharge: null,
    unitCost: '',
    quantity: 1,
-   transactionType: 'Charge',
+   transactionType: '',
    selectedRetainerPayment: null
 };
 
@@ -72,7 +74,7 @@ export default function EditTransaction({ customerData, setCustomerData, transac
             isInAdditionToMonthlyCharge: is_excess_to_subscription,
             unitCost: unit_cost,
             selectedDate: dayjs(transaction_date),
-            transactionType: transaction_type || 'Charge',
+            transactionType: transaction_type,
             selectedGeneralWorkDescription: workDescriptions.find(workDescription => workDescription.general_work_description_id === general_work_description_id),
             selectedRetainerPayment: activeRetainers.find(retainer => retainer.retainer_id === retainer_id) || null
          });
@@ -80,14 +82,8 @@ export default function EditTransaction({ customerData, setCustomerData, transac
       // eslint-disable-next-line
    }, [transactionData]);
 
-   const formatTotal = value => {
-      return value
-         .toFixed(2)
-         .toString()
-         .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-   };
-
    const handleSubmit = async () => {
+      console.log(selectedItems);
       const dataToPost = formObjectForTransactionPost(selectedItems, loggedInUser);
       const postedItem = await putEditTransaction(dataToPost, accountID, userID);
 
@@ -111,7 +107,7 @@ export default function EditTransaction({ customerData, setCustomerData, transac
                sx={{ width: 350, marginTop: '10px' }}
                options={['Time', 'Charge']}
                getOptionLabel={option => option || ''}
-               value={transactionType || 'Charge'}
+               value={transactionType}
                isOptionEqualToValue={(option, value) => option === value || true}
                onChange={(e, value) => setSelectedItems({ ...selectedItems, transactionType: value })}
                renderInput={params => <TextField {...params} label='Transaction Type' variant='standard' />}

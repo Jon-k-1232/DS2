@@ -138,7 +138,10 @@ const invoiceService = {
                // Handles query if there is a id in the lastBillDateLookup
                if (lastBillDateLookup[id]) {
                   builder.orWhere(subQuery => {
-                     subQuery.where('customer_transactions.customer_id', id).andWhere('customer_transactions.transaction_date', '>', lastBillDateLookup[id]);
+                     subQuery
+                        .where('customer_transactions.customer_id', id)
+                        .andWhere('customer_transactions.created_at', '>=', lastBillDateLookup[id])
+                        .whereNull('customer_transactions.customer_invoice_id');
                   });
                   // Handles query if there is no id in the lastBillDateLookup
                } else {
@@ -168,7 +171,7 @@ const invoiceService = {
                // Handles query if there is an ID in the lastBillDateLookup
                if (lastBillDateLookup[id]) {
                   builder.orWhere(subQuery => {
-                     subQuery.where('customer_payments.customer_id', id).andWhere('customer_payments.payment_date', '>', lastBillDateLookup[id]);
+                     subQuery.where('customer_payments.customer_id', id).andWhere('customer_payments.payment_date', '>=', lastBillDateLookup[id]).whereNull('customer_payments.customer_invoice_id');
                   });
                   // Handles query if there is no ID in the lastBillDateLookup
                } else {
@@ -198,7 +201,10 @@ const invoiceService = {
                // Handles query if there is a id in the lastBillDateLookup
                if (lastBillDateLookup[id]) {
                   builder.orWhere(subQuery => {
-                     subQuery.where('customer_writeoffs.customer_id', id).andWhere('customer_writeoffs.writeoff_date', '>', lastBillDateLookup[id]);
+                     subQuery
+                        .where('customer_writeoffs.customer_id', id)
+                        .andWhere('customer_writeoffs.writeoff_date', '>=', lastBillDateLookup[id])
+                        .whereNull('customer_writeoffs.customer_invoice_id');
                   });
                   // Handles query if there is no id in the lastBillDateLookup
                } else {
@@ -223,7 +229,7 @@ const invoiceService = {
             customerIDs.forEach(id => {
                if (lastBillDateLookup[id]) {
                   builder.orWhere(subQuery => {
-                     subQuery.where('customer_retainers_and_prepayments.customer_id', id).andWhere('customer_retainers_and_prepayments.created_at', '>', lastBillDateLookup[id]);
+                     subQuery.where('customer_retainers_and_prepayments.customer_id', id).andWhere('customer_retainers_and_prepayments.created_at', '>=', lastBillDateLookup[id]);
                   });
                } else {
                   builder.orWhere('customer_retainers_and_prepayments.customer_id', id);

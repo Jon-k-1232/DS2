@@ -8,6 +8,7 @@ const cleanAndValidateTransactionObject = require('./schemaValidation/transactio
 const invoiceService = require('../invoice-service');
 const transactionsService = require('../../transactions/transactions-service');
 const writeOffsService = require('../../writeOffs/writeOffs-service');
+const dayjs = require('dayjs');
 
 const dataInsertionOrchestrator = async (db, invoicesWithDetail, accountBillingInformation, pdfBuffer, userID) => {
    if (!invoicesWithDetail || !accountBillingInformation || !pdfBuffer || !userID) {
@@ -113,7 +114,7 @@ const newInvoiceObject = (invoice, pdfFileLocationsMap, userID) => {
       customer_id,
       customer_info_id,
       invoice_number: invoiceNumber,
-      due_date: new Date(dueDate).toISOString(),
+      due_date: dayjs(dueDate).format(),
       beginning_balance: outstandingInvoiceTotal || 0,
       total_payments: paymentTotal || 0,
       total_charges: transactionsTotal || 0,
@@ -122,12 +123,12 @@ const newInvoiceObject = (invoice, pdfFileLocationsMap, userID) => {
       total_amount_due: invoiceTotal || 0,
       remaining_balance_on_invoice: invoiceTotal,
       parent_invoice_id: null,
-      invoice_date: new Date().toISOString(),
+      invoice_date: dayjs().format(),
       is_invoice_paid_in_full: false,
       fully_paid_date: null,
       created_by_user_id: userID,
-      start_date: lastInvoiceDate.toISOString(),
-      end_date: new Date().toISOString(),
+      start_date: dayjs(lastInvoiceDate).format(),
+      end_date: dayjs().format(),
       invoice_file_location: pdfFileLocationsMap[customer_id],
       notes: null
    });
