@@ -10,6 +10,15 @@ const invoiceService = {
          .orderBy('customer_invoices.invoice_date', 'desc');
    },
 
+   deleteInvoice(db, customerInvoiceID) {
+      return db('customer_invoices').where('customer_invoice_id', customerInvoiceID).del();
+   },
+
+   // find most recent invoice and return the remaining balance
+   getRemainingInvoiceAmount(db, accountID, invoiceID) {
+      return db.select('remaining_balance_on_invoice').from('customer_invoices').where('account_id', accountID).andWhere('parent_invoice_id', invoiceID).orderBy('created_at', 'desc').first();
+   },
+
    getOutstandingInvoicesBetweenDates(db, accountID, start_date, end_date) {
       return db
          .select('customer_invoices.*', db.raw('customers.display_name as customer_name'), db.raw('users.display_name as created_by_user_name'))
@@ -84,7 +93,7 @@ const invoiceService = {
    async getLastInvoiceDatesByCustomerID(db, accountID, customerIDs) {
       const data = await db
          .select('customer_id')
-         .max('invoice_date as last_invoice_date')
+         .max('created_at as last_invoice_date')
          .from('customer_invoices')
          .where('account_id', accountID)
          .whereIn('customer_id', customerIDs)
@@ -160,9 +169,9 @@ const invoiceService = {
 
    async getPaymentsByCustomerID(db, accountID, customerIDs, lastBillDateLookup) {
       const data = await db('customer_payments')
-         .join('customer_invoices', 'customer_invoices.customer_invoice_id', '=', 'customer_payments.customer_invoice_id')
+         // switched to left join to include payments that are not attached to an invoice through a transaction. was just a 'join'.
+         .leftJoin('customer_invoices', 'customer_invoices.customer_invoice_id', '=', 'customer_payments.customer_invoice_id')
          .select('customer_payments.*', 'customer_invoices.*')
-         // .select('customer_payments.*')
          .where({
             'customer_payments.account_id': accountID
          })
@@ -171,7 +180,8 @@ const invoiceService = {
                // Handles query if there is an ID in the lastBillDateLookup
                if (lastBillDateLookup[id]) {
                   builder.orWhere(subQuery => {
-                     subQuery.where('customer_payments.customer_id', id).andWhere('customer_payments.payment_date', '>=', lastBillDateLookup[id]).whereNull('customer_payments.customer_invoice_id');
+                     // Changed payment date to created_at from payment date since created_at has the time stamp.
+                     subQuery.where('customer_payments.customer_id', id).andWhere('customer_payments.created_at', '>=', lastBillDateLookup[id]);
                   });
                   // Handles query if there is no ID in the lastBillDateLookup
                } else {
@@ -190,8 +200,9 @@ const invoiceService = {
 
    async getWriteOffsByCustomerID(db, accountID, customerIDs, lastBillDateLookup) {
       const data = await db('customer_writeoffs')
-         .join('customer_jobs', 'customer_jobs.customer_job_id', '=', 'customer_writeoffs.customer_job_id')
-         .join('customer_job_types', 'customer_job_types.job_type_id', '=', 'customer_jobs.job_type_id')
+         .leftJoin('customer_invoices', 'customer_invoices.customer_invoice_id', '=', 'customer_writeoffs.customer_invoice_id')
+         .leftJoin('customer_jobs', 'customer_jobs.customer_job_id', '=', 'customer_writeoffs.customer_job_id')
+         .leftJoin('customer_job_types', 'customer_job_types.job_type_id', '=', 'customer_jobs.job_type_id')
          .select('customer_writeoffs.*', 'customer_jobs.job_type_id', 'customer_job_types.job_description')
          .where({
             'customer_writeoffs.account_id': accountID
@@ -201,10 +212,7 @@ const invoiceService = {
                // Handles query if there is a id in the lastBillDateLookup
                if (lastBillDateLookup[id]) {
                   builder.orWhere(subQuery => {
-                     subQuery
-                        .where('customer_writeoffs.customer_id', id)
-                        .andWhere('customer_writeoffs.writeoff_date', '>=', lastBillDateLookup[id])
-                        .whereNull('customer_writeoffs.customer_invoice_id');
+                     subQuery.where('customer_writeoffs.customer_id', id).andWhere('customer_writeoffs.created_at', '>=', lastBillDateLookup[id]);
                   });
                   // Handles query if there is no id in the lastBillDateLookup
                } else {

@@ -5,7 +5,7 @@ import { context } from '../../../../../App';
 import SplitOptionLabel from '../../../../../Components/SplitOptionLabel';
 
 export default function RetainerSelection({ selectedItems, setSelectedItems }) {
-   const { selectedCustomer, selectedRetainerPayment } = selectedItems;
+   const { selectedCustomer, selectedRetainer } = selectedItems;
 
    const { accountID, userID, token } = useContext(context).loggedInUser;
 
@@ -30,8 +30,8 @@ export default function RetainerSelection({ selectedItems, setSelectedItems }) {
             <Autocomplete
                size='small'
                sx={{ width: 350, marginTop: '15px' }}
-               value={selectedRetainerPayment}
-               onChange={(event, value) => setSelectedItems({ ...selectedItems, selectedRetainerPayment: value })}
+               value={selectedRetainer}
+               onChange={(event, value) => setSelectedItems({ ...selectedItems, selectedRetainer: value })}
                getOptionLabel={option => `${option.display_name} Remaining: ${option.current_amount}`}
                renderOption={(props, option) => (
                   <li {...props}>

@@ -1,14 +1,13 @@
 import { Stack, TextField, Autocomplete } from '@mui/material';
 import SplitOptionLabel from '../../../../../Components/SplitOptionLabel';
+import RetainerSelection from './RetainerSelection';
 
-export default function PaymentOptions({ selectedItems, setSelectedItems, customerProfileData, page }) {
+export default function PaymentOptions({ selectedItems, setSelectedItems, page }) {
    const paymentFormsOne = ['Cash', 'Check', 'Credit Card', 'Debit Card', 'ACH', 'Retainer', 'Prepayment', 'Other'];
    const paymentFormsTwo = ['Cash', 'Check', 'Credit Card', 'Debit Card', 'ACH', 'Other'];
    const paymentForms = page !== 'NewRetainer' ? paymentFormsOne : paymentFormsTwo;
 
-   const { unitCost, formOfPayment, paymentReferenceNumber, selectedRetainer, currentAmount } = selectedItems;
-
-   const { customerRetainerData = [] } = customerProfileData?.customerRetainerData || {};
+   const { unitCost, formOfPayment, paymentReferenceNumber, currentAmount } = selectedItems;
 
    const handleFieldChange = field => e => {
       setSelectedItems(prevItems => ({ ...prevItems, [field]: e.target.value }));
@@ -18,8 +17,6 @@ export default function PaymentOptions({ selectedItems, setSelectedItems, custom
       if (field === 'formOfPayment') setSelectedItems({ ...selectedItems, selectedRetainer: null });
       setSelectedItems(prevItems => ({ ...prevItems, [field]: value }));
    };
-
-   const sortRetainerOrPrePayment = () => customerRetainerData.filter(payment => payment.type_of_hold === formOfPayment && payment.current_amount < 0.0);
 
    return (
       <>
@@ -52,20 +49,7 @@ export default function PaymentOptions({ selectedItems, setSelectedItems, custom
 
             {(formOfPayment === 'Retainer' || formOfPayment === 'Prepayment') && (
                <Stack style={{ margin: '5px 0px' }}>
-                  <Autocomplete
-                     size='small'
-                     sx={{ width: 350 }}
-                     value={selectedRetainer}
-                     options={sortRetainerOrPrePayment()}
-                     getOptionLabel={option => `${option.type_of_hold} Remaining: ${option.current_amount}`}
-                     renderOption={(props, option) => (
-                        <li {...props}>
-                           <SplitOptionLabel alignLeft={option.type_of_hold} alignRight={`Remaining: $${option.current_amount}`} />
-                        </li>
-                     )}
-                     onChange={handleAutocompleteChange('selectedRetainer')}
-                     renderInput={params => <TextField {...params} label='Retainers and Prepayments' variant='standard' />}
-                  />
+                  <RetainerSelection selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
                </Stack>
             )}
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Checkbox, Box, TextField } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import getDynamicColumnWidths from './DynamicColumnSizing';
+import CheckIcon from '@mui/icons-material/Check';
 
-export default function CreateInvoiceGridTable({ gridData, passedHeight, setSelectedRowsToInvoice }) {
+export default function CreateInvoiceGridTable({ gridData, passedHeight, selectedRowsToInvoice, setSelectedRowsToInvoice }) {
    const [checkboxes, setCheckboxes] = useState({});
    const [textValues, setTextValues] = useState({});
    const [selectedRowIds, setSelectedRowIds] = useState([]);
@@ -100,12 +102,30 @@ export default function CreateInvoiceGridTable({ gridData, passedHeight, setSele
       disableClickEventBubbling: true
    };
 
+   const writeOffsPresentColumn = {
+      field: 'writeOffs',
+      headerName: 'Write Offs Present',
+      renderCell: params =>
+         params.row.write_off_count > 0 ? (
+            <div style={{ justifyContent: 'center' }}>
+               <CheckIcon style={{ color: '#02ab55' }} />
+            </div>
+         ) : (
+            ''
+         ),
+      width: 120,
+      disableClickEventBubbling: true
+   };
+
    // Insert the showWriteOffs column after the display_name column
    const displayNameIndex = baseColumnsFromData.findIndex(col => col.field === 'display_name');
    baseColumnsFromData.splice(displayNameIndex + 1, 0, showWriteOffsColumn);
 
+   // Insert the writeOffs column after the showWriteOffs column
+   baseColumnsFromData.splice(displayNameIndex + 2, 0, writeOffsPresentColumn);
+
    // Insert the invoiceNote column after the showWriteOffs column
-   baseColumnsFromData.splice(displayNameIndex + 2, 0, invoiceNoteColumn);
+   baseColumnsFromData.splice(displayNameIndex + 3, 0, invoiceNoteColumn);
 
    // Size columns based on data
    const columns = getDynamicColumnWidths(rows, baseColumnsFromData);
@@ -131,37 +151,3 @@ export default function CreateInvoiceGridTable({ gridData, passedHeight, setSele
       </Box>
    );
 }
-
-/**
- * Sizes columns based on data
- * @param {*} rows
- * @param {*} columns
- * @returns
- */
-const getDynamicColumnWidths = (rows, columns) => {
-   const ctx = document.createElement('canvas').getContext('2d');
-   ctx.font = '14px Roboto';
-
-   const basePadding = 16;
-
-   return columns.map(column => {
-      if (column.field === 'invoiceNote') {
-         return { ...column, width: 350 };
-      }
-
-      if (column.field === 'showWriteOffs') {
-         return { ...column, width: 150 };
-      }
-
-      if (typeof rows[0][column.field] === 'string') {
-         const headerWidth = ctx.measureText(column.headerName).width;
-         const maxWidth = rows.reduce((maxWidth, row) => {
-            const textWidth = ctx.measureText(row[column.field] || '').width;
-            return Math.max(maxWidth, textWidth);
-         }, headerWidth);
-         return { ...column, width: maxWidth + 35 + basePadding };
-      }
-
-      return column;
-   });
-};

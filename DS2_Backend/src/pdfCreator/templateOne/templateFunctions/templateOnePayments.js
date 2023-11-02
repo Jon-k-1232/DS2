@@ -12,6 +12,8 @@ const createPaymentsSection = (doc, invoiceDetails, preferenceSettings) => {
       .fontSize(12)
       .text('Date', leftMargin + 10, groupHeight + lineHeight)
       .text('Invoice', 200, groupHeight + lineHeight)
+      .text('Type', 350, groupHeight + lineHeight)
+      .text('Reference', 450, groupHeight + lineHeight)
       .text('Amount', alignRight('Amount', 1), groupHeight + lineHeight);
 
    doc.lineCap('butt')
@@ -28,13 +30,11 @@ const createPaymentsSection = (doc, invoiceDetails, preferenceSettings) => {
       doc.font(normalFont)
          .fontSize(12)
          .text(`${dayjs(paymentRecord.payment_date).format('MM/DD/YYYY')}`, leftMargin + 10, yHeight)
-         .text(`${paymentRecord.invoice_number || 'No Attached Invoice'}`, 200, yHeight);
+         .text(`${paymentRecord.invoice_number || 'No Attached Invoice'}`, 200, yHeight)
+         .text(paymentRecord.form_of_payment, 350, yHeight + 2)
+         .text(paymentRecord.payment_reference_number, 450, yHeight + 2);
 
-      doc.font(normalFont)
-         .fontSize(8)
-         .text('Payment - Thank You', 400, yHeight + 2);
-
-      doc.font(normalFont).fontSize(12).text(paymentRecord.payment_amount, alignRight(paymentRecord.payment_amount, 0), yHeight);
+      doc.font(normalFont).fontSize(12).text(paymentRecord.payment_amount, alignRight(paymentRecord.payment_amount, 2), yHeight);
 
       // if last index draw line
       if (index === payments.paymentRecords.length - 1) {

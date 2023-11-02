@@ -62,7 +62,7 @@ export default function DeleteWriteOff({ customerData, setCustomerData, writeOff
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
-         setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList });
+         setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList, invoicesList: postedItem.invoicesList });
          navigate('/transactions/customerWriteOffs');
       }
    };

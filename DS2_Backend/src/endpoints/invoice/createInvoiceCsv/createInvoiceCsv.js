@@ -39,7 +39,7 @@ const convertToCSV = invoicesWithDetail => {
 
    const rows = invoicesWithDetail.map(customer => [
       customer.customer_id,
-      customer.customerContactInformation.display_name,
+      customer.customerContactInformation.display_name.replace(/,/g, ''),
       customer.outstandingInvoices.outstandingInvoiceTotal,
       customer.payments.paymentTotal,
       customer.transactions.transactionsTotal,

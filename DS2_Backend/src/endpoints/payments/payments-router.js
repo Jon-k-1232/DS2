@@ -7,6 +7,8 @@ const invoiceService = require('../invoice/invoice-service');
 const retainersService = require('../retainer/retainer-service');
 const { restoreDataTypesPaymentsTableOnCreate, restoreDataTypesPaymentsTableOnUpdate } = require('./paymentsObjects');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
+const { findInvoice, updateObjectsWithRemainingAmounts, checkIfPaymentIsAttachedToInvoice, returnTablesWithSuccessResponse } = require('./payment-logic');
+const { findMatchingRetainer } = require('../retainer/retainer-logic');
 
 // Create a new payment
 paymentsRouter.route('/createPayment/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -14,31 +16,38 @@ paymentsRouter.route('/createPayment/:accountID/:userID').post(jsonParser, async
    try {
       const sanitizedNewPayment = sanitizeFields(req.body.payment);
       const paymentTableFields = restoreDataTypesPaymentsTableOnCreate(sanitizedNewPayment);
-
-      const { customer_invoice_id, account_id, payment_amount } = paymentTableFields;
+      const { customer_invoice_id, account_id, payment_amount, retainer_id } = paymentTableFields;
 
       if (!customer_invoice_id) {
          throw new Error('No invoice ID provided for this payment.');
       }
 
-      // Find all records for this invoice
-      const [matchingInvoice] = await invoiceService.getInvoiceByInvoiceRowID(db, account_id, customer_invoice_id);
-      const { remaining_balance_on_invoice } = matchingInvoice || {};
+      // Need to find the invoice that the payment is being applied to
+      const matchingInvoice = await findInvoice(db, customer_invoice_id, account_id, payment_amount);
+      const insertionObjects = updateObjectsWithRemainingAmounts(matchingInvoice, paymentTableFields);
+      const { paymentInsertionObject, invoiceInsertionObject } = insertionObjects;
 
-      // If no matching invoice return error
-      if (!Object.keys(matchingInvoice).length) {
-         throw new Error('No matching invoice record found for this payment.');
+      // Handle for if a retainer/prepayment is being used to pay the invoice
+      if (retainer_id) {
+         const matchingRetainer = await findMatchingRetainer(db, retainer_id, account_id, payment_amount);
+         const newRemainingRetainerAmount = Number(matchingRetainer.current_amount) + Math.abs(payment_amount);
+         const newRetainerParentID = matchingRetainer.parent_retainer_id ? matchingRetainer.parent_retainer_id : matchingRetainer.retainer_id;
+         delete matchingRetainer.retainer_id;
+         delete matchingRetainer.created_at;
+         const updatedRetainer = { ...matchingRetainer, current_amount: newRemainingRetainerAmount, parent_retainer_id: newRetainerParentID };
+         await retainersService.createRetainer(db, updatedRetainer);
       }
 
-      // return error for over payment, along with the max amount that can be applied to this invoice
-      if (Math.abs(remaining_balance_on_invoice) < Math.abs(payment_amount)) {
-         throw new Error(`Payment amount exceeds remaining balance on invoice. Max amount that can be applied to this invoice is $${Math.abs(remaining_balance_on_invoice)}.`);
-      }
+      // Need to insert a new invoice first before payments because payments needs the customer_invoice_id to link the payment with the invoice change record.
+      const newInvoiceRecord = await invoiceService.createInvoice(db, invoiceInsertionObject);
+      const paymentInsertionWithInvoiceID = { ...paymentInsertionObject, customer_invoice_id: newInvoiceRecord.customer_invoice_id };
 
-      // Calculate remaining balance, and post
-      await handlePaymentMatchingInvoice(db, matchingInvoice, paymentTableFields);
+      // Post the new payment
+      await paymentsService.createPayment(db, paymentInsertionWithInvoiceID);
 
-      return returnTablesWithSuccessResponse(db, res, paymentTableFields);
+      const message = 'Successfully created payment.';
+
+      return returnTablesWithSuccessResponse(db, res, paymentTableFields, message);
    } catch (err) {
       console.log(err);
       res.send({
@@ -49,37 +58,34 @@ paymentsRouter.route('/createPayment/:accountID/:userID').post(jsonParser, async
 });
 
 // Get single payment
-paymentsRouter
-   .route('/getSinglePayment/:paymentID/:accountID/:userID')
-   // .all( requireAuth )
-   .get(async (req, res) => {
-      const db = req.app.get('db');
-      try {
-         const { paymentID, accountID } = req.params;
+paymentsRouter.route('/getSinglePayment/:paymentID/:accountID/:userID').get(async (req, res) => {
+   const db = req.app.get('db');
+   try {
+      const { paymentID, accountID } = req.params;
 
-         const activePayments = await paymentsService.getSinglePayment(db, paymentID, accountID);
+      const activePayments = await paymentsService.getSinglePayment(db, paymentID, accountID);
 
-         if (!activePayments.length) throw new Error('No matching payment record found.');
+      if (!activePayments.length) throw new Error('No matching payment record found.');
 
-         // Return Object
-         const activePaymentData = {
-            activePayments,
-            grid: createGrid(activePayments)
-         };
+      // Return Object
+      const activePaymentData = {
+         activePayments,
+         grid: createGrid(activePayments)
+      };
 
-         res.send({
-            activePaymentData,
-            message: 'Successfully retrieved single payment.',
-            status: 200
-         });
-      } catch (err) {
-         console.log(err);
-         res.send({
-            message: err.message || 'An error occurred while updating the Payment.',
-            status: 500
-         });
-      }
-   });
+      res.send({
+         activePaymentData,
+         message: 'Successfully retrieved single payment.',
+         status: 200
+      });
+   } catch (err) {
+      console.log(err);
+      res.send({
+         message: err.message || 'An error occurred while updating the Payment.',
+         status: 500
+      });
+   }
+});
 
 // Update a payment
 paymentsRouter.route('/updatePayment/:accountID/:userID').put(jsonParser, async (req, res) => {
@@ -89,29 +95,37 @@ paymentsRouter.route('/updatePayment/:accountID/:userID').put(jsonParser, async 
 
       // Create new object with sanitized fields
       const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
-      const { customer_invoice_id } = paymentTableFields;
+      const { customer_invoice_id, account_id, payment_amount, payment_id } = paymentTableFields;
 
-      // If payment is attached to an invoice, do not allow update
-      if (customer_invoice_id) {
-         throw new Error('Payment is attached to an invoice and cannot be updated.');
+      // If payment is invoiced, do not allow update
+      await checkIfPaymentIsAttachedToInvoice(db, paymentTableFields);
+
+      // Get payment record
+      const [matchingPayment] = await paymentsService.getSinglePayment(db, payment_id, account_id);
+      const { payment_amount: DbPaymentAmount, customer_invoice_id: DbCustomerInvoiceID } = matchingPayment || {};
+
+      // ToDo - re write this if block to update the invoice object with whatever new values need to be insert. factors = customerID change, invoiceID change, amount change, invoice Number change
+      if (DbPaymentAmount !== payment_amount || DbCustomerInvoiceID !== customer_invoice_id) {
+         // Get invoice record, update invoice, update payment
+         const [matchingInvoice] = await invoiceService.getInvoiceByInvoiceRowID(db, account_id, customer_invoice_id);
+         const { remaining_balance_on_invoice } = matchingInvoice || {};
+         const preOriginalPaymentInvoiceAmount = Math.abs(DbPaymentAmount) + remaining_balance_on_invoice;
+         const newInvoiceRemaining = preOriginalPaymentInvoiceAmount + payment_amount;
+
+         // update Invoice Object
+         matchingInvoice.remaining_balance_on_invoice = newInvoiceRemaining;
+         matchingInvoice.is_invoice_paid_in_full = newInvoiceRemaining === 0 ? true : false;
+         matchingInvoice.fully_paid_date = newInvoiceRemaining === 0 ? new Date() : null;
+
+         // Update invoice
+         await invoiceService.updateInvoice(db, matchingInvoice);
       }
 
       // Update payment
       await paymentsService.updatePayment(db, paymentTableFields);
 
-      // Get all payments
-      const activePayments = await paymentsService.getActivePayments(db, paymentTableFields.account_id);
-
-      const activePaymentsData = {
-         activePayments,
-         grid: createGrid(activePayments)
-      };
-
-      res.send({
-         paymentsList: { activePaymentsData },
-         message: 'Successfully updated payment.',
-         status: 200
-      });
+      const message = 'Successfully updated payment.';
+      return returnTablesWithSuccessResponse(db, res, paymentTableFields, message);
    } catch (err) {
       console.log(err);
       res.send({
@@ -129,29 +143,22 @@ paymentsRouter.route('/deletePayment/:accountID/:userID').delete(jsonParser, asy
 
       // Create new object with sanitized fields
       const paymentTableFields = restoreDataTypesPaymentsTableOnUpdate(sanitizedUpdatedPayment);
-      const { customer_invoice_id, payment_id, account_id } = paymentTableFields;
+      const { payment_id, account_id } = paymentTableFields;
 
-      // If payment is attached to an invoice, do not allow delete
-      if (customer_invoice_id) {
-         throw new Error('Payment is attached to an invoice and cannot be deleted.');
+      const records = await checkIfPaymentIsAttachedToInvoice(db, paymentTableFields);
+      const { retainerRecord, paymentInvoiceRecord } = records;
+
+      // Retainer used on payment, delete retainer
+      if (Object.keys(retainerRecord).length) {
+         await retainersService.deleteRetainer(db, retainerRecord.retainer_id, account_id);
       }
 
-      // Delete payment
+      // Delete the payment and the invoice
+      await invoiceService.deleteInvoice(db, paymentInvoiceRecord.customer_invoice_id);
       await paymentsService.deletePayment(db, payment_id);
 
-      // Get all payments
-      const paymentsData = await paymentsService.getActivePayments(db, account_id);
-
-      const activePaymentsData = {
-         paymentsData,
-         grid: createGrid(paymentsData)
-      };
-
-      res.send({
-         paymentsList: { activePaymentsData },
-         message: 'Successfully deleted payment.',
-         status: 200
-      });
+      const message = 'Successfully deleted payment.';
+      return returnTablesWithSuccessResponse(db, res, paymentTableFields, message);
    } catch (err) {
       console.log(err);
       res.send({
@@ -162,79 +169,3 @@ paymentsRouter.route('/deletePayment/:accountID/:userID').delete(jsonParser, asy
 });
 
 module.exports = paymentsRouter;
-
-/**
- *
- * @param {*} db
- * @param {*} matchingInvoice
- * @param {*} paymentTableFields
- * @param {*} outstandingInvoices
- */
-const handlePaymentMatchingInvoice = async (db, matchingInvoice, paymentTableFields) => {
-   const { remaining_balance_on_invoice = 0, customer_invoice_id } = matchingInvoice;
-   const paymentAmount = Number(paymentTableFields.payment_amount);
-   const remainingBalance = Number(remaining_balance_on_invoice);
-
-   let remainingAmount;
-   let invoiceInsertionObject = createInvoiceObject(matchingInvoice, null, customer_invoice_id);
-   let paymentObject = paymentTableFields;
-
-   if (remainingBalance === paymentAmount) {
-      remainingAmount = paymentAmount;
-   } else if (remainingBalance > paymentAmount) {
-      remainingAmount = remainingBalance + paymentAmount;
-      invoiceInsertionObject = createInvoiceObject(matchingInvoice, remainingAmount, customer_invoice_id);
-   }
-
-   await Promise.all([paymentsService.createPayment(db, paymentObject), invoiceService.createInvoice(db, invoiceInsertionObject)]);
-};
-
-/**
- * Send back all tables with success response
- * @param {*} db
- * @param {*} res
- * @param {*} paymentTableFields
- */
-const returnTablesWithSuccessResponse = async (db, res, paymentTableFields) => {
-   const { account_id } = paymentTableFields;
-
-   const [activePayments, activeRetainers] = await Promise.all([paymentsService.getActivePayments(db, account_id), retainersService.getActiveRetainers(db, account_id)]);
-
-   const activePaymentsData = {
-      activePayments,
-      grid: createGrid(activePayments)
-   };
-
-   const activeRetainerData = {
-      activeRetainers,
-      grid: createGrid(activeRetainers)
-   };
-
-   res.send({
-      paymentsList: { activePaymentsData },
-      accountRetainersList: { activeRetainerData },
-      message: 'Successfully created new payment.',
-      status: 200
-   });
-};
-
-/**
- * Makes invoice object for insertion into invoice table
- * @param {*} matchingInvoice
- * @param {*} remainingAmount- int, not required - if provided, this amount will be used as the remaining balance
- * @returns
- */
-const createInvoiceObject = (matchingInvoice, remainingAmount, customerInvoiceID) => {
-   const { parent_invoice_id } = matchingInvoice;
-
-   delete matchingInvoice.customer_invoice_id;
-
-   return {
-      ...matchingInvoice,
-      parent_invoice_id: parent_invoice_id > 0 ? parent_invoice_id : customerInvoiceID,
-      remaining_balance_on_invoice: remainingAmount || 0,
-      is_invoice_paid_in_full: remainingAmount === 0 ? true : false,
-      fully_paid_date: remainingAmount === 0 ? new Date() : null,
-      created_at: new Date()
-   };
-};

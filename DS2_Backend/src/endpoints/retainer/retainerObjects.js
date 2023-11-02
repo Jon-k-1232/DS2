@@ -15,7 +15,7 @@ const restoreDataTypesRetainersTableOnCreate = data => ({
 
 const restoreDataTypesRetainersTableOnUpdate = data => ({
    retainer_id: Number(data.retainerID),
-   parent_retainer_id: Number(data.parentRetainerID),
+   parent_retainer_id: Number(data.parentRetainerID) || null,
    customer_id: Number(data.customerID),
    account_id: Number(data.accountID),
    display_name: data.displayName,

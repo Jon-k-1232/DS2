@@ -4,9 +4,11 @@ const { sanitizeFields } = require('../../utils');
 const transactionsRouter = express.Router();
 const transactionsService = require('./transactions-service');
 const retainerService = require('../retainer/retainer-service');
+const paymentsService = require('../payments/payments-service');
 const jobService = require('../job/job-service');
-const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate } = require('./transactionsObjects');
+const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, createPaymentObjectFromTransaction } = require('./transactionsObjects');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
+const { createPayment } = require('../payments/payments-service');
 
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -25,6 +27,12 @@ transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParse
       const newRetainer = await updateRetainerTotal(db, retainer_id, account_id, total_transaction);
       const newRetainerID = newRetainer?.retainer_id || null;
       const newTransaction = { ...transactionTableFields, retainer_id: newRetainerID };
+
+      if (retainer_id) {
+         const newPayment = createPaymentObjectFromTransaction(sanitizedNewTransaction);
+         // post payment
+         await paymentsService.createPayment(db, newPayment);
+      }
 
       // Post new transaction
       await transactionsService.createTransaction(db, newTransaction);
@@ -171,9 +179,14 @@ const updateRecentJobTotal = async (db, customerJobID, accountID, transactionTot
 
    if (!Object.keys(recentJob).length) throw new Error('Job was not found.');
 
-   const { current_job_total, parent_job_id } = recentJob;
+   // Grabbing all the matching customer jobs transactions to add them all together.
+   const matchingCustomerJobs = await transactionsService.getAllSpecificCustomerJobTransactions(db, accountID, customerJobID);
+   const transactionTotals = matchingCustomerJobs ? matchingCustomerJobs.map(transaction => Number(transaction.total_transaction)) : 0;
+   const totalsWithNewTransactionAmount = transactionTotals.concat(Number(transactionTotalDifference));
 
-   const updatedJobAmount = Number(current_job_total) + Number(transactionTotalDifference);
+   const { parent_job_id } = recentJob;
+
+   const updatedJobAmount = totalsWithNewTransactionAmount.reduce((acc, curr) => acc + curr, 0);
    const parentJobID = !parent_job_id ? customerJobID : parent_job_id;
 
    // Create new object with updated job total
@@ -277,9 +290,22 @@ const handleRetainerUpdate = async (db, transactionDifferences, transactionTable
  */
 const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all transactions
-   const activeTransactions = await transactionsService.getActiveTransactions(db, accountID);
-   const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
-   const activeJobs = await jobService.getActiveJobs(db, accountID);
+   // const activeTransactions = await transactionsService.getActiveTransactions(db, accountID);
+   // const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
+   // const activeJobs = await jobService.getActiveJobs(db, accountID);
+   // const activePayments = await paymentsService.getActivePayments(db, account_id);
+
+   const [activeTransactions, activeRetainers, activeJobs, activePayments] = await Promise.all([
+      transactionsService.getActiveTransactions(db, accountID),
+      retainerService.getActiveRetainers(db, accountID),
+      jobService.getActiveJobs(db, accountID),
+      paymentsService.getActivePayments(db, accountID)
+   ]);
+
+   const activePaymentsData = {
+      activePayments,
+      grid: createGrid(activePayments)
+   };
 
    const activeTransactionsData = {
       activeTransactions,
@@ -302,6 +328,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
       transactionsList: { activeTransactionsData },
       accountRetainersList: { activeRetainerData },
       accountJobsList: { activeJobData },
+      paymentsList: { activePaymentsData },
       message: 'Successful.',
       status: 200
    });

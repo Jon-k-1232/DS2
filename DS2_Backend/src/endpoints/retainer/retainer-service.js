@@ -1,3 +1,5 @@
+const dayjs = require('dayjs');
+
 const retainersService = {
    // Must stay desc, used in finding if an invoice has to be created
    getActiveRetainers(db, accountID) {
@@ -20,6 +22,13 @@ const retainersService = {
 
    getSingleRetainer(db, accountID, retainerID) {
       return db.select().from('customer_retainers_and_prepayments').where('account_id', accountID).andWhere('retainer_id', retainerID);
+   },
+
+   getRetainerBySameTime(db, accountID, retainerID, createdAt) {
+      // Calculate 1/2 of a second after the provided createdAt time, having to solve this way as retainer line may not be stored
+      const oneSecondAfter = dayjs(createdAt).add(500, 'millisecond').toISOString();
+
+      return db.select().from('customer_retainers_and_prepayments').where('account_id', accountID).andWhere('parent_retainer_id', retainerID).andWhere('created_at', '<=', oneSecondAfter);
    },
 
    getMostRecentRecordOfCustomerRetainers(db, accountID, customerID) {

@@ -2,6 +2,7 @@ const invoiceService = require('../invoice-service');
 const customerService = require('../../customer/customer-service');
 const transactionsService = require('../../transactions/transactions-service');
 const retainerService = require('../../retainer/retainer-service');
+const writeOffsService = require('../../writeOffs/writeOffs-service');
 const { groupByFunction, findMostRecentOutstandingInvoiceRecords } = require('../sharedInvoiceFunctions');
 const dayjs = require('dayjs');
 
@@ -12,9 +13,9 @@ const dayjs = require('dayjs');
  * @returns {}
  */
 const findCustomersNeedingInvoices = async (db, accountID) => {
-   const [customers, invoices, transactions, retainers] = await fetchData(db, accountID);
-   const [invoicesByCustomer, transactionsByCustomer, retainersByCustomer] = groupDataByCustomerId([invoices, transactions, retainers]);
-   return invoiceEligibilityPerCustomer(customers, invoicesByCustomer, transactionsByCustomer, retainersByCustomer);
+   const [customers, invoices, transactions, retainers, writeOffs] = await fetchData(db, accountID);
+   const [invoicesByCustomer, transactionsByCustomer, retainersByCustomer, writeOffsByCustomer] = groupDataByCustomerId([invoices, transactions, retainers, writeOffs]);
+   return invoiceEligibilityPerCustomer(customers, invoicesByCustomer, transactionsByCustomer, retainersByCustomer, writeOffsByCustomer);
 };
 
 module.exports = { findCustomersNeedingInvoices };
@@ -25,7 +26,8 @@ const fetchData = async (db, accountID) => {
       customerService.getActiveCustomers(db, accountID),
       invoiceService.getInvoices(db, accountID),
       transactionsService.getActiveTransactions(db, accountID),
-      retainerService.getActiveRetainers(db, accountID)
+      retainerService.getActiveRetainers(db, accountID),
+      writeOffsService.getActiveWriteOffs(db, accountID)
    ]);
 };
 
@@ -34,7 +36,7 @@ const groupDataByCustomerId = data => {
    return data.map(dataset => groupByFunction(dataset, 'customer_id'));
 };
 
-const invoiceEligibilityPerCustomer = (customers, invoicesByCustomer, transactionsByCustomer, retainersByCustomer) => {
+const invoiceEligibilityPerCustomer = (customers, invoicesByCustomer, transactionsByCustomer, retainersByCustomer, writeOffsByCustomer) => {
    return customers
       .map(customer => {
          const { customer_id } = customer;
@@ -62,11 +64,15 @@ const invoiceEligibilityPerCustomer = (customers, invoicesByCustomer, transactio
             return null;
          }
 
+         const customerWriteOffs = writeOffsByCustomer[customer_id] || [];
+         const customerActiveWriteOffs = customerWriteOffs && customerWriteOffs?.filter(writeOff => Number(writeOff.writeoff_amount) < 0);
+
          return {
             ...customer,
             retainer_count: customerActiveRetainers.length,
             transaction_count: recentCustomerTransactions.length,
-            invoice_count: outstandingInvoices.length
+            invoice_count: outstandingInvoices.length,
+            write_off_count: customerActiveWriteOffs.length
          };
       })
       .filter(Boolean); // Removes null entries

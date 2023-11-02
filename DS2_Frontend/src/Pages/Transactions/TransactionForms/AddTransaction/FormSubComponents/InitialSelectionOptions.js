@@ -11,7 +11,7 @@ import { context } from '../../../../../App';
 import './Transactions.css';
 import SplitOptionLabel from '../../../../../Components/SplitOptionLabel';
 
-export default function InitialSelectionOptions({ customerData, selectedItems, setSelectedItems, customerProfileData, setCustomerData, initialState, page }) {
+export default function InitialSelectionOptions({ customerData, selectedItems, setSelectedItems, customerProfileData, setCustomerData, initialState, page, children }) {
    // Destructure state variables from the props
    const combinedData = { ...customerData, ...selectedItems, ...customerProfileData };
    const { selectedDate, selectedCustomer, selectedJob, selectedTeamMember, selectedInvoice } = combinedData;
@@ -47,6 +47,7 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
       if (key === 'selectedInvoice') setSelectedItems({ ...selectedItems, selectedJob: null });
       setSelectedItems(prevItems => ({ ...prevItems, [key]: value }));
    };
+
    const jobAutoCompleteProps = {
       autoCompleteLabel: 'Select Job',
       autoCompleteOptionsList: customerJobs,
@@ -75,18 +76,31 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
     * @returns
     */
    const findCustomerInvoices = () => {
-      const mostRecentInvoices = customerInvoiceData.reduce((acc, invoice) => {
+      // Group invoices
+      const invoiceGroups = customerInvoiceData.reduce((acc, invoice) => {
          const identifier = invoice.parent_invoice_id || invoice.customer_invoice_id;
-         const existingInvoice = acc.get(identifier);
 
-         if (!existingInvoice || dayjs(invoice.created_at).isAfter(dayjs(existingInvoice.created_at))) {
-            acc.set(identifier, invoice);
+         if (!acc[identifier]) {
+            acc[identifier] = [];
          }
-
+         acc[identifier].push(invoice);
          return acc;
-      }, new Map());
+      }, {});
 
-      return Array.from(mostRecentInvoices.values());
+      // Get most recent invoice for each group
+      const mostRecentInvoices = Object.values(invoiceGroups).map(group => {
+         return group.reduce((mostRecent, invoice) => {
+            if (!mostRecent || dayjs(invoice.created_at).isAfter(dayjs(mostRecent.created_at))) {
+               return invoice;
+            }
+            return mostRecent;
+         }, null);
+      });
+
+      // Filter out groups where the most recent invoice has remaining_balance_on_invoice <= 0
+      const filteredInvoices = mostRecentInvoices.filter(invoice => invoice.remaining_balance_on_invoice > 0);
+
+      return filteredInvoices;
    };
 
    /**
@@ -120,7 +134,7 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
                label='Select Transaction Date'
                value={selectedDate || dayjs()}
                onChange={newValue => handleAutocompleteChange('selectedDate', dayjs(newValue))}
-               renderInput={params => <TextField {...params} />}
+               slotProps={{ textField: { variant: 'outlined' } }}
             />
 
             <AutoCompleteWithDialog dialogTitle='New Customer' dialogOpen={customerDialogOpen} setDialogOpen={setCustomerDialogOpen} autoCompleteProps={customerAutoCompleteProps}>
@@ -132,6 +146,9 @@ export default function InitialSelectionOptions({ customerData, selectedItems, s
                   <NewJob customerData={customerData} setCustomerData={data => setCustomerData(data)} />
                </AutoCompleteWithDialog>
             )}
+
+            {/* In process of cleaning up this component, will be passing components as children. */}
+            {children}
 
             {page === 'Payment' && (
                <Box>

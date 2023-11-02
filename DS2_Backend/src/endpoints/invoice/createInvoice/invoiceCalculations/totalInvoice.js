@@ -3,13 +3,14 @@ const totalInvoice = (customer_id, invoiceInformation, showWriteOffs, hideRetain
 
    const invoiceTotalHidingWriteOffs = payments.paymentTotal + transactions.transactionsTotal + outstandingInvoices.outstandingInvoiceTotal;
 
-   const writeOffsTotal = showWriteOffs ? writeOffs.writeOffTotal : 0;
+   const writeOffsTotal = writeOffs.writeOffTotal;
    const retainerTotal = hideRetainers ? 0 : retainers.retainerTotal;
 
    const preRetainerInvoiceTotal = invoiceTotalHidingWriteOffs + writeOffsTotal;
-   const retainerAppliedToInvoice = transactionRetainerPayments.transactionRetainerPaymentTotal;
+   // These are payments that were applied at the time of the transaction charge/time and linked to a retainer.
+   const retainerAppliedToInvoice = payments.retainerPaymentTotal;
    const remainingRetainer = retainerTotal + Math.abs(retainerAppliedToInvoice);
-   const invoiceTotal = invoiceTotalHidingWriteOffs + writeOffsTotal + retainerAppliedToInvoice;
+   const invoiceTotal = invoiceTotalHidingWriteOffs + writeOffsTotal;
 
    if (isNaN(invoiceTotal)) {
       console.log(`Invoice Total on ${customer_id} is NaN`);

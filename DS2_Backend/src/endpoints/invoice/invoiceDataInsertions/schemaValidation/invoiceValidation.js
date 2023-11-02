@@ -34,6 +34,17 @@ const invoiceValidators = {
    null: n => n === null
 };
 
+const correctType = (value, expectedType) => {
+   switch (expectedType) {
+      case 'int':
+         return Number.isNaN(parseInt(value)) ? null : parseInt(value);
+      case 'string':
+         return value.toString();
+      default:
+         return null;
+   }
+};
+
 // Updated cleanAndValidateInvoiceObject function
 const cleanAndValidateInvoiceObject = invoiceObject => {
    // Remove any extraneous properties not in the schema

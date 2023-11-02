@@ -71,7 +71,7 @@ export default function DeletePayment({ customerData, setCustomerData, paymentDa
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
-         setCustomerData({ ...customerData, paymentsList: postedItem.paymentsList });
+         setCustomerData({ ...customerData, paymentsList: postedItem.paymentsList, invoicesList: postedItem.invoicesList });
          navigate('/transactions/customerPayments');
       }
    };

@@ -25,7 +25,7 @@ const initialState = {
    unitCost: '',
    quantity: 1,
    transactionType: '',
-   selectedRetainerPayment: null
+   selectedRetainer: null
 };
 
 export default function EditTransaction({ customerData, setCustomerData, transactionData }) {
@@ -76,14 +76,13 @@ export default function EditTransaction({ customerData, setCustomerData, transac
             selectedDate: dayjs(transaction_date),
             transactionType: transaction_type,
             selectedGeneralWorkDescription: workDescriptions.find(workDescription => workDescription.general_work_description_id === general_work_description_id),
-            selectedRetainerPayment: activeRetainers.find(retainer => retainer.retainer_id === retainer_id) || null
+            selectedRetainer: activeRetainers.find(retainer => retainer.retainer_id === retainer_id) || null
          });
       }
       // eslint-disable-next-line
    }, [transactionData]);
 
    const handleSubmit = async () => {
-      console.log(selectedItems);
       const dataToPost = formObjectForTransactionPost(selectedItems, loggedInUser);
       const postedItem = await putEditTransaction(dataToPost, accountID, userID);
 

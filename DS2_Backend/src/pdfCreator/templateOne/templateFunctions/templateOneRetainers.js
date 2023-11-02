@@ -10,7 +10,7 @@ const createRetainersSection = (doc, invoiceDetails, preferenceSettings) => {
       .fontSize(12)
       .text('Type', leftMargin + 10, groupHeight + lineHeight)
       .text('Original Amount', 200, groupHeight + lineHeight)
-      .text('Current Amount', alignRight('Current Amount', 1), groupHeight + lineHeight);
+      .text('Start Of Cycle Amount', alignRight('Start Of Cycle Amount', 1), groupHeight + lineHeight);
 
    doc.lineCap('butt')
       .lineWidth(1)
@@ -44,7 +44,13 @@ const createRetainersSection = (doc, invoiceDetails, preferenceSettings) => {
                yHeight + lineHeight * 1.5
             );
 
-         preferenceSettings.endOfGroupingHeight = yHeight + lineHeight * 1.5;
+         doc.lineCap('butt')
+            .lineWidth(1)
+            .moveTo(475, groupHeight + lineHeight * 5)
+            .lineTo(770, groupHeight + lineHeight * 5)
+            .stroke();
+
+         preferenceSettings.endOfGroupingHeight = yHeight + lineHeight * 1.7;
       }
    });
 

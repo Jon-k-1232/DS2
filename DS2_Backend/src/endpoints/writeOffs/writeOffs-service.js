@@ -10,9 +10,9 @@ const writeOffsService = {
          )
          .from('customer_writeoffs')
          .join('customers', 'customer_writeoffs.customer_id', 'customers.customer_id')
-         .join('customer_jobs', 'customer_writeoffs.customer_job_id', 'customer_jobs.customer_job_id')
-         .join('customer_job_types', 'customer_jobs.job_type_id', 'customer_job_types.job_type_id')
-         .join('users', 'customer_writeoffs.created_by_user_id', 'users.user_id') // Join with users on created_by_user_id
+         .leftJoin('customer_jobs', 'customer_writeoffs.customer_job_id', 'customer_jobs.customer_job_id')
+         .leftJoin('customer_job_types', 'customer_jobs.job_type_id', 'customer_job_types.job_type_id')
+         .join('users', 'customer_writeoffs.created_by_user_id', 'users.user_id')
          .where('customer_writeoffs.account_id', accountID);
    },
 

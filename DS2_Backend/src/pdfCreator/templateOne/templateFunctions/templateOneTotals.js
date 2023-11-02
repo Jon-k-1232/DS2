@@ -18,6 +18,12 @@ const createTotalsSection = (doc, invoiceDetails, preferenceSettings) => {
             groupHeight + lineHeight
          )
          .text(`Remaining Retainer/ Pre-Payment: ${remainingRetainer.toFixed(2)}`, alignRight(`Remaining Retainer/ Pre-Payment: ${remainingRetainer.toFixed(2)}`, 1), groupHeight + lineHeight * 2);
+
+      doc.lineCap('butt')
+         .lineWidth(1)
+         .moveTo(475, groupHeight + lineHeight * 3)
+         .lineTo(770, groupHeight + lineHeight * 3)
+         .stroke();
    }
 
    doc.font(boldFont)
@@ -25,7 +31,7 @@ const createTotalsSection = (doc, invoiceDetails, preferenceSettings) => {
       .text(
          `Balance Due: ${invoiceTotal.toFixed(2)}`,
          alignRight(`Balance Due: ${invoiceTotal.toFixed(2)}`, 1),
-         retainers.retainerRecords.length ? groupHeight + lineHeight * 3 : groupHeight + lineHeight
+         retainers.retainerRecords.length ? groupHeight + lineHeight * 3.5 : groupHeight + lineHeight
       );
 
    preferenceSettings.endOfGroupingHeight = groupHeight + lineHeight * 2;

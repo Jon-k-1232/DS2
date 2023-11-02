@@ -42,7 +42,7 @@ export const formObjectForTransactionPost = (selectedItems, loggedInUser) =>
       loggedForUserID: selectedItems.selectedTeamMember.user_id,
       transactionDate: dayjs(selectedItems.selectedDate).format(),
       totalTransaction: (selectedItems.quantity * selectedItems.unitCost).toFixed(2),
-      selectedRetainerID: selectedItems?.selectedRetainerPayment?.retainer_id || null,
+      selectedRetainerID: selectedItems?.selectedRetainer?.retainer_id || null,
       transactionType: selectedItems?.initialState?.transactionType || selectedItems?.transactionType,
       quantity: selectedItems?.initialState?.quantity || selectedItems?.quantity
    });
@@ -63,7 +63,7 @@ export const formObjectForWriteOffPost = (selectedItems, loggedInUser) =>
       selectedJobID: selectedItems?.selectedJob?.customer_job_id || null,
       loggedForUserID: selectedItems?.selectedTeamMember?.user_id || null,
       writeOffReason: selectedItems?.writeOffReason || null,
-      customerInvoiceID: selectedItems?.customerInvoiceID || null,
+      customerInvoiceID: selectedItems?.selectedInvoice?.customer_invoice_id || null,
       writeOffID: selectedItems?.writeOffID || null
    });
 

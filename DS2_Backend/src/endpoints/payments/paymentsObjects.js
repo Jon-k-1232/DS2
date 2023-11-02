@@ -36,7 +36,7 @@ const restoreDataTypesOnPayments = data => ({
    customer_job_id: Number(data.customer_job_id) || null,
    retainer_id: Number(data.retainer_id) || null,
    customer_invoice_id: Number(data.customer_invoice_id) || null,
-   payment_date: String(data.payment_date),
+   payment_date: new Date(data.payment_date),
    payment_amount: -Math.abs(Number(data.payment_amount)),
    form_of_payment: String(data.form_of_payment),
    payment_reference_number: String(data.payment_reference_number) || null,

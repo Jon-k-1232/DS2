@@ -40,4 +40,24 @@ const restoreDataTypesOnWriteOffs = data => ({
    note: String(data.note) || null
 });
 
-module.exports = { restoreDataTypesWriteOffsTableOnCreate, restoreDataTypesWriteOffsTableOnUpdate, restoreDataTypesOnWriteOffs };
+/**
+ * Used to convert write off to payment record.
+ * @param {*} data
+ * @returns
+ */
+const convertWriteOffToPayment = data => ({
+   customer_id: Number(data.customer_id),
+   account_id: Number(data.account_id),
+   customer_job_id: null,
+   retainer_id: null,
+   customer_invoice_id: Number(data.customer_invoice_id),
+   payment_date: data.writeoff_date,
+   payment_amount: -Math.abs(Number(data.writeoff_amount)),
+   form_of_payment: 'Write Off',
+   payment_reference_number: 'See write offs.',
+   is_transaction_billable: true,
+   created_by_user_id: Number(data.created_by_user_id),
+   note: data.note || null
+});
+
+module.exports = { restoreDataTypesWriteOffsTableOnCreate, restoreDataTypesWriteOffsTableOnUpdate, restoreDataTypesOnWriteOffs, convertWriteOffToPayment };

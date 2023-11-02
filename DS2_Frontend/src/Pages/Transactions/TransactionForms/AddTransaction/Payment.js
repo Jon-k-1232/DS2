@@ -62,7 +62,7 @@ export default function Payment({ customerData, setCustomerData }) {
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
-         setCustomerData({ ...customerData, paymentsList: postedItem.paymentsList });
+         setCustomerData({ ...customerData, paymentsList: postedItem.paymentsList, invoicesList: postedItem.invoicesList, accountRetainersList: postedItem.accountRetainersList });
       }
    };
 
@@ -83,7 +83,7 @@ export default function Payment({ customerData, setCustomerData }) {
 
                <InvoiceConfirmation customerProfileData={customerProfileData} selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 
-               <PaymentOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} customerProfileData={customerProfileData} />
+               <PaymentOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 
                <Stack>
                   <TextField sx={{ width: '350px' }} value={note} variant='standard' label='Optional Note' onChange={e => setSelectedItems({ ...selectedItems, note: e.target.value })} />

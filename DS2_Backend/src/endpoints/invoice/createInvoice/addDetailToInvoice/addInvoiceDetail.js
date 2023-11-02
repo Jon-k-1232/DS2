@@ -3,7 +3,7 @@ const fs = require('fs');
 const dayjs = require('dayjs');
 
 const addInvoiceDetails = (calculatedInvoices, invoiceQueryData, invoicesToCreateMap, accountBillingInformation, globalInvoiceNote) => {
-   const companyLogo = fs.readFileSync(accountBillingInformation.account_company_logo);
+   const companyLogo = fs.readFileSync(accountBillingInformation.account_company_logo) || '';
 
    return calculatedInvoices.map((invoiceCalculation, i) => {
       const { customer_id, invoiceNote } = invoicesToCreateMap[invoiceCalculation.customer_id];

@@ -27,9 +27,7 @@ const localLanPing = async () => {
 
    const currentTime = new Date().toLocaleString();
 
-   if (isNetworkOk) {
-      console.log(`[${currentTime}] - LAN PING - Status: 200`);
-   } else {
+   if (!isNetworkOk) {
       console.error(`[${currentTime}] - LAN PING - Status: 500`);
    }
 };

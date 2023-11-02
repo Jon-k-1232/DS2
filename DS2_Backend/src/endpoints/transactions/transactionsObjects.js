@@ -39,6 +39,7 @@ const restoreDataTypesTransactionsTableOnUpdate = transaction => ({
    note: String(transaction.note) || ''
 });
 
+// Difference between this and the above is one is camelCase while the other is formatted for the db already
 const restoreDataTypesOnTransactions = transaction => ({
    transaction_id: Number(transaction.transaction_id),
    account_id: Number(transaction.account_id),
@@ -61,4 +62,18 @@ const restoreDataTypesOnTransactions = transaction => ({
    note: String(transaction.note) || null
 });
 
-module.exports = { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, restoreDataTypesOnTransactions };
+const createPaymentObjectFromTransaction = data => ({
+   customer_id: Number(data.customerID),
+   account_id: Number(data.accountID),
+   customer_job_id: Number(data.customerJobID) || null,
+   retainer_id: Number(data.selectedRetainerID),
+   customer_invoice_id: Number(data.customerInvoicesID) || null,
+   payment_date: String(data.transactionDate),
+   payment_amount: -Math.abs(Number(data.totalTransaction)),
+   form_of_payment: 'Retainer',
+   payment_reference_number: 'Retainer',
+   is_transaction_billable: Boolean(data.isTransactionBillable) || true,
+   created_by_user_id: data.loggedForUserID,
+   note: null
+});
+module.exports = { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, restoreDataTypesOnTransactions, createPaymentObjectFromTransaction };

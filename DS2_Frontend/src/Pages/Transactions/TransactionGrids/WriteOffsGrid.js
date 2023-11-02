@@ -7,7 +7,6 @@ import { filterGridByColumnName } from '../../../Services/SharedFunctions';
 
 export default function WriteOffsGrid({ customerData, setCustomerData }) {
    if (!customerData || !customerData.writeOffsList || !customerData.writeOffsList.activeWriteOffsData) {
-      // You can render a loading indicator or an empty state here
       return <div>Loading...</div>;
    }
 
@@ -27,6 +26,8 @@ export default function WriteOffsGrid({ customerData, setCustomerData }) {
    const arrayOfColumnNames = [
       'writeoff_id',
       'customer_id',
+      'customer_invoice_id',
+      'customer_job_id',
       'customer_name',
       'job_description',
       'writeoff_amount',

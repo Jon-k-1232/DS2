@@ -8,9 +8,12 @@ import dayjs from 'dayjs';
 import { context } from '../../../../App';
 import InformationDialog from '../../../../Components/Dialogs/InformationDialog';
 import { formatTotal } from '../../../../Services/SharedFunctions';
+import InvoiceDropWithInvoiceAmounts from '../../../../Components/InitialSelectionOptions/InitialSelectionForms/InvoiceDropWithInvoiceAmounts';
+import JobDropWithCurrentCycleJobAmount from '../../../../Components/InitialSelectionOptions/InitialSelectionForms/JobDropWithCurrentCycleJobAmount';
 
 const initialState = {
    selectedCustomer: null,
+   selectedInvoice: null,
    selectedJob: null,
    selectedTeamMember: null,
    writeoffReason: '',
@@ -29,7 +32,7 @@ export default function WriteOff({ customerData, setCustomerData }) {
    const { unitCost, quantity } = selectedItems;
 
    const handleSubmit = async () => {
-      const dataToPost = formObjectForWriteOffPost(selectedItems, loggedInUser, 'WriteOff');
+      const dataToPost = formObjectForWriteOffPost(selectedItems, loggedInUser);
       const postedItem = await postNewWriteOff(dataToPost, accountID, userID);
 
       setPostStatus(postedItem);
@@ -37,7 +40,7 @@ export default function WriteOff({ customerData, setCustomerData }) {
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
-         setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList });
+         setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList, invoicesList: postedItem.invoicesList });
       }
    };
 
@@ -52,7 +55,23 @@ export default function WriteOff({ customerData, setCustomerData }) {
                selectedItems={selectedItems}
                setSelectedItems={data => setSelectedItems(data)}
                initialState={initialState}
-            />
+               page='WriteOff'
+            >
+               <InvoiceDropWithInvoiceAmounts
+                  customerData={customerData}
+                  selectedItems={selectedItems}
+                  setSelectedItems={data => setSelectedItems(data)}
+                  dropDownPlaceholderText={'Select Prior Invoice'}
+                  helperText={'For previously invoiced amounts, select an invoice with an outstanding invoice.'}
+               />
+               <JobDropWithCurrentCycleJobAmount
+                  customerData={customerData}
+                  selectedItems={selectedItems}
+                  setSelectedItems={data => setSelectedItems(data)}
+                  dropDownPlaceholderText={'Select Current Cycle Job'}
+                  helperText={'For not yet invoiced amounts, select a job with an outstanding invoice.'}
+               />
+            </InitialSelectionOptions>
 
             <WriteOffOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 
@@ -68,9 +87,11 @@ export default function WriteOff({ customerData, setCustomerData }) {
 }
 
 const helpText = [
-   'Adjustments are not currently supported. You can either write off a portion or the entire amount of a job.',
-   'If you need to adjust a transaction, please edit or delete the transaction directly from the transactions list.',
-   'When writing off, only provide the ID for an Invoice or select a Job. Do not provide both. In most cases, you will want to write off a Job.',
-   'Currently, you are required to provide the ID of the invoice you want to write off.',
-   'Definition of a Write Off: The inability to collect payment from a customer for a job that has been completed.'
+   'Adjustments are not currently supported.',
+   'If you need to adjust a current transaction, please edit or delete the transaction directly from the transactions list.',
+   'You can either write off a portion or the entire amount of a job as long as the job has an outstanding amount for the current billing cycle.',
+   'Definition of a Write Off: The inability to collect payment from a customer for a job that has been completed.',
+   'When writing off a prior amount (an invoice) you need to include the invoice number in the reason field.',
+   'An invoice write off will always show on the bill and be visible to the customer.',
+   `'Reasons' will be visible to the customer on the bill.`
 ];

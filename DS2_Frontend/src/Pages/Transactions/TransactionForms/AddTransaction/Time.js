@@ -21,7 +21,7 @@ const initialState = {
    unitCost: 0,
    quantity: 1,
    transactionType: 'Time',
-   selectedRetainerPayment: null
+   selectedRetainer: null
 };
 
 export default function Time({ customerData, setCustomerData }) {
@@ -42,7 +42,13 @@ export default function Time({ customerData, setCustomerData }) {
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
-         setCustomerData({ ...customerData, transactionsList: postedItem.transactionsList, accountRetainersList: postedItem.accountRetainersList, accountJobsList: postedItem.accountJobsList });
+         setCustomerData({
+            ...customerData,
+            transactionsList: postedItem.transactionsList,
+            accountRetainersList: postedItem.accountRetainersList,
+            accountJobsList: postedItem.accountJobsList,
+            paymentsList: postedItem.paymentsList
+         });
       }
    };
 

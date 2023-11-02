@@ -8,9 +8,12 @@ import { formObjectForWriteOffPost } from '../../../../Services/SharedPostObject
 import dayjs from 'dayjs';
 import { context } from '../../../../App';
 import { formatTotal } from '../../../../Services/SharedFunctions';
+import InvoiceDropWithInvoiceAmounts from '../../../../Components/InitialSelectionOptions/InitialSelectionForms/InvoiceDropWithInvoiceAmounts';
+import JobDropWithCurrentCycleJobAmount from '../../../../Components/InitialSelectionOptions/InitialSelectionForms/JobDropWithCurrentCycleJobAmount';
 
 const initialState = {
    selectedCustomer: null,
+   selectedInvoice: null,
    selectedJob: null,
    selectedTeamMember: null,
    writeoffReason: '',
@@ -30,7 +33,8 @@ export default function EditWriteOff({ customerData, setCustomerData, writeOffDa
    const {
       customersList: { activeCustomerData: { activeCustomers } = [] } = [],
       accountJobsList: { activeJobData: { activeJobs } = [] } = [],
-      teamMembersList: { activeUserData: { activeUsers } = [] } = []
+      teamMembersList: { activeUserData: { activeUsers } = [] } = [],
+      invoicesList: { activeInvoiceData: { activeInvoices } = [] } = []
    } = { ...customerData };
 
    const { account_id, created_at, created_by_user_id, customer_id, customer_invoice_id, customer_job_id, note, transaction_type, writeoff_amount, writeoff_date, writeoff_id, writeoff_reason } =
@@ -49,7 +53,7 @@ export default function EditWriteOff({ customerData, setCustomerData, writeOffDa
             unitCost: writeoff_amount,
             transactionType: transaction_type,
             selectedCustomer: activeCustomers.find(customer => customer.customer_id === customer_id),
-            customerInvoiceID: customer_invoice_id,
+            selectedInvoice: activeInvoices.find(invoice => invoice.customer_invoice_id === customer_invoice_id),
             selectedJob: activeJobs.find(job => job.customer_job_id === customer_job_id),
             note
          });
@@ -66,7 +70,7 @@ export default function EditWriteOff({ customerData, setCustomerData, writeOffDa
       if (postedItem.status === 200) {
          setTimeout(() => setPostStatus(null), 2000);
          setSelectedItems(initialState);
-         setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList });
+         setCustomerData({ ...customerData, writeOffsList: postedItem.writeOffsList, invoicesList: postedItem.invoicesList });
          navigate('/transactions/customerWriteOffs');
       }
    };
@@ -80,7 +84,23 @@ export default function EditWriteOff({ customerData, setCustomerData, writeOffDa
                selectedItems={selectedItems}
                setSelectedItems={data => setSelectedItems(data)}
                initialState={initialState}
-            />
+               page='WriteOff'
+            >
+               <InvoiceDropWithInvoiceAmounts
+                  customerData={customerData}
+                  selectedItems={selectedItems}
+                  setSelectedItems={data => setSelectedItems(data)}
+                  dropDownPlaceholderText={'Select Prior Invoice'}
+                  helperText={'For previously invoiced amounts, select an invoice with an outstanding invoice.'}
+               />
+               <JobDropWithCurrentCycleJobAmount
+                  customerData={customerData}
+                  selectedItems={selectedItems}
+                  setSelectedItems={data => setSelectedItems(data)}
+                  dropDownPlaceholderText={'Select Current Cycle Job'}
+                  helperText={'For not yet invoiced amounts, select a job with an outstanding invoice.'}
+               />
+            </InitialSelectionOptions>
 
             <WriteOffOptions selectedItems={selectedItems} setSelectedItems={data => setSelectedItems(data)} />
 

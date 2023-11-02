@@ -96,7 +96,7 @@ invoiceRouter.route('/createInvoice/AccountsWithBalance/:accountID/:invoiceID').
    // Return Object
    const activeOutstandingBalancesData = {
       activeOutstandingBalances,
-      grid: filterGridByColumnName(fullGrid, ['customer_id', 'business_name', 'customer_name', 'display_name', 'retainer_count', 'transaction_count', 'invoice_count'])
+      grid: filterGridByColumnName(fullGrid, ['customer_id', 'business_name', 'customer_name', 'display_name', 'retainer_count', 'transaction_count', 'invoice_count', 'write_off_count'])
    };
 
    res.send({
@@ -122,7 +122,7 @@ invoiceRouter.route('/createInvoice/:accountID/:userID').post(jsonParser, async 
       const [accountBillingInformation] = await accountService.getAccount(db, accountID);
       const invoiceQueryData = await fetchInitialQueryItems(db, invoicesToCreateMap, accountID);
       const calculatedInvoices = calculateInvoices(invoicesToCreate, invoiceQueryData);
-      const invoicesWithDetail = addInvoiceDetails(calculatedInvoices, invoiceQueryData, invoicesToCreateMap, accountBillingInformation, globalInvoiceNote);
+      const invoicesWithDetail = addInvoiceDetails(calculatedInvoices, invoiceQueryData, invoicesToCreateMap, accountBillingInformation, globalInvoiceNote, invoiceCreationSettings);
 
       let fileLocation = '';
 
@@ -205,6 +205,10 @@ invoiceRouter.route('/getInvoiceDetails/:invoiceID/:accountID/:userID').get(asyn
 
    const [invoiceDetails] = await invoiceService.getInvoiceByInvoiceRowID(db, accountID, invoiceID);
    const { start_date, end_date } = invoiceDetails;
+
+   // Update the remaining balance on the invoice. In either case of fetching the selected invoice, or the parent invoice, the current remaining balance is required to be fetched.
+   const currentBalance = await invoiceService.getRemainingInvoiceAmount(db, accountID, invoiceID);
+   invoiceDetails.remaining_balance_on_invoice = currentBalance.remaining_balance_on_invoice;
 
    // get all data between the start and end date to show what was accounted for.
    const invoiceTransactions = await transactionsService.getTransactionsBetweenDates(db, accountID, start_date, end_date);

@@ -74,6 +74,7 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
 
          setSelectedRowsToInvoice(initialState);
          setCustomerData({ ...customerData, invoicesList: postedItem.invoicesList });
+         window.location.reload();
       }
    };
 
@@ -134,11 +135,6 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
             <DialogTitle>Confirm Finalization</DialogTitle>
             <DialogContent>
                <DialogContentText>You are finalizing these invoices, please confirm.</DialogContentText>
-               {/* {selectedRowsToInvoice.invoicesToCreate.map((customer, index) => (
-            <Typography variant='subtitle1' key={index} sx={{ paddingTop: '5px' }}>
-              {customer.display_name}
-            </Typography>
-          ))} */}
             </DialogContent>
             <DialogActions>
                <Button onClick={submitInvoice}>Confirm</Button>

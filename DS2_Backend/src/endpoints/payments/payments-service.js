@@ -57,6 +57,11 @@ const paymentsService = {
          .into('customer_payments')
          .returning('*')
          .then(rows => rows[0]);
+   },
+
+   upsertPayments(db, payments) {
+      if (!payments.length) return [];
+      return db.insert(payments).into('customer_payments').onConflict('payment_id').merge();
    }
 };
 

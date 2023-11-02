@@ -5,6 +5,14 @@ const getDynamicColumnWidths = (rows, columns) => {
    const basePadding = 16;
 
    return columns.map(column => {
+      if (column.field === 'invoiceNote') {
+         return { ...column, width: 350 };
+      }
+
+      if (column.field === 'showWriteOffs') {
+         return { ...column, width: 150 };
+      }
+
       const headerWidth = ctx.measureText(column.headerName).width;
       const maxWidth = rows.reduce((maxWidth, row) => {
          const textWidth = ctx.measureText(row[column.field]).width;
