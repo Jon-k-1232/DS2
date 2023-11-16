@@ -9,5 +9,5 @@
    "prettier.jsxSingleQuote": true,
    "prettier.arrowParens": "avoid",
    "editor.defaultFormatter": "esbenp.prettier-vscode",
-   "cSpell.words": ["currentload"]
+   "cSpell.words": ["currentload", "perticular"]
 }

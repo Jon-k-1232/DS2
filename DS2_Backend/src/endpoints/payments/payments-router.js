@@ -6,9 +6,9 @@ const paymentsService = require('./payments-service');
 const invoiceService = require('../invoice/invoice-service');
 const retainersService = require('../retainer/retainer-service');
 const { restoreDataTypesPaymentsTableOnCreate, restoreDataTypesPaymentsTableOnUpdate } = require('./paymentsObjects');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
 const { findInvoice, updateObjectsWithRemainingAmounts, checkIfPaymentIsAttachedToInvoice, returnTablesWithSuccessResponse } = require('./payment-logic');
 const { findMatchingRetainer } = require('../retainer/retainer-logic');
+const createPaymentReturnObject = require('./paymentJsonObjects');
 
 // Create a new payment
 paymentsRouter.route('/createPayment/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -68,10 +68,7 @@ paymentsRouter.route('/getSinglePayment/:paymentID/:accountID/:userID').get(asyn
       if (!activePayments.length) throw new Error('No matching payment record found.');
 
       // Return Object
-      const activePaymentData = {
-         activePayments,
-         grid: createGrid(activePayments)
-      };
+      const activePaymentData = createPaymentReturnObject.activePaymentsData(activePayments);
 
       res.send({
          activePaymentData,

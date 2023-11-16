@@ -4,8 +4,9 @@ const jobTypeService = require('./jobType-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { restoreDataTypesJobTypeTableOnCreate, restoreDataTypesJobTypeTableOnUpdate } = require('./jobTypeObjects');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
+const createJobReturnObject = require('../job/jobJsonObjects');
 const jobService = require('../job/job-service');
+const createJobTypeReturnObject = require('./jobTypeJsonObjects');
 
 // Create a new jobType
 jobTypeRouter.route('/createJobType/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -31,26 +32,20 @@ jobTypeRouter.route('/createJobType/:accountID/:userID').post(jsonParser, async 
 });
 
 // Get single jobType
-jobTypeRouter
-   .route('/getSingleJobType/:jobTypeID/:account/:userID')
-   // .all( requireAuth )
-   .get(async (req, res) => {
-      const db = req.app.get('db');
-      const { jobTypeID, account } = req.params;
+jobTypeRouter.route('/getSingleJobType/:jobTypeID/:account/:userID').get(async (req, res) => {
+   const db = req.app.get('db');
+   const { jobTypeID, account } = req.params;
 
-      const activeJobs = await jobTypeService.getSingleJobType(db, jobTypeID, account);
+   const activeJobs = await jobTypeService.getSingleJobType(db, jobTypeID, account);
 
-      const activeJobData = {
-         activeJobs,
-         grid: createGrid(activeJobs)
-      };
+   const activeJobData = createJobReturnObject.activeJobData(activeJobs);
 
-      res.send({
-         activeJobData,
-         message: 'Successfully retrieved single jobType.',
-         status: 200
-      });
+   res.send({
+      activeJobData,
+      message: 'Successfully retrieved single jobType.',
+      status: 200
    });
+});
 
 // Update a jobType
 jobTypeRouter.route('/updateJobType/:accountID/:userID').put(jsonParser, async (req, res) => {
@@ -101,10 +96,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all jobTypes
    const jobTypesData = await jobTypeService.getActiveJobTypes(db, accountID);
 
-   const activeJobTypesData = {
-      jobTypesData,
-      grid: createGrid(jobTypesData)
-   };
+   const activeJobTypesData = createJobTypeReturnObject.activeJobTypesData(jobTypesData);
 
    res.send({
       jobTypesList: { activeJobTypesData },

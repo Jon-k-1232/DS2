@@ -3,9 +3,9 @@ const jobCategoriesRouter = express.Router();
 const jobCategoriesService = require('./jobCategories-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
 const { restoreDataTypesJobCategoriesOnCreate, restoreDataTypesJobCategoriesOnUpdate } = require('./jobCategoriesObjects');
 const jobTypeService = require('../jobType/jobType-service');
+const createJobCategoryReturnObject = require('./jobCategoryJsonObjects');
 
 // Create a new job category
 jobCategoriesRouter.route('/createJobCategory/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -80,10 +80,7 @@ jobCategoriesRouter.route('/getSingleJobCategory/:jobCategoryID/:accountID/:user
    const { jobCategoryID } = req.params;
    const activeJobCategory = await jobCategoriesService.getSingleJobCategory(db, jobCategoryID);
 
-   const activeJobCategoriesData = {
-      activeJobCategory,
-      grid: createGrid(activeJobCategory)
-   };
+   const activeJobCategoriesData = createJobCategoryReturnObject.activeJobCategoriesData(activeJobCategory);
 
    res.send({
       activeJobCategoriesData,
@@ -98,10 +95,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all Job Categories
    const activeJobCategories = await jobCategoriesService.getActiveJobCategories(db, accountID);
 
-   const activeJobCategoriesData = {
-      activeJobCategories,
-      grid: createGrid(activeJobCategories)
-   };
+   const activeJobCategoriesData = createJobCategoryReturnObject.activeJobCategoriesData(activeJobCategories);
 
    res.send({
       jobCategoriesList: { activeJobCategoriesData },

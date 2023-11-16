@@ -1,3 +1,5 @@
+const dayjs = require('dayjs');
+
 /**
  *  Format data for Mui Grid
  * @param {*} data  - Array of objects
@@ -96,4 +98,23 @@ const generateTreeGridData = (data, rowID, parentProperty) => {
    };
 };
 
-module.exports = { createGrid, filterGridByColumnName, generateTreeGridData };
+/**
+ * Finds the most recent job record for each job, the returns an array of those most recent records
+ * @param {*} jobs [{},{}] - Array of Objects - Each object is a job object. No perticular order
+ * @returns [Array] = Array of objects. Each object is a job.
+ */
+const findMostRecentJobRecords = jobs => {
+   // Jobs array must be oldest to newest when coming in from db
+   const mostRecentJobs = jobs.reduce((acc, curr) => {
+      if (!acc[curr.parent_job_id]) acc[curr.customer_job_id] = curr;
+      if (acc[curr.parent_job_id] && dayjs(curr.created_at).isAfter(dayjs(acc[curr.parent_job_id].created_at))) {
+         acc[curr.parent_job_id] = curr;
+      }
+
+      return acc;
+   }, {});
+
+   return Object.values(mostRecentJobs);
+};
+
+module.exports = { createGrid, filterGridByColumnName, generateTreeGridData, findMostRecentJobRecords };

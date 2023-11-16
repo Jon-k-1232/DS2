@@ -4,7 +4,7 @@ const workDescriptionService = require('./workDescriptions-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { restoreDataTypesWorkDescriptionTableOnCreate, restoreDataTypesWorkDescriptionTableOnUpdate } = require('./workDescriptionsObjects');
-const { createGrid } = require('../../helperFunctions/helperFunctions');
+const createWorkDescriptionReturnObject = require('../workDescriptions/workDescriptionsJsonObjects');
 
 // Create a new workDescription
 workDescriptionsRouter.route('/createWorkDescription/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -31,19 +31,16 @@ workDescriptionsRouter.route('/createWorkDescription/:accountID/:userID').post(j
 // Get single work description
 workDescriptionsRouter.route('/getSingleWorkDescription/:workDescriptionID/:accountID/:userID').get(async (req, res) => {
    const db = req.app.get('db');
-   const { workDescriptionID, accountID } = req.params;
+   const { workDescriptionID } = req.params;
 
    try {
       // Get single work description
       const workDescriptionData = await workDescriptionService.getSingleWorkDescription(db, workDescriptionID);
 
-      const activeWorkDescriptionData = {
-         workDescriptionData,
-         grid: createGrid(workDescriptionData)
-      };
+      const activeWorkDescriptionsData = createWorkDescriptionReturnObject.activeWorkDescriptionsData(workDescriptionData);
 
       res.send({
-         activeWorkDescriptionData,
+         activeWorkDescriptionsData,
          message: 'Successful',
          status: 200
       });
@@ -103,10 +100,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all workTypes
    const workDescriptionsData = await workDescriptionService.getActiveWorkDescriptions(db, accountID);
 
-   const activeWorkDescriptionsData = {
-      workDescriptionsData,
-      grid: createGrid(workDescriptionsData)
-   };
+   const activeWorkDescriptionsData = createWorkDescriptionReturnObject.activeWorkDescriptionsData(workDescriptionsData);
 
    res.send({
       workDescriptionsList: { activeWorkDescriptionsData },

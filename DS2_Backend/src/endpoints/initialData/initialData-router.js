@@ -13,6 +13,11 @@ const writeOffsService = require('../writeOffs/writeOffs-service');
 const paymentsService = require('../payments/payments-service');
 const workDescriptionService = require('../workDescriptions/workDescriptions-service');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
+const createJobReturnObject = require('../job/jobJsonObjects');
+const createJobTypeReturnObject = require('../jobType/jobTypeJsonObjects');
+const createJobCategoryReturnObject = require('../jobCategories/jobCategoryJsonObjects');
+const createPaymentReturnObject = require('../payments/paymentJsonObjects');
+const createWorkDescriptionReturnObject = require('../workDescriptions/workDescriptionsJsonObjects');
 
 // Initial data object on app load
 initialDataRouter.route('/initialBlob/:accountID/:userID').get(async (req, res) => {
@@ -87,30 +92,17 @@ const initialData = async (db, res, accountID) => {
       treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
    };
 
-   const activeJobData = {
-      activeJobs,
-      grid: createGrid(activeJobs),
-      treeGrid: generateTreeGridData(activeJobs, 'customer_job_id', 'parent_job_id')
-   };
+   const activeJobData = createJobReturnObject.activeJobData(activeJobs);
 
-   const activeJobCategoriesData = {
-      activeJobCategories,
-      grid: createGrid(activeJobCategories)
-   };
+   const activeJobCategoriesData = createJobCategoryReturnObject.activeJobCategoriesData(activeJobCategories);
 
-   const activeJobTypesData = {
-      jobTypesData,
-      grid: createGrid(jobTypesData)
-   };
+   const activeJobTypesData = createJobTypeReturnObject.activeJobTypesData(jobTypesData);
+
+   const activePaymentsData = createPaymentReturnObject.activePaymentsData(activePayments);
 
    const activeWriteOffsData = {
       activeWriteOffs,
       grid: createGrid(activeWriteOffs)
-   };
-
-   const activePaymentsData = {
-      activePayments,
-      grid: createGrid(activePayments)
    };
 
    const activeRetainerData = {
@@ -119,10 +111,7 @@ const initialData = async (db, res, accountID) => {
       treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
    };
 
-   const activeWorkDescriptionsData = {
-      workDescriptions,
-      grid: createGrid(workDescriptions)
-   };
+   const activeWorkDescriptionsData = createWorkDescriptionReturnObject.activeWorkDescriptionsData(workDescriptions);
 
    res.send({
       customersList: { activeCustomerData },

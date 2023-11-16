@@ -6,8 +6,8 @@ const writeOffsService = require('../writeOffs/writeOffs-service');
 const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const { restoreDataTypesJobTableOnCreate, restoreDataTypesJobTableOnUpdate } = require('./jobObjects');
-const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
-const dayjs = require('dayjs');
+const { findMostRecentJobRecords } = require('../../helperFunctions/helperFunctions');
+const createJobReturnObject = require('../job/jobJsonObjects');
 
 // Create a new job
 jobRouter.route('/createJob/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -42,11 +42,7 @@ jobRouter.route('/getSingleJob/:customerJobID/:accountID/:userID').get(async (re
 
    const activeJobs = await jobService.getSingleJob(db, customerJobID);
 
-   const activeJobData = {
-      activeJobs,
-      grid: createGrid(activeJobs),
-      treeGrid: generateTreeGridData(activeJobs, 'customer_job_id', 'parent_job_id')
-   };
+   const activeJobData = createJobReturnObject.activeJobData(activeJobs);
 
    res.send({
       activeJobData,
@@ -67,12 +63,7 @@ jobRouter.route('/getActiveCustomerJobs/:accountID/:userID/:customerID').get(asy
    // Add display_name field for autocomplete
    activeCustomerJobs.forEach(job => (job.display_name = `${job.job_description} - ${job.customer_job_category}`));
 
-   // Return Object
-   const activeCustomerJobData = {
-      activeCustomerJobs,
-      grid: createGrid(activeCustomerJobs),
-      treeGrid: generateTreeGridData(activeCustomerJobs, 'customer_job_id', 'parent_job_id')
-   };
+   const activeCustomerJobData = createJobReturnObject.activeCustomerJobData(activeCustomerJobs);
 
    res.send({
       activeCustomerJobData,
@@ -91,6 +82,7 @@ jobRouter.route('/updateJob/:accountID/:userID').put(jsonParser, async (req, res
       // Create new object with sanitized fields
       const jobTableFields = restoreDataTypesJobTableOnUpdate(sanitizedUpdatedJob);
 
+      // getSingleJob returns only one object within an array. Destructure that array.
       const [jobRowBeforeEdits] = await jobService.getSingleJob(db, jobTableFields.customer_job_id);
 
       if (jobTableFields.is_job_complete !== jobRowBeforeEdits.is_job_complete) {
@@ -137,33 +129,16 @@ jobRouter.route('/deleteJob/:jobID/:accountID/:userID').delete(jsonParser, async
 module.exports = jobRouter;
 
 /**
- * Finds the most recent job record for each job, the returns an array of those most recent records
- * @param {*} jobs
- * @returns
+ * Standard return for jobs
+ * @param {*} db
+ * @param {*} res
+ * @param {*} accountID
  */
-const findMostRecentJobRecords = jobs => {
-   // Jobs array must be oldest to newest when coming in from db
-   const mostRecentJobs = jobs.reduce((acc, curr) => {
-      if (!acc[curr.parent_job_id]) acc[curr.customer_job_id] = curr;
-      if (acc[curr.parent_job_id] && dayjs(curr.created_at).isAfter(dayjs(acc[curr.parent_job_id].created_at))) {
-         acc[curr.parent_job_id] = curr;
-      }
-
-      return acc;
-   }, {});
-
-   return Object.values(mostRecentJobs);
-};
-
 const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all jobs
    const activeJobs = await jobService.getActiveJobs(db, accountID);
 
-   const activeJobData = {
-      activeJobs,
-      grid: createGrid(activeJobs),
-      treeGrid: generateTreeGridData(activeJobs, 'customer_job_id', 'parent_job_id')
-   };
+   const activeJobData = createJobReturnObject.activeJobData(activeJobs);
 
    res.send({
       accountJobsList: { activeJobData },

@@ -2,7 +2,7 @@ const paymentsService = require('./payments-service');
 const invoiceService = require('../invoice/invoice-service');
 const retainersService = require('../retainer/retainer-service');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
-
+const createPaymentReturnObject = require('./paymentJsonObjects');
 /**
  * Finds matching invoice and returns it
  * @param {*} customer_invoice_id
@@ -102,10 +102,7 @@ const returnTablesWithSuccessResponse = async (db, res, paymentTableFields, mess
       invoiceService.getInvoices(db, account_id)
    ]);
 
-   const activePaymentsData = {
-      activePayments,
-      grid: createGrid(activePayments)
-   };
+   const activePaymentsData = createPaymentReturnObject.activePaymentsData(activePayments);
 
    const activeRetainerData = {
       activeRetainers,

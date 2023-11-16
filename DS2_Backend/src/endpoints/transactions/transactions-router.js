@@ -8,7 +8,8 @@ const paymentsService = require('../payments/payments-service');
 const jobService = require('../job/job-service');
 const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, createPaymentObjectFromTransaction } = require('./transactionsObjects');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
-const { createPayment } = require('../payments/payments-service');
+const createJobReturnObject = require( '../job/jobJsonObjects' );
+const createPaymentReturnObject = require('../payments/paymentJsonObjects');
 
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -290,11 +291,6 @@ const handleRetainerUpdate = async (db, transactionDifferences, transactionTable
  */
 const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all transactions
-   // const activeTransactions = await transactionsService.getActiveTransactions(db, accountID);
-   // const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
-   // const activeJobs = await jobService.getActiveJobs(db, accountID);
-   // const activePayments = await paymentsService.getActivePayments(db, account_id);
-
    const [activeTransactions, activeRetainers, activeJobs, activePayments] = await Promise.all([
       transactionsService.getActiveTransactions(db, accountID),
       retainerService.getActiveRetainers(db, accountID),
@@ -302,10 +298,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
       paymentsService.getActivePayments(db, accountID)
    ]);
 
-   const activePaymentsData = {
-      activePayments,
-      grid: createGrid(activePayments)
-   };
+   const activePaymentsData = createPaymentReturnObject.activePaymentsData(activePayments);
 
    const activeTransactionsData = {
       activeTransactions,
@@ -318,11 +311,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
       treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
    };
 
-   const activeJobData = {
-      activeJobs,
-      grid: createGrid(activeJobs),
-      treeGrid: generateTreeGridData(activeJobs, 'customer_job_id', 'parent_job_id')
-   };
+   const activeJobData = createJobReturnObject.activeJobData(activeJobs);
 
    res.send({
       transactionsList: { activeTransactionsData },
