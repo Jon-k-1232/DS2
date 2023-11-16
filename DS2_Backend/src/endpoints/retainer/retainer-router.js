@@ -6,6 +6,7 @@ const retainerService = require('./retainer-service');
 const { restoreDataTypesRetainersTableOnCreate, restoreDataTypesRetainersTableOnUpdate } = require('./retainerObjects');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const transactionsService = require('../transactions/transactions-service');
+const createRetainerReturnObject = require('./retainerJsonObject');
 
 // Create a new retainer
 retainerRouter.route('/createRetainer/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -86,11 +87,7 @@ retainerRouter.route('/getSingleRetainer/:retainerID/:accountID/:userID').get(as
 
       if (!activeRetainer.length) throw new Error('Error no retainer found: ' + error.message);
 
-      const activeRetainerData = {
-         activeRetainer,
-         grid: createGrid(activeRetainer),
-         treeGrid: generateTreeGridData(activeRetainer, 'retainer_id', 'parent_retainer_id')
-      };
+      const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainer);
 
       res.send({
          activeRetainerData,
@@ -112,11 +109,7 @@ retainerRouter.route('/getActiveRetainers/:customerID/:accountID/:userID').get(a
    try {
       const activeRetainers = await retainerService.getMostRecentRecordOfCustomerRetainers(db, accountID, customerID);
 
-      const activeRetainerData = {
-         activeRetainers,
-         grid: createGrid(activeRetainers),
-         treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
-      };
+      const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainers);
 
       res.send({
          activeRetainerData,
@@ -137,11 +130,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all retainers
    const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
 
-   const activeRetainerData = {
-      activeRetainers,
-      grid: createGrid(activeRetainers),
-      treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
-   };
+   const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainers);
 
    res.send({
       accountRetainersList: { activeRetainerData },

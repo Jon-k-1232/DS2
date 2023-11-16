@@ -8,8 +8,9 @@ const paymentsService = require('../payments/payments-service');
 const jobService = require('../job/job-service');
 const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, createPaymentObjectFromTransaction } = require('./transactionsObjects');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
-const createJobReturnObject = require( '../job/jobJsonObjects' );
+const createJobReturnObject = require('../job/jobJsonObjects');
 const createPaymentReturnObject = require('../payments/paymentJsonObjects');
+const createRetainerReturnObject = require('../retainer/retainerJsonObject');
 
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -305,11 +306,7 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
       grid: createGrid(activeTransactions)
    };
 
-   const activeRetainerData = {
-      activeRetainers,
-      grid: createGrid(activeRetainers),
-      treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
-   };
+   const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainers);
 
    const activeJobData = createJobReturnObject.activeJobData(activeJobs);
 

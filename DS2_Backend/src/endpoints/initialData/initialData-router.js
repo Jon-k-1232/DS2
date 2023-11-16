@@ -18,6 +18,7 @@ const createJobTypeReturnObject = require('../jobType/jobTypeJsonObjects');
 const createJobCategoryReturnObject = require('../jobCategories/jobCategoryJsonObjects');
 const createPaymentReturnObject = require('../payments/paymentJsonObjects');
 const createWorkDescriptionReturnObject = require('../workDescriptions/workDescriptionsJsonObjects');
+const createRetainerReturnObject = require('../retainer/retainerJsonObject');
 
 // Initial data object on app load
 initialDataRouter.route('/initialBlob/:accountID/:userID').get(async (req, res) => {
@@ -105,11 +106,7 @@ const initialData = async (db, res, accountID) => {
       grid: createGrid(activeWriteOffs)
    };
 
-   const activeRetainerData = {
-      activeRetainers,
-      grid: createGrid(activeRetainers),
-      treeGrid: generateTreeGridData(activeRetainers, 'retainer_id', 'parent_retainer_id')
-   };
+   const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainers);
 
    const activeWorkDescriptionsData = createWorkDescriptionReturnObject.activeWorkDescriptionsData(workDescriptions);
 
