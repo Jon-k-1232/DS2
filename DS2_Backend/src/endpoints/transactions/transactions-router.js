@@ -7,10 +7,10 @@ const retainerService = require('../retainer/retainer-service');
 const paymentsService = require('../payments/payments-service');
 const jobService = require('../job/job-service');
 const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, createPaymentObjectFromTransaction } = require('./transactionsObjects');
-const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const createJobReturnObject = require('../job/jobJsonObjects');
 const createPaymentReturnObject = require('../payments/paymentJsonObjects');
 const createRetainerReturnObject = require('../retainer/retainerJsonObject');
+const createTransactionsReturnObject = require('./transactionsJsonObjects');
 
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -133,15 +133,11 @@ transactionsRouter.route('/getSingleTransaction/:customerID/:transactionID/:acco
    const { customerID, transactionID, accountID } = req.params;
 
    // Get specific transaction
-   const transactionData = await transactionsService.getSingleTransaction(db, accountID, customerID, transactionID);
-
-   const activeTransactionsData = {
-      transactionData,
-      grid: createGrid(transactionData)
-   };
+   const [transactionData] = await transactionsService.getSingleTransaction(db, accountID, customerID, transactionID);
+   const activeTransactionData = createTransactionsReturnObject.activeTransactionData(transactionData);
 
    res.send({
-      activeTransactionsData,
+      activeTransactionData,
       message: 'Successfully retrieved specific transaction.',
       status: 200
    });
@@ -300,14 +296,8 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    ]);
 
    const activePaymentsData = createPaymentReturnObject.activePaymentsData(activePayments);
-
-   const activeTransactionsData = {
-      activeTransactions,
-      grid: createGrid(activeTransactions)
-   };
-
+   const activeTransactionsData = createTransactionsReturnObject.activeTransactionsData(activeTransactions);
    const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainers);
-
    const activeJobData = createJobReturnObject.activeJobData(activeJobs);
 
    res.send({

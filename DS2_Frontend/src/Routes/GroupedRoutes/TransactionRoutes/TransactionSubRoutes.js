@@ -21,7 +21,7 @@ export default function TransactionSubRoutes({ customerData, setCustomerData }) 
       const fetchTransactionData = async () => {
          if (rowData) {
             const fetchTransaction = await fetchSingleTransaction(customer_id, transaction_id, accountID, userID, token);
-            setTransactionData(...fetchTransaction.activeTransactionsData.transactionData);
+            setTransactionData(fetchTransaction.activeTransactionData.transactionData);
          }
       };
       fetchTransactionData();

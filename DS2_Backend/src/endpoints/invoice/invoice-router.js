@@ -21,6 +21,7 @@ const { createAndSaveZip } = require('../../pdfCreator/zipOrchestrator');
 const dataInsertionOrchestrator = require('./invoiceDataInsertions/dataInsertionOrchestrator');
 const { requireManagerOrAdmin } = require('../auth/jwt-auth');
 const config = require('../../../config');
+const createInvoiceReturnObject = require('./invoiceJsonObjects');
 
 // GET all invoices
 invoiceRouter.route('/getInvoices/:accountID/:invoiceID').get(async (req, res) => {
@@ -30,11 +31,7 @@ invoiceRouter.route('/getInvoices/:accountID/:invoiceID').get(async (req, res) =
    const activeInvoices = await invoiceService.getInvoices(db, accountID);
 
    // Return Object
-   const activeInvoiceData = {
-      activeInvoices,
-      grid: createGrid(activeInvoices),
-      treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
-   };
+   const activeInvoiceData = createInvoiceReturnObject.activeInvoiceData(activeInvoices);
 
    res.send({
       activeInvoiceData,
@@ -53,9 +50,11 @@ invoiceRouter
 
       try {
          // check from transactions, writeoffs, and retainers, payments, and writeoffs
-         const foundTransactions = await transactionsService.getTransactionsForInvoice(db, accountID, invoiceID);
-         const foundPayments = await paymentsService.getPaymentsForInvoice(db, accountID, invoiceID);
-         const foundWriteoffs = await writeOffsService.getWriteoffsForInvoice(db, accountID, invoiceID);
+         const [foundTransactions, foundPayments, foundWriteoffs] = await Promise.all([
+            transactionsService.getTransactionsForInvoice(db, accountID, invoiceID),
+            paymentsService.getPaymentsForInvoice(db, accountID, invoiceID),
+            writeOffsService.getWriteoffsForInvoice(db, accountID, invoiceID)
+         ]);
 
          if (foundTransactions.length || foundPayments.length || foundWriteoffs.length) {
             throw new Error('Cannot delete invoice with transactions, retainers, payments, or writeoffs.');
@@ -65,11 +64,7 @@ invoiceRouter
          const activeInvoices = await invoiceService.getInvoices(db, accountID);
 
          // Return Object
-         const activeInvoiceData = {
-            activeInvoices,
-            grid: createGrid(activeInvoices),
-            treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
-         };
+         const activeInvoiceData = createInvoiceReturnObject.activeInvoiceData(activeInvoices);
 
          res.send({
             invoicesList: { activeInvoiceData },
@@ -146,11 +141,7 @@ invoiceRouter.route('/createInvoice/:accountID/:userID').post(jsonParser, async 
       const activeInvoices = await invoiceService.getInvoices(db, accountID);
 
       // Return Object
-      const activeInvoiceData = {
-         activeInvoices,
-         grid: createGrid(activeInvoices),
-         treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
-      };
+      const activeInvoiceData = createInvoiceReturnObject.activeInvoiceData(activeInvoices);
 
       res.send({
          invoicesWithDetail,
@@ -208,14 +199,15 @@ invoiceRouter.route('/getInvoiceDetails/:invoiceID/:accountID/:userID').get(asyn
 
    // Update the remaining balance on the invoice. In either case of fetching the selected invoice, or the parent invoice, the current remaining balance is required to be fetched.
    const currentBalance = await invoiceService.getRemainingInvoiceAmount(db, accountID, invoiceID);
-   invoiceDetails.remaining_balance_on_invoice = currentBalance.remaining_balance_on_invoice;
+   invoiceDetails.remaining_balance_on_invoice = currentBalance?.remaining_balance_on_invoice;
 
-   // get all data between the start and end date to show what was accounted for.
-   const invoiceTransactions = await transactionsService.getTransactionsBetweenDates(db, accountID, start_date, end_date);
-   const invoicePayments = await paymentsService.getPaymentsBetweenDates(db, accountID, start_date, end_date);
-   const invoiceWriteoffs = await writeOffsService.getWriteoffsBetweenDates(db, accountID, start_date, end_date);
-   const invoiceRetainers = await retainersService.getRetainersBetweenDates(db, accountID, start_date, end_date);
-   const invoiceOutstandingInvoices = await invoiceService.getOutstandingInvoicesBetweenDates(db, accountID, start_date, end_date);
+   const [invoiceTransactions, invoicePayments, invoiceWriteoffs, invoiceRetainers, invoiceOutstandingInvoices] = await Promise.all([
+      transactionsService.getTransactionsBetweenDates(db, accountID, start_date, end_date),
+      paymentsService.getPaymentsBetweenDates(db, accountID, start_date, end_date),
+      writeOffsService.getWriteoffsBetweenDates(db, accountID, start_date, end_date),
+      retainersService.getRetainersBetweenDates(db, accountID, start_date, end_date),
+      invoiceService.getOutstandingInvoicesBetweenDates(db, accountID, start_date, end_date)
+   ]);
 
    // create grid objects
    const invoiceTransactionsData = {

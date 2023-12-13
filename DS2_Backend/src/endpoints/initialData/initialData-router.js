@@ -12,13 +12,18 @@ const jobTypeService = require('../jobType/jobType-service');
 const writeOffsService = require('../writeOffs/writeOffs-service');
 const paymentsService = require('../payments/payments-service');
 const workDescriptionService = require('../workDescriptions/workDescriptions-service');
-const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const createJobReturnObject = require('../job/jobJsonObjects');
 const createJobTypeReturnObject = require('../jobType/jobTypeJsonObjects');
 const createJobCategoryReturnObject = require('../jobCategories/jobCategoryJsonObjects');
 const createPaymentReturnObject = require('../payments/paymentJsonObjects');
 const createWorkDescriptionReturnObject = require('../workDescriptions/workDescriptionsJsonObjects');
 const createRetainerReturnObject = require('../retainer/retainerJsonObject');
+const createInvoiceReturnObject = require('../invoice/invoiceJsonObjects');
+const createWriteOffReturnObject = require('../writeOffs/writeOffJsonObjects');
+const createUserReturnObject = require('../user/userJsonObjects');
+const createCustomerReturnObject = require('../customer/customerJsonObjects');
+const createRecurringCustomerReturnObject = require('../recurringCustomer/recurringCustomerJsonObjects');
+const createTransactionsReturnObject = require('../transactions/transactionsJsonObjects');
 
 // Initial data object on app load
 initialDataRouter.route('/initialBlob/:accountID/:userID').get(async (req, res) => {
@@ -67,47 +72,17 @@ const initialData = async (db, res, accountID) => {
       workDescriptionService.getActiveWorkDescriptions(db, accountID)
    ]);
 
-   const activeCustomerData = {
-      activeCustomers,
-      grid: createGrid(activeCustomers)
-   };
-
-   const activeRecurringCustomersData = {
-      activeRecurringCustomers,
-      grid: createGrid(activeRecurringCustomers)
-   };
-
-   const activeUserData = {
-      activeUsers,
-      grid: createGrid(activeUsers)
-   };
-
-   const activeTransactionsData = {
-      activeTransactions,
-      grid: createGrid(activeTransactions)
-   };
-
-   const activeInvoiceData = {
-      activeInvoices,
-      grid: createGrid(activeInvoices),
-      treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
-   };
-
+   const activeTransactionsData = createTransactionsReturnObject.activeTransactionsData(activeTransactions);
+   const activeRecurringCustomersData = createRecurringCustomerReturnObject.activeRecurringCustomersData(activeRecurringCustomers);
+   const activeCustomerData = createCustomerReturnObject.activeCustomerData(activeCustomers);
+   const activeUserData = createUserReturnObject.activeUserData(activeUsers);
+   const activeInvoiceData = createInvoiceReturnObject.activeInvoiceData(activeInvoices);
    const activeJobData = createJobReturnObject.activeJobData(activeJobs);
-
    const activeJobCategoriesData = createJobCategoryReturnObject.activeJobCategoriesData(activeJobCategories);
-
    const activeJobTypesData = createJobTypeReturnObject.activeJobTypesData(jobTypesData);
-
    const activePaymentsData = createPaymentReturnObject.activePaymentsData(activePayments);
-
-   const activeWriteOffsData = {
-      activeWriteOffs,
-      grid: createGrid(activeWriteOffs)
-   };
-
+   const activeWriteOffsData = createWriteOffReturnObject.activeWriteOffsData(activeWriteOffs);
    const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainers);
-
    const activeWorkDescriptionsData = createWorkDescriptionReturnObject.activeWorkDescriptionsData(workDescriptions);
 
    res.send({

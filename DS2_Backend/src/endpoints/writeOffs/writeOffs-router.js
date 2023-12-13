@@ -5,9 +5,10 @@ const writeOffsRouter = express.Router();
 const writeOffsService = require('./writeOffs-service');
 const invoiceService = require('../invoice/invoice-service');
 const { restoreDataTypesWriteOffsTableOnCreate, restoreDataTypesWriteOffsTableOnUpdate, convertWriteOffToPayment } = require('./writeOffsObjects');
-const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const { unableToCompleteRequest } = require('../../serverResponses/errors');
 const { findInvoice, updateObjectsWithRemainingAmounts } = require('../payments/payment-logic');
+const createInvoiceReturnObject = require('../invoice/invoiceJsonObjects');
+const createWriteOffReturnObject = require('./writeOffJsonObjects');
 
 // Create a new WriteOff
 writeOffsRouter.route('/createWriteOffs/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -56,12 +57,7 @@ writeOffsRouter.route('/getSingleWriteOff/:writeOffID/:accountID/:userID').get(a
    const { writeOffID, accountID } = req.params;
 
    const activeWriteOffs = await writeOffsService.getSingleWriteOff(db, writeOffID, accountID);
-
-   // Return Object
-   const activeWriteOffsData = {
-      activeWriteOffs,
-      grid: createGrid(activeWriteOffs)
-   };
+   const activeWriteOffsData = createWriteOffReturnObject.activeWriteOffsData(activeWriteOffs);
 
    res.send({
       activeWriteOffsData,
@@ -136,20 +132,11 @@ module.exports = writeOffsRouter;
 
 const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all writeOff
-   const activeWriteOffs = await writeOffsService.getActiveWriteOffs(db, accountID);
-   const activeInvoices = await invoiceService.getInvoices(db, accountID);
+   const [activeWriteOffs, activeInvoices] = await Promise.all([writeOffsService.getActiveWriteOffs(db, accountID), invoiceService.getInvoices(db, accountID)]);
 
    // Return Object
-   const activeWriteOffsData = {
-      activeWriteOffs,
-      grid: createGrid(activeWriteOffs)
-   };
-
-   const activeInvoiceData = {
-      activeInvoices,
-      grid: createGrid(activeInvoices),
-      treeGrid: generateTreeGridData(activeInvoices, 'customer_invoice_id', 'parent_invoice_id')
-   };
+   const activeWriteOffsData = createWriteOffReturnObject.activeWriteOffsData(activeWriteOffs);
+   const activeInvoiceData = createInvoiceReturnObject.activeInvoiceData(activeInvoices);
 
    res.send({
       invoicesList: { activeInvoiceData },

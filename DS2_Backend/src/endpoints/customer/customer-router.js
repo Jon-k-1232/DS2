@@ -19,6 +19,8 @@ const {
    restoreDataTypesCustomersInformationOnUpdate
 } = require('./customerObjects');
 const dayjs = require('dayjs');
+const createCustomerReturnObject = require('./customerJsonObjects');
+const createRecurringCustomerReturnObject = require('../recurringCustomer/recurringCustomerJsonObjects');
 
 // Create New Customer
 customerRouter.route('/createCustomer/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -59,16 +61,8 @@ customerRouter.route('/createCustomer/:accountID/:userID').post(jsonParser, asyn
       // call active customers
       const activeCustomers = await customerService.getActiveCustomers(db, account_id);
       const activeRecurringCustomers = await recurringCustomerService.getActiveRecurringCustomers(db, account_id);
-
-      const activeCustomerData = {
-         activeCustomers,
-         grid: createGrid(activeCustomers)
-      };
-
-      const activeRecurringCustomersData = {
-         activeRecurringCustomers,
-         grid: createGrid(activeRecurringCustomers)
-      };
+      const activeCustomerData = createCustomerReturnObject.activeCustomerData(activeCustomers);
+      const activeRecurringCustomersData = createRecurringCustomerReturnObject.activeRecurringCustomersData(activeRecurringCustomers);
 
       res.send({
          customersList: { activeCustomerData },
@@ -97,10 +91,7 @@ customerRouter.route('/activeCustomers/customerByID/:accountID/:userID/:customer
    const customerTransactions = await transactionsService.getCustomerTransactionsByID(db, accountID, customerID);
    const customerJobs = await jobService.getActiveCustomerJobs(db, accountID, customerID);
 
-   const customerData = {
-      customerData: customerContactData,
-      grid: createGrid(customerContactData)
-   };
+   const customerData = createCustomerReturnObject.customerData(customerContactData);
 
    const customerRetainerData = {
       customerRetainers,
@@ -175,15 +166,8 @@ customerRouter.route('/updateCustomer/:accountID/:userID').put(jsonParser, async
       const activeCustomers = await customerService.getActiveCustomers(db, accountID);
       const activeRecurringCustomers = await recurringCustomerService.getActiveRecurringCustomers(db, accountID);
 
-      const activeCustomerData = {
-         activeCustomers,
-         grid: createGrid(activeCustomers)
-      };
-
-      const activeRecurringCustomersData = {
-         activeRecurringCustomers,
-         grid: createGrid(activeRecurringCustomers)
-      };
+      const activeCustomerData = createCustomerReturnObject.activeCustomerData(activeCustomers);
+      const activeRecurringCustomersData = createRecurringCustomerReturnObject.activeRecurringCustomersData(activeRecurringCustomers);
 
       res.send({
          customersList: { activeCustomerData },
@@ -227,10 +211,7 @@ customerRouter
          // call active customers
          const activeCustomers = await customerService.getActiveCustomers(db, accountID);
 
-         const activeCustomerData = {
-            activeCustomers,
-            grid: createGrid(activeCustomers)
-         };
+         const activeCustomerData = createCustomerReturnObject.activeCustomerData(activeCustomers);
 
          res.send({
             customersList: { activeCustomerData },

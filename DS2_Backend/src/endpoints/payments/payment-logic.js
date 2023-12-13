@@ -1,9 +1,9 @@
 const paymentsService = require('./payments-service');
 const invoiceService = require('../invoice/invoice-service');
 const retainersService = require('../retainer/retainer-service');
-const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
 const createPaymentReturnObject = require('./paymentJsonObjects');
 const createRetainerReturnObject = require('../retainer/retainerJsonObject');
+const createInvoiceReturnObject = require('../invoice/invoiceJsonObjects');
 
 /**
  * Finds matching invoice and returns it
@@ -38,16 +38,19 @@ const checkIfPaymentIsAttachedToInvoice = async (db, paymentTableFields) => {
    const { payment_id, account_id, customer_id } = paymentTableFields;
 
    // Need to check if the payment has been invoiced yet. If it has been invoiced, do not allow delete in order to preserve records.
-   const customerLastInvoiceDateObject = await invoiceService.getLastInvoiceDatesByCustomerID(db, account_id, [customer_id]);
-   const [paymentRecord] = await paymentsService.getSinglePayment(db, payment_id, account_id);
+   const [customerLastInvoiceDateObject, paymentRecord] = await Promise.all([
+      invoiceService.getLastInvoiceDatesByCustomerID(db, account_id, [customer_id]),
+      paymentsService.getSinglePayment(db, payment_id, account_id).then(([record]) => record)
+   ]);
 
    const customerInvoiceID = paymentRecord.customer_invoice_id;
 
-   const [paymentInvoiceRecord] = await invoiceService.getInvoiceByInvoiceRowID(db, account_id, customerInvoiceID);
-
    // Also need to check if the retainer record has been invoiced yet. If it has been invoiced, do not allow delete in order to preserve records.
    // Retainer row id not stored, only the parent is stored. the parent is only stored for invoicing purposes.
-   const [retainerRecord] = await retainersService.getRetainerBySameTime(db, account_id, paymentRecord?.retainer_id, paymentRecord.created_at);
+   const [paymentInvoiceRecord, retainerRecord] = await Promise.all([
+      invoiceService.getInvoiceByInvoiceRowID(db, account_id, customerInvoiceID).then(([invoiceRecord]) => invoiceRecord),
+      retainersService.getRetainerBySameTime(db, account_id, paymentRecord?.retainer_id, paymentRecord.created_at).then(([retainer]) => retainer)
+   ]);
 
    // If payment is attached to an invoice, do not allow delete
    if (paymentInvoiceRecord?.created_at <= customerLastInvoiceDateObject[customer_id]) {
@@ -98,7 +101,7 @@ const updateObjectsWithRemainingAmounts = (matchingInvoice, paymentTableFields) 
 const returnTablesWithSuccessResponse = async (db, res, paymentTableFields, message) => {
    const { account_id } = paymentTableFields;
 
-   const [activePayments, activeRetainers, invoicesList] = await Promise.all([
+   const [activePayments, activeRetainers, activeInvoices] = await Promise.all([
       paymentsService.getActivePayments(db, account_id),
       retainersService.getActiveRetainers(db, account_id),
       invoiceService.getInvoices(db, account_id)
@@ -108,11 +111,7 @@ const returnTablesWithSuccessResponse = async (db, res, paymentTableFields, mess
 
    const activeRetainerData = createRetainerReturnObject.activeRetainerData(activeRetainers);
 
-   const activeInvoiceData = {
-      invoicesList,
-      grid: createGrid(invoicesList),
-      treeGrid: generateTreeGridData(invoicesList, 'customer_invoice_id', 'parent_invoice_id')
-   };
+   const activeInvoiceData = createInvoiceReturnObject.activeInvoiceData(activeInvoices);
 
    res.send({
       paymentsList: { activePaymentsData },

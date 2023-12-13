@@ -21,7 +21,7 @@ export default function JobTypeSubRoutes({ customerData, setCustomerData }) {
       const fetchJobData = async () => {
          if (rowData) {
             const data = await fetchSingleWorkDescription(general_work_description_id, accountID, userID, token);
-            setWorkDescriptionData(...data.activeWorkDescriptionsData.workDescriptionsData);
+            setWorkDescriptionData(data.activeWorkDescriptionsData.workDescriptionData);
          }
       };
       fetchJobData();

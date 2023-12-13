@@ -35,9 +35,9 @@ workDescriptionsRouter.route('/getSingleWorkDescription/:workDescriptionID/:acco
 
    try {
       // Get single work description
-      const workDescriptionData = await workDescriptionService.getSingleWorkDescription(db, workDescriptionID);
+      const [workDescriptionData] = await workDescriptionService.getSingleWorkDescription(db, workDescriptionID);
 
-      const activeWorkDescriptionsData = createWorkDescriptionReturnObject.activeWorkDescriptionsData(workDescriptionData);
+      const activeWorkDescriptionsData = createWorkDescriptionReturnObject.singleWorkDescriptionsData(workDescriptionData);
 
       res.send({
          activeWorkDescriptionsData,

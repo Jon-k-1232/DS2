@@ -6,6 +6,7 @@ const { sanitizeFields } = require('../../utils');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
 const { requireManagerOrAdmin } = require('../auth/jwt-auth');
 const { restoreDataTypesUserOnCreate, restoreDataTypesUserLoginOnCreate, restoreDataTypesUserOnUpdate, restoreDataTypesUserLoginOnUpdate } = require('./userObjects');
+const createUserReturnObject = require('./userJsonObjects');
 
 // Create a new user
 userRouter
@@ -166,12 +167,7 @@ module.exports = userRouter;
 const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    // Get all active users
    const activeUsers = await accountUserService.getActiveAccountUsers(db, accountID);
-
-   // Return Object
-   const activeUserData = {
-      activeUsers,
-      grid: createGrid(activeUsers)
-   };
+   const activeUserData = createUserReturnObject.activeUserData(activeUsers);
 
    res.send({
       teamMembersList: { activeUserData },
