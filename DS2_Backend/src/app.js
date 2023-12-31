@@ -21,7 +21,7 @@ const retainerRouter = require('./endpoints/retainer/retainer-router');
 const writeOffsRouter = require('./endpoints/writeOffs/writeOffs-router');
 const initialDataRouter = require('./endpoints/initialData/initialData-router');
 const workDescriptionsRouter = require('./endpoints/workDescriptions/workDescriptions-router');
-const { healthRouter, localLanPing } = require('./endpoints/health/health-router');
+const { healthRouter } = require('./endpoints/health/health-router');
 const cookieParser = require('cookie-parser');
 const { requireAuth } = require('./endpoints/auth/jwt-auth');
 
@@ -46,9 +46,6 @@ app.use(
       origin: '*'
    })
 );
-
-// Checks connectivity inside LAN every minute.
-setInterval(localLanPing, 60000);
 
 /* ///////////////////////////\\\\  USER ENDPOINTS  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 

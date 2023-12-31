@@ -20,22 +20,27 @@ export default function LoginForm() {
 
    const handleSubmit = async () => {
       const fetchedToken = await postLoginAuth(username, password);
-      if (fetchedToken.status !== 200) setIncorrectCredential(fetchedToken.response.data);
 
-      const { account_id, user_id, display_name, job_title, access_level } = fetchedToken.user;
-      TokenService.saveAuthToken(fetchedToken.authToken);
-      window.sessionStorage.setItem('userID', user_id);
-      window.sessionStorage.setItem('accountID', account_id);
+      if (fetchedToken.message === 'Network Error') {
+         setIncorrectCredential(fetchedToken.message);
+      } else if (fetchedToken.status !== 200) {
+         setIncorrectCredential(fetchedToken?.response?.data);
+      } else if (fetchedToken.status === 200) {
+         const { account_id, user_id, display_name, job_title, access_level } = fetchedToken.user;
+         TokenService.saveAuthToken(fetchedToken.authToken);
+         window.sessionStorage.setItem('userID', user_id);
+         window.sessionStorage.setItem('accountID', account_id);
 
-      setLoggedInUser({
-         accountID: account_id,
-         userID: user_id,
-         displayName: display_name,
-         role: job_title,
-         accessLevel: access_level,
-         token: fetchedToken.authToken
-      });
-      navigate('/customers/customersList');
+         setLoggedInUser({
+            accountID: account_id,
+            userID: user_id,
+            displayName: display_name,
+            role: job_title,
+            accessLevel: access_level,
+            token: fetchedToken.authToken
+         });
+         navigate('/customers/customersList');
+      }
    };
 
    return (

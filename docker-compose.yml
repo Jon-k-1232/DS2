@@ -7,14 +7,13 @@ networks:
 services:
    # Frontend
    app:
-      # container_name: DS2_Frontend
       environment:
          - TZ=America/Phoenix
       build:
          context: ./DS2_Frontend
          dockerfile: Dockerfile
       ports:
-         - '3003-3005:3003'
+         - '3003:3003'
       env_file:
          - ./DS2_Frontend/.env
       volumes:
@@ -28,14 +27,13 @@ services:
 
    # Backend
    api:
-      # container_name: DS2_Backend
       environment:
          - TZ=America/Phoenix
       build:
          context: ./DS2_Backend
          dockerfile: Dockerfile
       ports:
-         - '8003-8005:8003'
+         - '8003:8003'
       env_file:
          - ./DS2_Backend/.env
       volumes:

@@ -6,7 +6,7 @@ const accountService = require('./account-service');
 const { createGrid } = require('../../helperFunctions/helperFunctions');
 const { requireAdmin } = require('../auth/jwt-auth');
 const { restoreDataTypesAccountOnCreate, restoreDataTypesAccountInformationOnCreate, restoreDataTypesAccountOnUpdate, restoreDataTypesAccountInformationOnUpdate } = require('./accountObjects');
-const fs = require('fs').promises;
+const fs = require('fs');
 
 // Create post to input new account
 accountRouter.route('/createAccount').post(jsonParser, async (req, res) => {
@@ -78,15 +78,50 @@ accountRouter
    .get(async (req, res) => {
       const db = req.app.get('db');
       const { accountID } = req.params;
-      const [data] = await accountService.getAccount(db, accountID);
+      const [accountInfo] = await accountService.getAccount(db, accountID);
 
-      const account_logo_buffer = await fs.readFile(data.account_company_logo);
-      const accountData = { ...data, account_logo_buffer };
+      const filePath = accountInfo.account_company_logo;
 
-      res.send({
-         account: { accountData },
-         message: 'Successfully retrieved customer.',
-         status: 200
+      // Check if the path is a file
+      fs.stat(filePath, (err, stats) => {
+         if (err) {
+            console.log('Error accessing file');
+            console.error(err);
+            return res.status(500).send('Error accessing file');
+         }
+
+         if (!stats.isFile()) {
+            console.log('Path is not a file');
+            return res.status(400).send('Path is not a file');
+         }
+
+         // Check if the file is readable
+         fs.access(filePath, fs.constants.R_OK, err => {
+            if (err) {
+               console.log('File is not readable');
+               console.error(err);
+               return res.status(500).send('File is not readable');
+            }
+
+            // Read the file
+            fs.readFile(filePath, (err, buffer) => {
+               if (err) {
+                  console.log('Error reading file');
+                  console.error(err);
+                  return res.status(500).send('Error reading file');
+               } else {
+                  const account_logo_buffer = buffer;
+
+                  const accountData = { ...accountInfo, account_logo_buffer };
+
+                  res.send({
+                     account: { accountData },
+                     message: 'Successfully retrieved customer.',
+                     status: 200
+                  });
+               }
+            });
+         });
       });
    });
 

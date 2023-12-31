@@ -126,20 +126,22 @@ invoiceRouter.route('/createInvoice/:accountID/:userID').post(jsonParser, async 
 
       let fileLocation = '';
 
-      const csvBuffer = createCsvData(invoicesWithDetail);
-      const pdfBuffer = await createPDFInvoices(invoicesWithDetail);
-      const filesToZip = pdfBuffer.concat(csvBuffer);
+      if (isCsvOnly || isRoughDraft || isFinalized) {
+         const csvBuffer = createCsvData(invoicesWithDetail);
+         const pdfBuffer = await createPDFInvoices(invoicesWithDetail);
+         const filesToZip = pdfBuffer.concat(csvBuffer);
 
-      if (isCsvOnly && isRoughDraft) {
-         fileLocation = await createAndSaveZip(filesToZip, accountBillingInformation, 'monthly_files/csv_report_and_draft_invoices', 'zipped_files.zip');
-      } else if (isCsvOnly) {
-         fileLocation = await createAndSaveZip([csvBuffer], accountBillingInformation, 'monthly_files/csv_report', 'zipped_files.zip');
-      } else if (isRoughDraft) {
-         fileLocation = await createAndSaveZip(pdfBuffer, accountBillingInformation, 'monthly_files/draft_invoices', 'zipped_files.zip');
-      } else if (isFinalized) {
-         fileLocation = await createAndSaveZip(pdfBuffer, accountBillingInformation, 'monthly_files/final_invoices', 'zipped_files.zip');
-         // Insert data into db
-         await dataInsertionOrchestrator(db, invoicesWithDetail, accountBillingInformation, pdfBuffer, userID);
+         if (isCsvOnly && isRoughDraft) {
+            fileLocation = await createAndSaveZip(filesToZip, accountBillingInformation, 'monthly_files/csv_report_and_draft_invoices', 'zipped_files.zip');
+         } else if (isCsvOnly) {
+            fileLocation = await createAndSaveZip([csvBuffer], accountBillingInformation, 'monthly_files/csv_report', 'zipped_files.zip');
+         } else if (isRoughDraft) {
+            fileLocation = await createAndSaveZip(pdfBuffer, accountBillingInformation, 'monthly_files/draft_invoices', 'zipped_files.zip');
+         } else if (isFinalized) {
+            fileLocation = await createAndSaveZip(pdfBuffer, accountBillingInformation, 'monthly_files/final_invoices', 'zipped_files.zip');
+            // Insert data into db
+            await dataInsertionOrchestrator(db, invoicesWithDetail, accountBillingInformation, pdfBuffer, userID);
+         }
       }
 
       // get invoices table data

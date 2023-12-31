@@ -26,6 +26,9 @@ if (NODE_ENV === 'production') {
    https.createServer(sslOptions, app).listen(NODE_PORT, HOST_IP, () => {
       console.log(`Server listening at https://${HOST_IP}:${NODE_PORT}`);
    });
+   // app.listen(NODE_PORT, HOST_IP, () => {
+   //    console.log(`Server listening at http://${HOST_IP}:${NODE_PORT}`);
+   // });
 } else {
    app.listen(NODE_PORT, HOST_IP, () => {
       console.log(`Server listening at http://${HOST_IP}:${NODE_PORT}`);

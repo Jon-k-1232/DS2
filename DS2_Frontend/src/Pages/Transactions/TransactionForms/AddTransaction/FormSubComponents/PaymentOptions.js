@@ -1,5 +1,4 @@
 import { Stack, TextField, Autocomplete } from '@mui/material';
-import SplitOptionLabel from '../../../../../Components/SplitOptionLabel';
 import RetainerSelection from './RetainerSelection';
 
 export default function PaymentOptions({ selectedItems, setSelectedItems, page }) {

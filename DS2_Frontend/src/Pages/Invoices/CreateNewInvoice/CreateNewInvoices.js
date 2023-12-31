@@ -61,7 +61,6 @@ export default function CreateNewInvoices({ customerData, setCustomerData }) {
       setOpenDialog(false);
 
       const postedItem = await postInvoiceCreation(selectedRowsToInvoice, accountID, userID);
-      console.log(postedItem);
 
       setPostStatus(postedItem);
 

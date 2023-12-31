@@ -28,8 +28,6 @@ export default function Router() {
    const [pageTitle, setPageTitle] = useState('');
    const [customerData, setCustomerData] = useState({});
 
-   console.log(customerData);
-
    useEffect(() => {
       // With every route check if token is still good or not.
       const checkedToken = token && TokenService.isTokenExpired(token);

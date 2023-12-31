@@ -1,45 +1,15 @@
 const express = require('express');
 const healthRouter = express.Router();
-const ping = require('ping');
 const os = require('os');
 const si = require('systeminformation');
 const healthService = require('./health-service');
-const { LAN_IPS } = require('../../../config');
-
-// LAN only application. This is to check if the local container has lost connectivity with the LAN.
-const localLanPing = async () => {
-   const hosts = [LAN_IPS];
-   const numPings = 3;
-
-   const promises = hosts.flatMap(host => {
-      return Array.from({ length: numPings }, (_, i) => {
-         return new Promise(resolve => ping.sys.probe(host, isAlive => resolve(isAlive)));
-      });
-   });
-
-   const results = await Promise.all(promises);
-   const groupedResults = chunkArray(results, numPings);
-
-   const isNetworkOk = groupedResults.some(hostResults => {
-      const successfulPings = hostResults.filter(Boolean).length;
-      return successfulPings >= 2;
-   });
-
-   const currentTime = new Date().toLocaleString();
-
-   if (!isNetworkOk) {
-      console.error(`[${currentTime}] - LAN PING - Status: 500`);
-   }
-};
-
-// Helper function to chunk an array into smaller arrays
-const chunkArray = (array, chunkSize) => {
-   return Array.from({ length: Math.ceil(array.length / chunkSize) }, (_, i) => array.slice(i * chunkSize, i * chunkSize + chunkSize));
-};
+const accountService = require('../account/account-service');
+const fs = require('fs');
 
 // Provide basic server status to front end.
-healthRouter.route('/status').get(async (req, res) => {
+healthRouter.route('/status/:accountID/:userID').get(async (req, res) => {
    const db = req.app.get('db');
+   const { accountID } = req.params;
 
    try {
       // for memory
@@ -49,6 +19,10 @@ healthRouter.route('/status').get(async (req, res) => {
       // for cpu
       const cpuData = await si.currentLoad();
       const cpuLoad = cpuData.currentLoad;
+
+      // for file system
+      const [data] = await accountService.getAccount(db, accountID);
+      const filePath = data?.account_company_logo;
 
       const memory = {
          message: freeMemory > 100 ? 'UP' : 'DOWN',
@@ -65,10 +39,15 @@ healthRouter.route('/status').get(async (req, res) => {
          message: healthService.dbStatus(db) ? 'UP' : 'DOWN'
       };
 
+      const fileSystem = {
+         message: fs.existsSync(filePath) ? 'UP' : 'DOWN'
+      };
+
       res.send({
          memory,
          cpu,
          database,
+         fileSystem,
          message: 'UP',
          status: 200
       });
@@ -81,4 +60,4 @@ healthRouter.route('/status').get(async (req, res) => {
    }
 });
 
-module.exports = { healthRouter, localLanPing };
+module.exports = { healthRouter };

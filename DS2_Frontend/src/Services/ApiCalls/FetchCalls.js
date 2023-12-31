@@ -11,9 +11,11 @@ const headers = memoryToken => {
    };
 };
 
-export const fetchServerHealth = async () => {
+console.log(config.API_ENDPOINT);
+
+export const fetchServerHealth = async (accountID, userID, token) => {
    try {
-      const response = await axios.get(`${config.API_ENDPOINT}/health/status`);
+      const response = await axios.get(`${config.API_ENDPOINT}/health/status/${accountID}/${userID}`, headers(token));
       const serverHealth = response.data;
       return serverHealth;
    } catch (error) {

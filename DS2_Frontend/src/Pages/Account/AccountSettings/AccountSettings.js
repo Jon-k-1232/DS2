@@ -14,7 +14,12 @@ export default function AccountSettings({ customerData, setCustomerData }) {
    useEffect(() => {
       const getAccountInformation = async () => {
          const accountInfo = await fetchAccountInformation(accountID, userID);
-         setAccountInformation(accountInfo.account.accountData);
+         if (accountInfo.status !== 200) {
+            console.log('Error getting account information');
+         } else {
+            console.log(accountInfo);
+            setAccountInformation(accountInfo.account.accountData);
+         }
       };
 
       getAccountInformation();
