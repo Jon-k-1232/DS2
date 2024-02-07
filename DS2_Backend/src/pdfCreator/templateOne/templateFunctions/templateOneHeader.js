@@ -9,8 +9,8 @@ const createPdfHeader = (doc, invoiceDetails, preferenceSettings) => {
    doc.font(normalFont)
       .fontSize(12)
       .text(`${account_name}`, 140, headerHeight)
-      .text(`${account_street}`, 140, headerHeight + 30)
-      .text(`${account_city}, ${account_state} ${account_zip}`, 140, headerHeight + 15)
+      .text(`${account_street}`, 140, headerHeight + 15)
+      .text(`${account_city}, ${account_state} ${account_zip}`, 140, headerHeight + 30)
       .text(`Phone: ${account_phone}`, 140, headerHeight + 45)
       .text(`Email: ${account_email}`, 140, headerHeight + 60);
 

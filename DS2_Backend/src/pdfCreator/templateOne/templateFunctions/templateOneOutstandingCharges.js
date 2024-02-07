@@ -30,8 +30,8 @@ const createOutstandingChargesSection = (doc, invoiceDetails, preferenceSettings
          .fontSize(12)
          .text(`${dayjs(outstandingRecord.invoice_date).format('MM/DD/YYYY')}`, leftMargin + 10, yHeight)
          .text(`${outstandingRecord.invoice_number}`, 200, yHeight)
-         .text(`${outstandingRecord.remaining_balance_on_invoice.toFixed(2)}`, 400, yHeight)
-         .text(`${outstandingRecord.remaining_balance_on_invoice.toFixed(2)}`, alignRight(`${outstandingRecord.remaining_balance_on_invoice.toFixed(2)}`, 1), yHeight);
+         .text(`${Number(outstandingRecord.remaining_balance_on_invoice).toFixed(2)}`, 400, yHeight)
+         .text(`${Number(outstandingRecord.remaining_balance_on_invoice).toFixed(2)}`, alignRight(`${Number(outstandingRecord.remaining_balance_on_invoice).toFixed(2)}`, 1), yHeight);
 
       // if last index draw line
       if (index === outstandingInvoices.outstandingInvoiceRecords.length - 1) {

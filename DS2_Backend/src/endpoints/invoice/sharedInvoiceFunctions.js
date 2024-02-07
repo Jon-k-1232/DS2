@@ -10,27 +10,6 @@ const groupByFunction = (array, passedPropertyToGroupBy) =>
       return acc;
    }, {});
 
-// key value pair where the value is a string value
-const stringValueMap = (inputArray, groupProperty) => {
-   return inputArray.reduce((accumulator, current) => {
-      accumulator[current[groupProperty]] = current.invoice_date;
-      return accumulator;
-   }, {});
-};
-
-// Groups transactions by customer ID and then by transaction type
-const groupTransactionTypes = (array, passedPropertyToGroupBy) =>
-   array.reduce((acc, transaction) => {
-      const groupByPropertyValue = transaction[passedPropertyToGroupBy];
-      const transactionType = transaction.transaction_type;
-      if (!acc[groupByPropertyValue]) acc[groupByPropertyValue] = {};
-
-      if (!acc[groupByPropertyValue][transactionType]) acc[groupByPropertyValue][transactionType] = [];
-
-      acc[groupByPropertyValue][transactionType].push(transaction);
-      return acc;
-   }, {});
-
 /**
  * Takes in an array of sorted invoices and returns an array of the most recent outstanding invoices
  * @param {*} invoices
@@ -39,7 +18,7 @@ const groupTransactionTypes = (array, passedPropertyToGroupBy) =>
 const findMostRecentOutstandingInvoiceRecords = invoices => {
    const mostRecentOutstandingInvoices = invoices.reduce((acc, invoice) => {
       // Skip if no remaining balance
-      if (invoice.remaining_balance_on_invoice <= 0) return acc;
+      if (Number(invoice.remaining_balance_on_invoice) <= 0) return acc;
 
       const parentID = invoice.parent_invoice_id || invoice.customer_invoice_id;
 
@@ -94,8 +73,6 @@ const incrementAnInvoiceOrQuote = (invoiceNumber, increment) => {
 
 module.exports = {
    groupByFunction,
-   groupTransactionTypes,
    incrementAnInvoiceOrQuote,
-   stringValueMap,
    findMostRecentOutstandingInvoiceRecords
 };

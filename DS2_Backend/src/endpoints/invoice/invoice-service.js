@@ -285,13 +285,14 @@ const invoiceService = {
          }
 
          // Include parent invoices along with all their children where at least one of the children still has a remaining balance
-         if (children.some(child => child.remaining_balance_on_invoice > 0)) {
+         if (children.some(child => Number(child.remaining_balance_on_invoice) > 0)) {
             outstandingInvoices[parentInvoice.customer_id].push(...children, parentInvoice);
             return;
          }
 
          // Include parent invoices along with all their children where a payment has been made after the last invoice date, regardless of the remaining balance
-         const paymentAfterLastBillDate = children.some(child => child.remaining_balance_on_invoice === 0 && new Date(child.created_at) > new Date(lastBillDate));
+         const paymentAfterLastBillDate = children.some(child => Number(child.remaining_balance_on_invoice) === 0 && new Date(child.created_at) > new Date(lastBillDate));
+
          if (paymentAfterLastBillDate) {
             outstandingInvoices[parentInvoice.customer_id].push(...children, parentInvoice);
             return;
