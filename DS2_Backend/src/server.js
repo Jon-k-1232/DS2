@@ -17,18 +17,18 @@ const db = knex({
 app.set('db', db);
 
 if (NODE_ENV === 'production') {
-   const sslOptions = {
-      key: fs.readFileSync('/app/ssl/192.168.12.209.key'),
-      cert: fs.readFileSync('/app/ssl/192.168.12.209.crt')
-   };
+   // const sslOptions = {
+   //    key: fs.readFileSync('/app/ssl/192.168.12.209.key'),
+   //    cert: fs.readFileSync('/app/ssl/192.168.12.209.crt')
+   // };
 
    // Create HTTPS server
-   https.createServer(sslOptions, app).listen(NODE_PORT, HOST_IP, () => {
-      console.log(`Server listening at https://${HOST_IP}:${NODE_PORT}`);
-   });
-   // app.listen(NODE_PORT, HOST_IP, () => {
-   //    console.log(`Server listening at http://${HOST_IP}:${NODE_PORT}`);
+   // https.createServer(sslOptions, app).listen(NODE_PORT, HOST_IP, () => {
+   //    console.log(`Server listening at https://${HOST_IP}:${NODE_PORT}`);
    // });
+   app.listen(NODE_PORT, HOST_IP, () => {
+      console.log(`Server listening at http://${HOST_IP}:${NODE_PORT}`);
+   });
 } else {
    app.listen(NODE_PORT, HOST_IP, () => {
       console.log(`Server listening at http://${HOST_IP}:${NODE_PORT}`);

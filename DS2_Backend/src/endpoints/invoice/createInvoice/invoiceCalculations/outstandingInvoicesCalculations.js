@@ -5,7 +5,9 @@ const groupAndTotalOutstandingInvoices = (customer_id, invoiceQueryData) => {
    const customersLastInvoiceDate = invoiceQueryData.lastInvoiceDateByCustomerID[customer_id] || [];
    const customerPayments = invoiceQueryData.customerPayments[customer_id] || [];
 
-   const outstandingInvoiceRecords = filterInvoices(customerOutstandingInvoices, customerPayments, customersLastInvoiceDate);
+   const customerWriteOffRecords = invoiceQueryData.customerWriteOffs[customer_id] || [];
+
+   const outstandingInvoiceRecords = filterInvoices(customerOutstandingInvoices, customerPayments, customersLastInvoiceDate, customerWriteOffRecords);
    const outstandingInvoiceTotal = outstandingInvoiceRecords.reduce((prev, invoice) => (prev += Number(invoice.remaining_balance_on_invoice)), 0);
 
    if (isNaN(outstandingInvoiceTotal)) {
@@ -26,6 +28,8 @@ const groupAndTotalOutstandingInvoices = (customer_id, invoiceQueryData) => {
 
 module.exports = { groupAndTotalOutstandingInvoices };
 
+const isSameOrBefore = (date1, date2) => dayjs(date1).isBefore(dayjs(date2)) || dayjs(date1).isSame(dayjs(date2));
+
 /**
  * This function will filter the invoices into one invoice record per invoice number.
  *    - The invoice should be the most recent invoice for the customer, upto the last invoice date.
@@ -34,20 +38,27 @@ module.exports = { groupAndTotalOutstandingInvoices };
  * Include parent invoices that do not have children and have a remaining balance.
  * Include parent invoices along with all their children where at least one of the children still has a remaining balance.
  * Include parent invoices along with all their children where a payment has been made after the last invoice date, regardless of the remaining balance.
+ * Added conditional check for writeoffs tied to invoices.
+ * @param {*} customerOutstandingInvoices
+ * @param {*} customerPayments
+ * @param {*} customersLastInvoiceDate
+ * @param {*} customerWriteOffRecords
+ * @returns [{object}]
  */
-const isSameOrBefore = (date1, date2) => dayjs(date1).isBefore(dayjs(date2)) || dayjs(date1).isSame(dayjs(date2));
-
-const filterInvoices = (customerOutstandingInvoices, customerPayments, customersLastInvoiceDate) => {
+const filterInvoices = (customerOutstandingInvoices, customerPayments, customersLastInvoiceDate, customerWriteOffRecords) => {
    const discardedGroups = new Set();
 
    const invoices = customerOutstandingInvoices.reduce((prev, invoice) => {
-      const { invoice_number, created_at, remaining_balance_on_invoice, is_invoice_paid_in_full, fully_paid_date } = invoice;
+      const { invoice_number, created_at, remaining_balance_on_invoice, is_invoice_paid_in_full, fully_paid_date, customer_invoice_id } = invoice;
 
       // Check if this invoice has a payment after the last invoice date, this ensures if an invoice is paid off, it will show on the same bill as the payment made.
       const invoiceHasPayment = customerPayments.some(payment => payment.invoice_number === invoice_number);
+      const invoiceHasWriteOff = customerWriteOffRecords.some(writeOff => writeOff.customer_invoice_id === customer_invoice_id);
+
+      // Note: Added checking for if a writeoff has invoice as an error occurred when a writeoff was made to an invoice.
 
       // Check for conditions to discard this group of invoices
-      if (!invoiceHasPayment && (is_invoice_paid_in_full || fully_paid_date || Number(remaining_balance_on_invoice) === 0)) {
+      if (!invoiceHasPayment && !invoiceHasWriteOff && (is_invoice_paid_in_full || fully_paid_date || Number(remaining_balance_on_invoice) === 0)) {
          discardedGroups.add(invoice_number);
       }
 

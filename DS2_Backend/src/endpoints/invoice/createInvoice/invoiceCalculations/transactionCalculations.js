@@ -9,8 +9,8 @@ const groupAndTotalTransactions = (customer_id, invoiceQueryData, showWriteOffs)
    return totalGroupedJobsByCustomer(transactionsGroupedByJob, customerTransactions);
 };
 
-// NOTE: if transactions is empty, but writeoffs exists..... condition to be handled in write offs calculation
-// NOTE: - as written, for write offs to work, the written off job has to be on the current invoice, and be greater than the written off amount. Needs testing.
+// NOTE: if transactions is empty, but writeoffs exists..... condition to be handled in write offs calculation. this excludes if an invoice is written off. If a invoice is written off is already addressed in the outstanding invoice calculation.
+// NOTE: - as written, for write offs to work, the amount outstanding must be greater than the written off amount. Needs testing.
 
 module.exports = { groupAndTotalTransactions };
 
