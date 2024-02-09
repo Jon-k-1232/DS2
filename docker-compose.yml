@@ -5,7 +5,6 @@ networks:
       driver: bridge
 
 services:
-   # Frontend
    app:
       environment:
          - TZ=America/Phoenix
@@ -25,7 +24,6 @@ services:
       networks:
          - ds2_network
 
-   # Backend
    api:
       environment:
          - TZ=America/Phoenix
@@ -44,7 +42,6 @@ services:
       networks:
          - ds2_network
 
-   # Server (Nginx)
    server:
       container_name: DS2_Server
       environment:
@@ -53,8 +50,7 @@ services:
          context: ./Nginx
          dockerfile: Dockerfile
       ports:
-         - '80:80'
-         - '443:443' # Map port 443 on the host to port 443 in the container for HTTPS
+         - '443:443' # Only expose port 443 for HTTPS, remove port 80 mapping
       volumes:
          - './Nginx/default.conf:/etc/nginx/conf.d/default.conf'
          - './Nginx/Server_ssl:/etc/nginx/ssl' # Map the SSL directory to the container
