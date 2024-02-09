@@ -40,8 +40,6 @@ services:
          - /app/node_modules
          - ./DS2_Backend:/app
          - /Users/jonkimmel/Desktop/DS2_Files:/DS2_Files
-         - ./Nginx/Server_ssl/192.168.12.209.crt:/app/ssl/192.168.12.209.crt
-         - ./Nginx/Server_ssl/192.168.12.209.key:/app/ssl/192.168.12.209.key
       restart: always
       networks:
          - ds2_network
@@ -60,9 +58,6 @@ services:
          dockerfile: Dockerfile
       ports:
          - '81:81'
-      volumes:
-         - ./Nginx/Server_ssl/192.168.12.209.crt:/etc/nginx/192.168.12.209.crt
-         - ./Nginx/Server_ssl/192.168.12.209.key:/etc/nginx/192.168.12.209.key
       restart: always
       networks:
          - ds2_network
