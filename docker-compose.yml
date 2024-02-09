@@ -11,8 +11,7 @@ services:
       build:
          context: ./DS2_Frontend
          dockerfile: Dockerfile
-      ports:
-         - '3003:3003'
+      # Removed ports mapping to only allow access via Nginx
       env_file:
          - ./DS2_Frontend/.env
       volumes:
@@ -30,8 +29,7 @@ services:
       build:
          context: ./DS2_Backend
          dockerfile: Dockerfile
-      ports:
-         - '8003:8003'
+      # Removed ports mapping to only allow access via Nginx
       env_file:
          - ./DS2_Backend/.env
       volumes:
@@ -50,7 +48,7 @@ services:
          context: ./Nginx
          dockerfile: Dockerfile
       ports:
-         - '443:443' # Only expose port 443 for HTTPS, remove port 80 mapping
+         - '443:443' # Only expose port 443 for HTTPS
       volumes:
          - './Nginx/default.conf:/etc/nginx/conf.d/default.conf'
          - './Nginx/Server_ssl:/etc/nginx/ssl' # Map the SSL directory to the container
