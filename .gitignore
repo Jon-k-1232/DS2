@@ -24,8 +24,9 @@ DS2_Backend/ssl
 .env.test.local
 .env.production.local
 env
-192.168.12.209.crt
-192.168.12.209.key
+certificate.crt
+certificate.csr
+private.key
 
 
 npm-debug.log*

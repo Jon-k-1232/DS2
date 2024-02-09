@@ -1,6 +1,6 @@
 const app = require('./app');
-const https = require('https');
-const fs = require('fs');
+// const https = require('https');
+// const fs = require('fs');
 const { NODE_PORT, HOST_IP, DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, NODE_ENV } = require('../config');
 const knex = require('knex');
 
