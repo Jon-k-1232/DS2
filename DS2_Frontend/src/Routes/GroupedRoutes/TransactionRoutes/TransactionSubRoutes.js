@@ -41,14 +41,14 @@ export default function TransactionSubRoutes({ customerData, setCustomerData }) 
                   </ErrorBoundary>
                }
             />
-            <Route
+            {/* <Route
                path='editTransaction'
                element={
                   <ErrorBoundary fallbackComponent='/transactions/customerTransactions'>
                      <EditTransaction customerData={customerData} setCustomerData={data => setCustomerData(data)} transactionData={transactionData} />
                   </ErrorBoundary>
                }
-            />
+            /> */}
          </Routes>
       </>
    );
@@ -60,11 +60,11 @@ const fetchMenuOptions = navigate => [
       value: 'deleteTimeOrCharge',
       route: '/transactions/customerTransactions/deleteTimeOrCharge',
       onClick: () => navigate('/transactions/customerTransactions/deleteTimeOrCharge')
-   },
-   {
-      display: 'Edit Transaction',
-      value: 'editTransaction',
-      route: '/transactions/customerTransactions/editTransaction',
-      onClick: () => navigate('/transactions/customerTransactions/editTransaction')
    }
+   // {
+   //    display: 'Edit Transaction',
+   //    value: 'editTransaction',
+   //    route: '/transactions/customerTransactions/editTransaction',
+   //    onClick: () => navigate('/transactions/customerTransactions/editTransaction')
+   // }
 ];

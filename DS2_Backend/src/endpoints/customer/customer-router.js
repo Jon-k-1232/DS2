@@ -215,7 +215,7 @@ customerRouter
          const customerInvoices = await invoiceService.getCustomerInvoiceByID(db, accountID, customerID);
          const customerPayments = await paymentsService.getActivePaymentsForCustomer(db, accountID, customerID);
          const customerTransactions = await transactionsService.getCustomerTransactionsByID(db, accountID, customerID);
-         const customerRecurring = await recurringCustomerService.getActiveRecurringCustomers(db, accountID);
+         const customerRecurring = await recurringCustomerService.getRecurringCustomerByID(db, accountID, customerID);
 
          if (customerJobs.length || customerRetainers.length || customerInvoices.length || customerPayments.length || customerTransactions.length || customerRecurring.length) {
             throw new Error('Cannot delete customer with associated jobs, retainers, invoices, payments, transactions, or recurring customers. Please disable customer instead.');

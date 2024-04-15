@@ -15,8 +15,22 @@ const invoiceService = {
    },
 
    // find most recent invoice and return the remaining balance
+   // commented out 4/10/24 - fixing bug on invoice viewing, around invoice-router line 212
+   // getRemainingInvoiceAmount(db, accountID, invoiceID) {
+   //    return db.select('remaining_balance_on_invoice').from('customer_invoices').where('account_id', accountID).andWhere('parent_invoice_id', invoiceID).orderBy('created_at', 'desc').first();
+   // },
    getRemainingInvoiceAmount(db, accountID, invoiceID) {
-      return db.select('remaining_balance_on_invoice').from('customer_invoices').where('account_id', accountID).andWhere('parent_invoice_id', invoiceID).orderBy('created_at', 'desc').first();
+      return db
+         .select('remaining_balance_on_invoice')
+         .from('customer_invoices')
+         .where('account_id', accountID)
+         .andWhere(builder => {
+            builder.where('parent_invoice_id', invoiceID).orWhere(qb => {
+               qb.where('customer_invoice_id', invoiceID).andWhere('parent_invoice_id', null);
+            });
+         })
+         .orderBy('created_at', 'desc')
+         .first();
    },
 
    getOutstandingInvoicesBetweenDates(db, accountID, start_date, end_date) {

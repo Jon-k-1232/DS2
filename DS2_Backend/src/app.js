@@ -53,6 +53,7 @@ app.use('/auth', authentication);
 app.use('/customer', requireAuth, customerRouter);
 app.use('/jobs', requireAuth, company);
 app.use('/transactions', requireAuth, transactions);
+// app.use('/transactions', transactions);
 app.use('/user', requireAuth, user);
 app.use('/invoices', requireAuth, invoices);
 app.use('/jobCategories', requireAuth, jobCategoriesRouter);

@@ -29,7 +29,6 @@ export default function UpdateAccountAddress() {
    const [selectedItems, setSelectedItems] = useState(initialState);
 
    const handleSubmit = async () => {
-      // Todo - Not hooked up
       const dataToPost = formObjectForAccountAddressUpdate(selectedItems, loggedInUser);
       const postedItem = await putUpdateAccountAddress(dataToPost, accountID, userID);
 

@@ -1,11 +1,13 @@
-import { Container } from '@mui/material';
+import { Stack } from '@mui/material';
+import EmployeeTimeWidget from './EmployeeTimeWidget';
 
 export default function Dashboard() {
-  return (
-    <>
-      <Container style={{ display: 'contents' }}>
-        <h1>Welcome</h1>
-      </Container>
-    </>
-  );
+   return (
+      <>
+         <Stack spacing={3}>
+            <h1>Welcome</h1>
+            <EmployeeTimeWidget />
+         </Stack>
+      </>
+   );
 }

@@ -56,8 +56,9 @@ export default function InvoiceDetails({ invoiceData, postStatus, setPostStatus 
                   <tr>
                      <th style={styles.thStyle}>Billing Address:</th>
                      <td style={styles.tdStyle}>
-                        {customer_street} {customer_city}
-                        {customer_state}, {customer_zip}
+                        {customer_street}
+                        <br />
+                        {customer_city} {customer_state}, {customer_zip}
                      </td>
                   </tr>
                   <tr>

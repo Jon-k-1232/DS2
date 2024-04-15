@@ -225,3 +225,14 @@ export const fetchCustomerInvoiceInformation = async (accountID, userID, custome
       return [];
    }
 };
+
+export const fetchAllEmployeeTransactionsBetweenDates = async (startDate, endDate, accountID, userID, token) => {
+   try {
+      const response = await axios.get(`${config.API_ENDPOINT}/transactions/fetchEmployeeTransactions/${startDate}/${endDate}/${accountID}/${userID}`, headers(token));
+      const retainer = response.data;
+      return retainer;
+   } catch (error) {
+      console.error('Error fetching single retainer:', error);
+      return [];
+   }
+};

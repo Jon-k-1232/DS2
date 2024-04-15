@@ -17,7 +17,6 @@ export default function AccountSettings({ customerData, setCustomerData }) {
          if (accountInfo.status !== 200) {
             console.log('Error getting account information');
          } else {
-            console.log(accountInfo);
             setAccountInformation(accountInfo.account.accountData);
          }
       };

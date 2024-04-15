@@ -30,7 +30,28 @@ const transactionsService = {
    },
 
    getTransactionsBetweenDates(db, accountID, start_date, end_date) {
-      return db.select().from('customer_transactions').where('account_id', accountID).andWhere('transaction_date', '>=', start_date).andWhere('transaction_date', '<=', end_date);
+      return db
+         .select(
+            'customer_transactions.*',
+            'customers.business_name',
+            'customers.customer_name',
+            'customers.display_name',
+            'customer_jobs.job_quote_amount',
+            'customer_jobs.agreed_job_amount',
+            'customer_jobs.current_job_total',
+            'customer_jobs.job_status',
+            'customer_jobs.notes as job_notes',
+            'customer_job_types.job_description',
+            'customer_job_types.book_rate',
+            'customer_job_types.estimated_straight_time'
+         )
+         .from('customer_transactions')
+         .join('customers', 'customer_transactions.customer_id', 'customers.customer_id')
+         .join('customer_jobs', 'customer_transactions.customer_job_id', 'customer_jobs.customer_job_id')
+         .leftJoin('customer_job_types', 'customer_jobs.job_type_id', 'customer_job_types.job_type_id')
+         .where('customer_transactions.account_id', accountID)
+         .andWhere('customer_transactions.transaction_date', '>=', start_date)
+         .andWhere('customer_transactions.transaction_date', '<=', end_date);
    },
 
    getCustomerTransactionsByID(db, accountID, customerID) {

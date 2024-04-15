@@ -3,12 +3,14 @@ const jsonParser = express.json();
 const { sanitizeFields } = require('../../utils');
 const transactionsRouter = express.Router();
 const transactionsService = require('./transactions-service');
+const accountUserService = require('../user/user-service');
 const retainerService = require('../retainer/retainer-service');
 const paymentsService = require('../payments/payments-service');
 const jobService = require('../job/job-service');
 const { restoreDataTypesTransactionsTableOnCreate, restoreDataTypesTransactionsTableOnUpdate, createPaymentObjectFromTransaction } = require('./transactionsObjects');
 const { createGrid, generateTreeGridData } = require('../../helperFunctions/helperFunctions');
-const { createPayment } = require('../payments/payments-service');
+const { fetchUserTime } = require('./transactionLogic');
+const dayjs = require('dayjs');
 
 // Create a new transaction
 transactionsRouter.route('/createTransaction/:accountID/:userID').post(jsonParser, async (req, res) => {
@@ -143,6 +145,30 @@ transactionsRouter.route('/getSingleTransaction/:customerID/:transactionID/:acco
       message: 'Successfully retrieved specific transaction.',
       status: 200
    });
+});
+
+// Get all employee transactions
+transactionsRouter.route('/fetchEmployeeTransactions/:startDate/:endDate/:accountID/:userID').get(async (req, res) => {
+   const db = req.app.get('db');
+   const { startDate, endDate, accountID } = req.params;
+
+   try {
+      const [activeUsers, transactions] = await Promise.all([
+         await accountUserService.getActiveAccountUsers(db, accountID),
+         await transactionsService.getTransactionsBetweenDates(db, accountID, dayjs(startDate).format(), dayjs(endDate).format())
+      ]);
+
+      const userTime = fetchUserTime(activeUsers, transactions, 'Time');
+      // const userChargeCount = fetchUserTime(activeUsers, transactions, 'Charge');
+
+      return sendUpdatedTableWith200Response(db, res, accountID, { userTime });
+   } catch (err) {
+      console.log(err);
+      res.send({
+         message: err.message || 'An error occurred while fetching user time.',
+         status: 500
+      });
+   }
 });
 
 module.exports = transactionsRouter;
@@ -288,13 +314,8 @@ const handleRetainerUpdate = async (db, transactionDifferences, transactionTable
  * @param {*} res
  * @param {*} accountID
  */
-const sendUpdatedTableWith200Response = async (db, res, accountID) => {
+const sendUpdatedTableWith200Response = async (db, res, accountID, additionalItems = {}) => {
    // Get all transactions
-   // const activeTransactions = await transactionsService.getActiveTransactions(db, accountID);
-   // const activeRetainers = await retainerService.getActiveRetainers(db, accountID);
-   // const activeJobs = await jobService.getActiveJobs(db, accountID);
-   // const activePayments = await paymentsService.getActivePayments(db, account_id);
-
    const [activeTransactions, activeRetainers, activeJobs, activePayments] = await Promise.all([
       transactionsService.getActiveTransactions(db, accountID),
       retainerService.getActiveRetainers(db, accountID),
@@ -325,10 +346,11 @@ const sendUpdatedTableWith200Response = async (db, res, accountID) => {
    };
 
    res.send({
-      transactionsList: { activeTransactionsData },
-      accountRetainersList: { activeRetainerData },
-      accountJobsList: { activeJobData },
-      paymentsList: { activePaymentsData },
+      ...additionalItems,
+      // transactionsList: { activeTransactionsData },
+      // accountRetainersList: { activeRetainerData },
+      // accountJobsList: { activeJobData },
+      // paymentsList: { activePaymentsData },
       message: 'Successful.',
       status: 200
    });

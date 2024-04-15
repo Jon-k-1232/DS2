@@ -206,18 +206,20 @@ invoiceRouter.route('/getInvoiceDetails/:invoiceID/:accountID/:userID').get(asyn
    const { accountID, invoiceID } = req.params;
 
    const [invoiceDetails] = await invoiceService.getInvoiceByInvoiceRowID(db, accountID, invoiceID);
-   const { start_date, end_date } = invoiceDetails;
-
+   const { start_date, end_date, customer_id } = invoiceDetails;
    // Update the remaining balance on the invoice. In either case of fetching the selected invoice, or the parent invoice, the current remaining balance is required to be fetched.
    const currentBalance = await invoiceService.getRemainingInvoiceAmount(db, accountID, invoiceID);
    invoiceDetails.remaining_balance_on_invoice = currentBalance.remaining_balance_on_invoice;
 
    // get all data between the start and end date to show what was accounted for.
-   const invoiceTransactions = await transactionsService.getTransactionsBetweenDates(db, accountID, start_date, end_date);
-   const invoicePayments = await paymentsService.getPaymentsBetweenDates(db, accountID, start_date, end_date);
-   const invoiceWriteoffs = await writeOffsService.getWriteoffsBetweenDates(db, accountID, start_date, end_date);
+   const invoiceTransactions = await transactionsService.getTransactionsForInvoice(db, accountID, invoiceID);
+   const invoicePayments = await paymentsService.getPaymentsForInvoice(db, accountID, invoiceID);
+   const invoiceWriteoffs = await writeOffsService.getWriteoffsForInvoice(db, accountID, invoiceID);
+   // ToDo: Find retainer record applicable at time of invoice creation
    const invoiceRetainers = await retainersService.getRetainersBetweenDates(db, accountID, start_date, end_date);
-   const invoiceOutstandingInvoices = await invoiceService.getOutstandingInvoicesBetweenDates(db, accountID, start_date, end_date);
+   const lastBillDate = await invoiceService.getLastInvoiceDatesByCustomerID(db, accountID, [customer_id]);
+   const customerOutstandingInvoices = await invoiceService.getOutstandingInvoices(db, accountID, [customer_id], lastBillDate[customer_id]);
+   const invoiceOutstandingInvoices = customerOutstandingInvoices[customer_id];
 
    // create grid objects
    const invoiceTransactionsData = {

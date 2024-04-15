@@ -8,63 +8,63 @@ import EditWriteOff from '../../../Pages/Transactions/TransactionForms/EditTrans
 import ErrorBoundary from '../../../Components/ErrorBoundary';
 
 export default function WriteOffSubRoutes({ customerData, setCustomerData }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { accountID, userID, token } = useContext(context).loggedInUser;
-  const { rowData } = location?.state ?? {};
-  const { writeoff_id } = rowData ?? {};
-  const menuOptions = fetchMenuOptions(navigate);
+   const navigate = useNavigate();
+   const location = useLocation();
+   const { accountID, userID, token } = useContext(context).loggedInUser;
+   const { rowData } = location?.state ?? {};
+   const { writeoff_id } = rowData ?? {};
+   const menuOptions = fetchMenuOptions(navigate);
 
-  const [writeOffData, setWriteOffData] = useState({});
+   const [writeOffData, setWriteOffData] = useState({});
 
-  useEffect(() => {
-    const fetchWriteOffData = async () => {
-      if (rowData) {
-        const fetchPayment = await fetchSingleWriteOff(writeoff_id, accountID, userID, token);
-        setWriteOffData(...fetchPayment.activeWriteOffsData.activeWriteOffs);
-      }
-    };
-    fetchWriteOffData();
-    // eslint-disable-next-line
-  }, [rowData]);
+   useEffect(() => {
+      const fetchWriteOffData = async () => {
+         if (rowData) {
+            const fetchPayment = await fetchSingleWriteOff(writeoff_id, accountID, userID, token);
+            setWriteOffData(...fetchPayment.activeWriteOffsData.activeWriteOffs);
+         }
+      };
+      fetchWriteOffData();
+      // eslint-disable-next-line
+   }, [rowData]);
 
-  return (
-    <>
-      <PageNavigationHeader menuOptions={menuOptions} onClickNavigation={() => {}} currentLocation={location} />
+   return (
+      <>
+         <PageNavigationHeader menuOptions={menuOptions} onClickNavigation={() => {}} currentLocation={location} />
 
-      <Routes>
-        <Route
-          path='deleteWriteOff'
-          element={
-            <ErrorBoundary fallbackComponent='/transactions/customerWriteOffs'>
-              <DeleteWriteOff customerData={customerData} setCustomerData={data => setCustomerData(data)} writeOffData={writeOffData} />
-            </ErrorBoundary>
-          }
-        />
-        <Route
+         <Routes>
+            <Route
+               path='deleteWriteOff'
+               element={
+                  <ErrorBoundary fallbackComponent='/transactions/customerWriteOffs'>
+                     <DeleteWriteOff customerData={customerData} setCustomerData={data => setCustomerData(data)} writeOffData={writeOffData} />
+                  </ErrorBoundary>
+               }
+            />
+            {/* <Route
           path='editWriteOff'
           element={
             <ErrorBoundary fallbackComponent='/transactions/customerWriteOffs'>
               <EditWriteOff customerData={customerData} setCustomerData={data => setCustomerData(data)} writeOffData={writeOffData} />
             </ErrorBoundary>
           }
-        />
-      </Routes>
-    </>
-  );
+        /> */}
+         </Routes>
+      </>
+   );
 }
 
 const fetchMenuOptions = navigate => [
-  {
-    display: 'Delete Write Off',
-    value: 'deleteWriteOff',
-    route: '/transactions/customerWriteOffs/deleteWriteOff',
-    onClick: () => navigate('/transactions/customerWriteOffs/deleteWriteOff')
-  },
-  {
-    display: 'Edit Write Off',
-    value: 'editWriteOff',
-    route: '/transactions/customerWriteOffs/editWriteOff',
-    onClick: () => navigate('/transactions/customerWriteOffs/editWriteOff')
-  }
+   {
+      display: 'Delete Write Off',
+      value: 'deleteWriteOff',
+      route: '/transactions/customerWriteOffs/deleteWriteOff',
+      onClick: () => navigate('/transactions/customerWriteOffs/deleteWriteOff')
+   }
+   // {
+   //   display: 'Edit Write Off',
+   //   value: 'editWriteOff',
+   //   route: '/transactions/customerWriteOffs/editWriteOff',
+   //   onClick: () => navigate('/transactions/customerWriteOffs/editWriteOff')
+   // }
 ];

@@ -38,7 +38,6 @@ export default function UpdateAccount() {
          dataToPost[key] = value;
       });
 
-      // Todo - not hooked up
       const formattedData = formObjectForUpdateAccountPost(dataToPost);
       const postedItem = await putUpdateAccount(formattedData);
 
