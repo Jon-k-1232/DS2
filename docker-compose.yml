@@ -6,6 +6,7 @@ networks:
 
 services:
    app:
+      container_name: DS2-App
       image: marine1232/ds2-frontend:latest
       environment:
          - TZ=America/Phoenix
@@ -25,6 +26,7 @@ services:
          - ds2_network
 
    api:
+      container_name: DS2-Api
       image: marine1232/ds2-backend:latest
       environment:
          - TZ=America/Phoenix
@@ -43,8 +45,8 @@ services:
          - ds2_network
 
    server:
+      container_name: DS2-Server
       image: marine1232/ds2-nginx:latest
-      container_name: DS2_Server
       environment:
          - TZ=America/Phoenix
       build:
