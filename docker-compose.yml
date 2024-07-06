@@ -6,6 +6,7 @@ networks:
 
 services:
    app:
+      image: marine1232/ds2-frontend:latest
       environment:
          - TZ=America/Phoenix
       build:
@@ -24,6 +25,7 @@ services:
          - ds2_network
 
    api:
+      image: marine1232/ds2-backend:latest
       environment:
          - TZ=America/Phoenix
       build:
@@ -41,6 +43,7 @@ services:
          - ds2_network
 
    server:
+      image: marine1232/ds2-nginx:latest
       container_name: DS2_Server
       environment:
          - TZ=America/Phoenix
@@ -48,10 +51,10 @@ services:
          context: ./Nginx
          dockerfile: Dockerfile
       ports:
-         - '443:443' # Only expose port 443 for HTTPS
+         - '443:443'
       volumes:
          - './Nginx/default.conf:/etc/nginx/conf.d/default.conf'
-         - './Nginx/Server_ssl:/etc/nginx/ssl' # Map the SSL directory to the container
+         - '/Users/jonkimmel/Desktop/Code/DS2/DS2/Nginx/Server_ssl:/etc/nginx/ssl'
       restart: always
       networks:
          - ds2_network

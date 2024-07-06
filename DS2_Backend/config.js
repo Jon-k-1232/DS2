@@ -6,7 +6,7 @@ const config = {
    HOST_IP: process.env.NODE_ENV === 'production' ? process.env.HOST_IP_PROD : process.env.HOST_IP_DEV,
    DATABASE_USER: process.env.DATABASE_USER,
    DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
-   DATABASE_URL: 'ds_2',
+   DATABASE_URL: process.env.NODE_ENV === 'production' ? 'ds_2' : 'ds2_dev',
    TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || 'postgresql://@localhost/ds_2',
    API_TOKEN: process.env.API_TOKEN,
    JWT_EXPIRATION: process.env.JWT_EXPIRATION,

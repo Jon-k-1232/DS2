@@ -48,6 +48,10 @@ app.use(
 );
 
 /* ///////////////////////////\\\\  USER ENDPOINTS  ////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+app.get('/', (req, res) => {
+   console.log('HELLO WORLD');
+   res.send('Hello, world!');
+});
 
 app.use('/auth', authentication);
 app.use('/customer', requireAuth, customerRouter);

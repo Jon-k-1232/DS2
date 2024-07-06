@@ -151,11 +151,13 @@ transactionsRouter.route('/getSingleTransaction/:customerID/:transactionID/:acco
 transactionsRouter.route('/fetchEmployeeTransactions/:startDate/:endDate/:accountID/:userID').get(async (req, res) => {
    const db = req.app.get('db');
    const { startDate, endDate, accountID } = req.params;
+   const startingDate = startDate ? startDate : dayjs(startDate).format();
+   const endingDate = endDate ? endDate : dayjs(endDate).format();
 
    try {
       const [activeUsers, transactions] = await Promise.all([
          await accountUserService.getActiveAccountUsers(db, accountID),
-         await transactionsService.getTransactionsBetweenDates(db, accountID, dayjs(startDate).format(), dayjs(endDate).format())
+         await transactionsService.getTransactionsBetweenDates(db, accountID, dayjs(startingDate).format(), dayjs(endingDate).format())
       ]);
 
       const userTime = fetchUserTime(activeUsers, transactions, 'Time');
@@ -347,10 +349,10 @@ const sendUpdatedTableWith200Response = async (db, res, accountID, additionalIte
 
    res.send({
       ...additionalItems,
-      // transactionsList: { activeTransactionsData },
-      // accountRetainersList: { activeRetainerData },
-      // accountJobsList: { activeJobData },
-      // paymentsList: { activePaymentsData },
+      transactionsList: { activeTransactionsData },
+      accountRetainersList: { activeRetainerData },
+      accountJobsList: { activeJobData },
+      paymentsList: { activePaymentsData },
       message: 'Successful.',
       status: 200
    });
