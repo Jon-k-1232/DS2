@@ -1,53 +1,51 @@
-name: Build and Deploy Docker Image
+name: Build and Deploy Docker Images
 
 on:
-  push:
-    branches:
-      - master
+   push:
+      branches:
+         - master
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+   build:
+      runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      steps:
+         - name: Checkout code
+           uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+         - name: Set up Docker Buildx
+           uses: docker/setup-buildx-action@v1
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+         - name: Login to Docker Hub
+           uses: docker/login-action@v2
+           with:
+              username: ${{ secrets.DOCKER_USERNAME }}
+              password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Set environment variables for frontend
-      run: |
-        echo "ENV_VAR_NAME=${{ secrets.ENV_VAR_NAME }}" >> ./DS2_Frontend/.env
-        echo "ANOTHER_ENV_VAR_NAME=${{ secrets.ANOTHER_ENV_VAR_NAME }}" >> ./DS2_Frontend/.env
+         - name: Set environment variables for frontend
+           run: |
+              echo "REACT_APP_ENV=${{ secrets.REACT_APP_ENV}}" >> ./DS2_Frontend/.env
+              echo "REACT_APP_API_PROD_ENDPOINT=${{ secrets.REACT_APP_API_PROD_ENDPOINT}}" >> ./DS2_Frontend/.env
 
-    - name: Set environment variables for backend
-      run: |
-        echo "ENV_VAR_NAME=${{ secrets.ENV_VAR_NAME }}" >> ./DS2_Backend/.env
-        echo "ANOTHER_ENV_VAR_NAME=${{ secrets.ANOTHER_ENV_VAR_NAME }}" >> ./DS2_Backend/.env
+         - name: Set environment variables for backend
+           run: |
+              echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> ./DS2_Backend/.env
+              echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> ./DS2_Backend/.env
+              echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> ./DS2_Backend/.env
+              echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> ./DS2_Backend/.env
+              echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> ./DS2_Backend/.env
+              echo "NODE_PORT_PROD=${{ secrets.NODE_PORT_PROD }}" >> ./DS2_Backend/.env
+              echo "DB_PROD_HOST=${{ secrets.DB_PROD_HOST }}" >> ./DS2_Backend/.env
+              echo "FRONT_END_URL_PROD=${{ secrets.FRONT_END_URL_PROD }}" >> ./DS2_Backend/.env
+              echo "PRODUCTION_PDF_SAVE_LOCATION=${{ secrets.PRODUCTION_PDF_SAVE_LOCATION }}" >> ./DS2_Backend/.env
+              echo "HOST_IP_PROD=${{ secrets.HOST_IP_PROD }}" >> ./DS2_Backend/.env
 
-    - name: Build and push frontend Docker image
-      run: |
-        docker build -t marine1232/ds2-frontend:latest -f ./DS2_Frontend/Dockerfile ./DS2_Frontend
-        docker push marine1232/ds2-frontend:latest
+         - name: Build and push Docker images
+           run: |
+              docker-compose -f docker-compose.yml build
+              docker-compose -f docker-compose.yml push
 
-    - name: Build and push backend Docker image
-      run: |
-        docker build -t marine1232/ds2-backend:latest -f ./DS2_Backend/Dockerfile ./DS2_Backend
-        docker push marine1232/ds2-backend:latest
-
-    - name: Build and push Nginx Docker image
-      run: |
-        docker build -t marine1232/ds2-nginx:latest -f ./Nginx/Dockerfile ./Nginx
-        docker push marine1232/ds2-nginx:latest
-
-    - name: Deploy to Docker Desktop
-      run: |
-        docker-compose -f docker-compose.yml pull
-        docker-compose -f docker-compose.yml up -d
+         - name: Deploy to Docker Desktop
+           run: |
+              docker-compose -f docker-compose.yml pull
+              docker-compose -f docker-compose.yml up -d
