@@ -14,6 +14,7 @@ const restoreDataTypesTransactionsTableOnCreate = transaction => ({
    total_transaction: Math.abs(Number(transaction.totalTransaction)),
    is_transaction_billable: Boolean(transaction.isTransactionBillable),
    is_excess_to_subscription: Boolean(transaction.isInAdditionToMonthlyCharge) || false,
+   created_at: new Date(),
    created_by_user_id: Number(transaction.loggedByUserID),
    note: String(transaction.note) || ''
 });
@@ -35,6 +36,7 @@ const restoreDataTypesTransactionsTableOnUpdate = transaction => ({
    total_transaction: Math.abs(Number(transaction.totalTransaction)),
    is_transaction_billable: Boolean(transaction.isTransactionBillable),
    is_excess_to_subscription: Boolean(transaction.isInAdditionToMonthlyCharge) || false,
+   created_at: new Date(),
    created_by_user_id: Number(transaction.loggedByUserID),
    note: String(transaction.note) || ''
 });
