@@ -22,6 +22,16 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
+    - name: Set environment variables for frontend
+      run: |
+        echo "ENV_VAR_NAME=${{ secrets.ENV_VAR_NAME }}" >> ./DS2_Frontend/.env
+        echo "ANOTHER_ENV_VAR_NAME=${{ secrets.ANOTHER_ENV_VAR_NAME }}" >> ./DS2_Frontend/.env
+
+    - name: Set environment variables for backend
+      run: |
+        echo "ENV_VAR_NAME=${{ secrets.ENV_VAR_NAME }}" >> ./DS2_Backend/.env
+        echo "ANOTHER_ENV_VAR_NAME=${{ secrets.ANOTHER_ENV_VAR_NAME }}" >> ./DS2_Backend/.env
+
     - name: Build and push Docker image
       run: |
         docker-compose -f docker-compose.yml build
@@ -31,4 +41,3 @@ jobs:
       run: |
         docker-compose -f docker-compose.yml pull
         docker-compose -f docker-compose.yml up -d
-
