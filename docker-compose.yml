@@ -3,6 +3,7 @@ version: '3.9'
 networks:
    ds2_network:
       driver: bridge
+      name: ds2_network
 
 services:
    app:
@@ -13,7 +14,6 @@ services:
       build:
          context: ./DS2_Frontend
          dockerfile: Dockerfile
-      # Removed ports mapping to only allow access via Nginx
       env_file:
          - ./DS2_Frontend/.env
       volumes:
@@ -33,7 +33,6 @@ services:
       build:
          context: ./DS2_Backend
          dockerfile: Dockerfile
-      # Removed ports mapping to only allow access via Nginx
       env_file:
          - ./DS2_Backend/.env
       volumes:
