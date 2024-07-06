@@ -32,10 +32,20 @@ jobs:
         echo "ENV_VAR_NAME=${{ secrets.ENV_VAR_NAME }}" >> ./DS2_Backend/.env
         echo "ANOTHER_ENV_VAR_NAME=${{ secrets.ANOTHER_ENV_VAR_NAME }}" >> ./DS2_Backend/.env
 
-    - name: Build and push Docker image
+    - name: Build and push frontend Docker image
       run: |
-        docker-compose -f docker-compose.yml build
-        docker-compose -f docker-compose.yml push
+        docker build -t marine1232/ds2-frontend:latest -f ./DS2_Frontend/Dockerfile ./DS2_Frontend
+        docker push marine1232/ds2-frontend:latest
+
+    - name: Build and push backend Docker image
+      run: |
+        docker build -t marine1232/ds2-backend:latest -f ./DS2_Backend/Dockerfile ./DS2_Backend
+        docker push marine1232/ds2-backend:latest
+
+    - name: Build and push Nginx Docker image
+      run: |
+        docker build -t marine1232/ds2-nginx:latest -f ./Nginx/Dockerfile ./Nginx
+        docker push marine1232/ds2-nginx:latest
 
     - name: Deploy to Docker Desktop
       run: |
