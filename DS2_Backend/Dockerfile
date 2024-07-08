@@ -5,17 +5,17 @@ FROM node:latest
 ENV TZ=America/Phoenix
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Set working directory in the container
+# Create and change to the app directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
+# Copy the package.json and package-lock.json
 COPY package*.json ./
 
-# Install app dependencies
-RUN npm install --force
+# Install dependencies
+RUN npm install
 
-# Copy app source code
+# Copy the rest of the application code
 COPY . .
 
-# Start the app
-CMD [ "npm", "start" ]
+# Command to run the application
+CMD ["npm", "start"]
